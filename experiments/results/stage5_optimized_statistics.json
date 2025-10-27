@@ -1,0 +1,12 @@
+{
+  "total_cells": 255,
+  "header_cells": 51,
+  "empty_cells": 105,
+  "data_cells": 99,
+  "time": {
+    "extraction": "0.21s",
+    "ocr": "125.03s",
+    "total": "125.32s"
+  },
+  "method": "Optimized Tesseract"
+}

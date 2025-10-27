@@ -1,0 +1,77 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project specific
+data/output/*
+!data/output/.gitkeep
+*.exe
+build/
+spec/
+dist/
+
+# OCR temp files
+temp/
+*.tmp
+
+# Logs
+*.log
+
+# References (keep structure but ignore cloned repos)
+experiments/references/**/*
+!experiments/references/.gitkeep
+!experiments/references/**/.gitkeep
+!experiments/references/**/README.md
+!experiments/references/**/notes.md
+
+# Large experiment folders
+experiments/PaddleOCR/
+experiments/DocumentAIExtractionPipeline/
+
+# Results images (optional - comment out if you want to keep them)
+# experiments/results/*.jpg
+# experiments/results/*.png
+
+# Model files (jika ada model yang besar)
+*.pt
+*.pth
+*.onnx
+*.pb
+models/*.h5
+models/*.tflite

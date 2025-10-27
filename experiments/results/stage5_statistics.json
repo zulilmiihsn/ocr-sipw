@@ -1,0 +1,12 @@
+{
+  "total_cells": 255,
+  "empty_cells": 0,
+  "filled_cells": 255,
+  "skip_ratio": "0.0%",
+  "time": {
+    "extraction": "0.12s",
+    "empty_detection": "0.01s",
+    "ocr": "2.41s",
+    "total": "2.57s"
+  }
+}

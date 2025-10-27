@@ -1,0 +1,24 @@
+# Core Dependencies
+opencv-python>=4.8.0
+numpy>=1.24.0
+Pillow>=10.0.0
+
+# PDF Handling
+pdf2image>=1.16.3
+
+# OCR Engines
+pytesseract>=0.3.10
+
+# PaddleOCR (Optional - for AI-based table detection)
+paddlepaddle>=2.5.0
+paddleocr>=2.7.0
+
+# Table Transformer (Optional - for state-of-the-art table detection)
+# transformers>=4.30.0
+# torch>=2.0.0
+
+# GUI
+customtkinter>=5.2.0
+
+# Data Export
+pandas>=2.0.0

@@ -1,0 +1,83 @@
+╔═══════════════════════════════════════════════════════════════╗
+║           LANGKAH TERAKHIR: PUSH KE GITHUB                   ║
+╚═══════════════════════════════════════════════════════════════╝
+
+✅ SUDAH SELESAI:
+   - Git repository initialized
+   - 84 files committed
+   - Branch renamed to 'main'
+   - Ready to push!
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📌 LANGKAH 1: BUAT REPOSITORY DI GITHUB
+   
+   1. Buka: https://github.com/new
+   2. Isi form:
+      - Repository name: lab-untuk-ocr  (atau nama lain)
+      - Description: OCR Lab for table detection and extraction
+      - Public atau Private (pilih sesuai kebutuhan)
+      - ❌ JANGAN centang "Add a README file"
+      - ❌ JANGAN centang "Add .gitignore"  
+   3. Klik "Create repository"
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📌 LANGKAH 2: PUSH KE GITHUB
+
+   Setelah repository dibuat, jalankan command ini:
+   (Ganti USERNAME dengan username GitHub kamu)
+
+   git remote add origin https://github.com/USERNAME/lab-untuk-ocr.git
+   git push -u origin main
+
+   CONTOH:
+   git remote add origin https://github.com/johndoe/lab-untuk-ocr.git
+   git push -u origin main
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+⚠️ CATATAN PENTING:
+
+   1. Saat push, kamu akan diminta login GitHub
+   2. Gunakan Personal Access Token (bukan password biasa)
+   3. Cara buat token:
+      - Buka: https://github.com/settings/tokens
+      - Generate new token (classic)
+      - Centang scope: repo
+      - Copy token yang muncul
+      - Paste saat diminta password
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📊 STATISTIK:
+
+   Total Files: 84
+   Total Changes: 8,504 insertions
+   Branch: main
+   
+   Files yang di-upload:
+   ✅ Source code (src/)
+   ✅ Experiments & tests
+   ✅ Results & documentation
+   ✅ Configuration files
+   
+   Files yang di-skip (via .gitignore):
+   ❌ __pycache__/
+   ❌ experiments/PaddleOCR/
+   ❌ experiments/DocumentAIExtractionPipeline/
+   ❌ *.exe files
+   ❌ Virtual environments
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🔄 UNTUK UPDATE SELANJUTNYA:
+
+   git add .
+   git commit -m "Deskripsi perubahan"
+   git push
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✨ SELAMAT! Repository kamu siap di-upload ke GitHub!
+

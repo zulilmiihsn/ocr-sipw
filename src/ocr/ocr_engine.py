@@ -184,3 +184,4 @@ def preprocess_cell_for_ocr(image: np.ndarray) -> np.ndarray:
     
     return gray
 
+

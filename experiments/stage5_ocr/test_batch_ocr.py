@@ -310,3 +310,4 @@ def test_batch_ocr():
 if __name__ == '__main__':
     success = test_batch_ocr()
     sys.exit(0 if success else 1)
+

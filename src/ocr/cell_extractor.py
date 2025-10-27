@@ -230,3 +230,4 @@ def extract_cell_images(image: np.ndarray, num_rows: int = NUM_ROWS, num_cols: i
     """
     return segment_cells(image, num_rows, num_cols)
 
+

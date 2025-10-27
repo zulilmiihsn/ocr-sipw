@@ -1,11 +1,11 @@
 {
-  "total_cells": 255,
-  "empty_cells": 76,
-  "data_cells": 179,
+  "total_cells": 238,
+  "empty_cells": 60,
+  "data_cells": 178,
   "time": {
-    "extraction": "0.18s",
-    "ocr": "145.50s",
-    "total": "145.74s"
+    "extraction": "0.14s",
+    "ocr": "73.54s",
+    "total": "73.71s"
   },
   "method": "Simple OCR + Post-Processing"
 }

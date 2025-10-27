@@ -24,3 +24,4 @@ Extract text dari setiap cell dengan akurasi tinggi.
   - [ ] Blurry/small text
   - [ ] Dark/bright cells
 
+

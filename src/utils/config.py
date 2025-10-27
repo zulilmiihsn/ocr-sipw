@@ -53,3 +53,4 @@ CSV_QUOTING = "minimal"
 LOG_LEVEL = "INFO"
 LOG_FILE = BASE_DIR / "ocr_scanner.log"
 
+

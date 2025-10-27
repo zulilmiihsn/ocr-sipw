@@ -30,11 +30,12 @@ def test_stage3_ultrafast(image_path: str):
     
     overall_start = time.time()
     
-    # Step 1: Load & Preprocess
-    print('\n[Step 1] Loading & Preprocessing...')
+    # Step 1: Load (NO preprocessing)
+    print('\n[Step 1] Loading original image (no preprocessing)...')
     start = time.time()
     img = load_image(image_path)
-    processed = preprocess_image(img, full_pipeline=True)
+    # Use original image without preprocessing
+    processed = img
     preprocess_time = time.time() - start
     print(f'  ✓ Image: {processed.shape}')
     print(f'  ⏱ Time: {preprocess_time:.2f}s')
@@ -89,3 +90,4 @@ if __name__ == '__main__':
     
     success = test_stage3_ultrafast(image_path)
     sys.exit(0 if success else 1)
+

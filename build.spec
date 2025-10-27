@@ -53,3 +53,4 @@ exe = EXE(
     icon=None,  # Can add icon.ico here
 )
 
+

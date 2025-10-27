@@ -87,3 +87,4 @@ def validate_cell_ocr_result(ocr_text: str, cell_image: np.ndarray) -> str:
     
     return ocr_text
 
+

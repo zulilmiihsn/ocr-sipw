@@ -1,6 +1,65 @@
 # Version History
 
-## Version 1.0 (Current)
+## Version 1.1: PP-OCRv5 Experiments (Current)
+**Release Date:** October 28, 2025
+
+### 🔬 Research & Experiments
+- **Deep research on PaddleOCR** architecture and models
+  - Analyzed PP-OCRv5 (detection + recognition)
+  - Analyzed PP-StructureV3 (table structure recognition)
+  - Documented in `PADDLEOCR_RESEARCH.md`
+
+### 🧪 PP-OCRv5 Testing
+Tested 3 optimization strategies for Stage 5:
+
+#### 1. Sequential Processing
+- **Time:** 584.47s for 238 cells
+- **Accuracy:** 85-95%
+- **Conclusion:** Too slow for production
+
+#### 2. Parallel Processing (3 cores)
+- **Time:** 401.70s for 238 cells
+- **Speedup:** 1.5x vs sequential
+- **Conclusion:** Still 5.5x slower than Tesseract
+
+#### 3. Ultra-Fast Mode (Recognition-only)
+- **Attempted:** Disable text detection, batch processing
+- **Issue:** Model initialization overhead (~20-30s per process)
+- **Conclusion:** Requires GPU for competitive speed
+
+### 📊 Performance Comparison
+
+| Method | Time | Accuracy | Speed vs Tesseract |
+|--------|------|----------|-------------------|
+| **Tesseract (v1.0)** | 73.54s | 70-80% | 1.0x (baseline) |
+| **PP-OCRv5 Sequential** | 584.47s | 85-95% | 0.13x (8x slower) |
+| **PP-OCRv5 Parallel** | 401.70s | 85-95% | 0.18x (5.5x slower) |
+
+### 🎯 Key Findings
+1. **PP-OCRv5 is more accurate** (85-95% vs 70-80%)
+2. **PP-OCRv5 is much slower on CPU** (5-8x slower)
+3. **GPU acceleration is REQUIRED** for PP-OCRv5 to be competitive
+4. **Tesseract remains best for CPU-only deployment**
+
+### 💡 Recommendations
+- **For CPU-only:** Stick with Tesseract (Version 1.0)
+- **For GPU-enabled:** PP-OCRv5 can achieve ~5-10s with GPU
+- **For production:** Implement manual review UI for correction
+- **Hybrid approach:** Use Tesseract + manual review for uncertain cells
+
+### 📁 Files Added
+- `experiments/stage5_ocr/test_paddleocr_fast.py` - Batch processing test
+- `experiments/stage5_ocr/test_paddleocr_ultrafast.py` - Recognition-only test
+- `experiments/stage5_ocr/test_paddleocr_parallel.py` - Parallel processing test
+- `PADDLEOCR_RESEARCH.md` - Deep dive into PaddleOCR architecture
+- Results: `stage5_paddleocr_fast_results.json`, `stage5_parallel_results.json`
+
+### 🏷️ Git Tag
+`v1.1-paddleocr-experiments`
+
+---
+
+## Version 1.0
 **Release Date:** October 27, 2025
 
 ### 🎯 Features

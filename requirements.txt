@@ -21,8 +21,8 @@ pdf2image>=1.16.3
 pytesseract==0.3.10
 
 # PaddleOCR (AI-based OCR)
-paddlepaddle==2.5.2
-paddleocr==2.7.3
+paddlepaddle==3.2.0
+paddleocr==3.3.1
 
 # ============================================================================
 # GUI APPLICATION

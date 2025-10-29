@@ -96,6 +96,9 @@ class OCRWorker(QThread):
                 header_candidates = [y for y in lines if y < image_height * 0.25]
                 header_y_max = max(header_candidates) if header_candidates else (lines[0] if lines else 0)
             
+            # ADAPTIVE TOLERANCE based on image size
+            adaptive_tolerance = max(10, int(image_height * 0.02))  # 2% of image height, min 10px
+            
             # Collect Y-centers of data detections (below header)
             data_y_centers = []
             for det in ocr_results:
@@ -110,7 +113,7 @@ class OCRWorker(QThread):
                 # Group detections that are close together (same row)
                 row_groups = []
                 current_group = [data_y_centers[0]]
-                tolerance = 15  # pixels tolerance for same row
+                tolerance = adaptive_tolerance  # ADAPTIVE pixels tolerance for same row
                 
                 for y in data_y_centers[1:]:
                     if y - current_group[-1] <= tolerance:
@@ -123,10 +126,37 @@ class OCRWorker(QThread):
                 # Get average Y for each row group
                 row_y_positions = [sum(group) / len(group) for group in row_groups]
                 
-                # Force exactly 10 rows by merging or splitting
+                # SMART ROW DETECTION: Combine OCR clustering with horizontal line detection
+                # Get horizontal lines in data region
+                data_h_lines = [y for y in all_h_lines if y > header_y_max + 10]
+                
+                # Validate row positions against detected lines
+                validated_rows = []
+                for row_y in row_y_positions:
+                    # Check if there's a nearby horizontal line (within tolerance)
+                    has_line_support = any(abs(row_y - line_y) < adaptive_tolerance for line_y in data_h_lines)
+                    
+                    # Accept row if it has line support OR strong OCR evidence
+                    row_confidence = len([g for g in row_groups if abs(sum(g)/len(g) - row_y) < 1])
+                    if has_line_support or row_confidence >= 2:  # At least 2 detections
+                        validated_rows.append(row_y)
+                
+                # Use validated rows if reasonable, otherwise use original
+                if 8 <= len(validated_rows) <= 12:  # Reasonable range around 10
+                    row_y_positions = validated_rows
+                
+                # Force exactly 10 rows by intelligent merging or splitting
                 if len(row_y_positions) > 10:
-                    # Too many rows, keep first 10
-                    row_y_positions = row_y_positions[:10]
+                    # Too many rows, keep most confident 10
+                    # Prefer rows with horizontal line support
+                    rows_with_score = []
+                    for row_y in row_y_positions:
+                        line_support = min([abs(row_y - line_y) for line_y in data_h_lines]) if data_h_lines else 999
+                        score = -line_support  # Lower distance = higher score
+                        rows_with_score.append((row_y, score))
+                    rows_with_score.sort(key=lambda x: x[1], reverse=True)
+                    row_y_positions = [y for y, _ in rows_with_score[:10]]
+                    row_y_positions.sort()
                 elif len(row_y_positions) < 10:
                     # Too few rows, interpolate missing ones
                     if len(row_y_positions) >= 2:
@@ -250,6 +280,13 @@ class OCRWorker(QThread):
                 
                 return total_score
             
+            # Calculate adaptive row tolerance based on average row height
+            if len(h_lines) > 1:
+                avg_row_height = (h_lines[-1] - h_lines[0]) / max(len(h_lines) - 1, 1)
+                adaptive_row_tolerance = max(5, int(avg_row_height * 0.3))  # 30% of row height, min 5px
+            else:
+                adaptive_row_tolerance = adaptive_tolerance
+            
             # Map detections to cells using advanced scoring
             for det in ocr_results:
                 y_center = (det['y_min'] + det['y_max']) / 2
@@ -267,8 +304,8 @@ class OCRWorker(QThread):
                     row_y_min = h_lines[i]
                     row_y_max = h_lines[i + 1]
                     
-                    # Skip if detection is far from this row (STRICTER: 10px tolerance)
-                    if y_center < row_y_min - 10 or y_center > row_y_max + 10:
+                    # Skip if detection is far from this row (ADAPTIVE tolerance)
+                    if y_center < row_y_min - adaptive_row_tolerance or y_center > row_y_max + adaptive_row_tolerance:
                         continue
                     
                     for j in range(len(column_structure)):

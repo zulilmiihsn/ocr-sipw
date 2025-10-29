@@ -93,18 +93,30 @@ def run_full_document_ocr(image):
     Returns:
         List of detections with text, confidence, and position
     """
-    # Preprocessing optimization for better OCR
-    # Increase contrast and sharpness for better text detection
+    # ADVANCED PREPROCESSING for robust OCR (handles low quality images)
     import cv2
     
-    # Convert to grayscale if needed (faster processing)
+    # Convert to grayscale if needed
     if len(image.shape) == 3:
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        # Apply CLAHE (Contrast Limited Adaptive Histogram Equalization) for better contrast
-        clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
-        enhanced = clahe.apply(gray)
-        # Convert back to BGR for PaddleOCR
-        image = cv2.cvtColor(enhanced, cv2.COLOR_GRAY2BGR)
+    else:
+        gray = image.copy()
+    
+    # 1. Denoising (remove noise for better quality)
+    denoised = cv2.fastNlMeansDenoising(gray, None, h=10, templateWindowSize=7, searchWindowSize=21)
+    
+    # 2. Contrast Enhancement (CLAHE - better than simple histogram equalization)
+    clahe = cv2.createCLAHE(clipLimit=2.5, tileGridSize=(8,8))
+    enhanced = clahe.apply(denoised)
+    
+    # 3. Sharpening (improve edge definition for better text detection)
+    kernel_sharpen = np.array([[-1,-1,-1],
+                               [-1, 9,-1],
+                               [-1,-1,-1]])
+    sharpened = cv2.filter2D(enhanced, -1, kernel_sharpen)
+    
+    # Convert back to BGR for PaddleOCR
+    image = cv2.cvtColor(sharpened, cv2.COLOR_GRAY2BGR)
     
     ocr = PaddleOCREngine.get_instance()
     result = ocr.predict(image)

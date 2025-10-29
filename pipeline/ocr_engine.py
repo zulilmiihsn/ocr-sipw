@@ -73,35 +73,14 @@ class PaddleOCREngine:
             from paddleocr import PaddleOCR
             import paddle
             
-            # Auto-detect GPU availability
-            use_gpu = False
-            try:
-                if paddle.device.cuda.device_count() > 0:
-                    use_gpu = True
-                    paddle.set_device('gpu:0')
-                    print(f"✅ GPU detected! Using GPU for acceleration (CUDA devices: {paddle.device.cuda.device_count()})")
-                else:
-                    paddle.set_device('cpu')
-                    print("ℹ️ No GPU detected. Using CPU with all cores.")
-            except:
-                paddle.set_device('cpu')
-                print("ℹ️ GPU check failed. Using CPU with all cores.")
+            # Simple setup - let PaddleOCR auto-detect everything
+            print("🔧 Initializing PaddleOCR with default settings...")
             
-            # Build config with ONLY core supported parameters
+            # MINIMAL config - only essential parameters
             ocr_config = {
                 'lang': OCRConfig.PADDLE_LANG,
-                'use_angle_cls': False,           # Disable angle detection (faster)
-                'use_gpu': use_gpu,               # Auto-detected GPU
-                'rec_batch_num': 6                # Batch recognition (conservative)
+                'use_angle_cls': False            # Disable angle detection (faster)
             }
-            
-            # CPU-specific optimizations
-            if not use_gpu:
-                ocr_config['enable_mkldnn'] = True   # Intel MKL-DNN for CPU
-                ocr_config['cpu_threads'] = 0         # Use all CPU cores
-            else:
-                # GPU-specific optimizations
-                ocr_config['gpu_mem'] = 8000          # GPU memory limit (MB)
             
             cls._instance = PaddleOCR(**ocr_config)
         return cls._instance

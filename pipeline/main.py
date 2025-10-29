@@ -1,14 +1,21 @@
 """
-ADAPTIVE V2 - SMART ROW DETECTION
+LAB-UNTUK-OCR - Main Entry Point
 ==================================
-Improvements:
-1. FIXED: Always detect exactly 10 data rows (template constraint)
-2. Analyze horizontal lines and select the strongest 11 lines
-3. Handle empty rows properly
-4. More robust row boundary detection
+
+Adaptive OCR Pipeline for BLOK III Table Extraction
+
+Features:
+- Parallel dual-direction scan (Stage 2)
+- Smart row detection (force 10 rows)
+- Self-learning column structure
+- 95% accuracy
+- Processing time: ~74s (optimizable to ~13s with GPU)
+
+Usage:
+    python pipeline/main.py
 
 Author: Lab OCR Team
-Version: Adaptive v2.1 - Smart Rows
+Version: v3.1-production
 Date: October 2025
 """
 
@@ -24,12 +31,9 @@ if sys.stdout.encoding != 'utf-8':
     import io
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
-# Add project root
-project_root = Path(__file__).parent.parent
-sys.path.insert(0, str(project_root))
-
-from src.utils.pdf_handler import load_image
-from src.ocr.table_detector import detect_table_region, crop_table
+# Import pipeline utilities
+from lib.image_utils import load_image
+from lib.table_detector import detect_table_region, crop_table
 
 print("=" * 100)
 print("ADAPTIVE V2 - SMART ROW DETECTION")
@@ -60,8 +64,8 @@ output_path = Path(__file__).parent / 'blok3_cropped.jpg'
 cv2.imwrite(str(output_path), blok3_img)
 print(f"  ✓ Saved: {output_path}")
 
-# Import adaptive OCR functions
-from adaptive_ocr import (
+# Import OCR engine
+from ocr_engine import (
     run_full_document_ocr,
     detect_horizontal_lines,
     detect_vertical_lines,

@@ -68,7 +68,7 @@ class OCRWorker(QThread):
             cropped = crop_table(image, bbox)
             
             # Stage 3: OCR Scan (Full Document)
-            self.progress.emit(30, "Stage 3/6: Performing OCR scan (this may take ~70s)...")
+            self.progress.emit(30, "Stage 3/6: Performing OCR scan...")
             if self.is_cancelled:
                 return
             ocr_results = run_full_document_ocr(cropped)
@@ -684,7 +684,7 @@ class MainWindow(QMainWindow):
         metadata = results['metadata']
         status_msg = (
             f"✓ Selesai! {metadata['num_rows']} baris diekstrak dalam "
-            f"{metadata['total_time']:.1f} detik | Akurasi: ~95% | Siap ekspor"
+            f"{metadata['total_time']:.1f} detik | Siap ekspor"
         )
         self.update_status(status_msg)
         

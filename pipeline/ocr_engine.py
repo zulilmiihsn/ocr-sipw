@@ -87,19 +87,12 @@ class PaddleOCREngine:
                 paddle.set_device('cpu')
                 print("ℹ️ GPU check failed. Using CPU with all cores.")
             
-            # Build config with ONLY supported parameters
+            # Build config with ONLY core supported parameters
             ocr_config = {
                 'lang': OCRConfig.PADDLE_LANG,
                 'use_angle_cls': False,           # Disable angle detection (faster)
                 'use_gpu': use_gpu,               # Auto-detected GPU
-                'det_limit_side_len': 1920,       # Larger detection limit
-                'det_limit_type': 'max',          # Max limit
-                'rec_batch_num': 16,              # Batch recognition
-                'max_batch_size': 16,             # Parallel processing
-                'det_db_box_thresh': 0.5,         # Detection threshold
-                'det_db_unclip_ratio': 1.8,       # Text box expansion
-                'total_process_num': 1,           # Single process
-                'use_mp': False                   # No multiprocessing overhead
+                'rec_batch_num': 6                # Batch recognition (conservative)
             }
             
             # CPU-specific optimizations

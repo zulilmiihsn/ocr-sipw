@@ -179,10 +179,11 @@ def _fallback_ratio_detection(image: np.ndarray, height: int, width: int) -> Opt
     print(f"  📐 RATIO-BASED DETECTION:")
     print(f"    Document size: {width}x{height}px")
     
-    # BLOK III typically located at 25%-75% of document height
-    # These ratios are based on standard BPS form layout
-    TOP_RATIO = 0.25      # BLOK III starts at ~25% from top
-    BOTTOM_RATIO = 0.75   # BLOK III ends at ~75% from top
+    # BLOK III typically located at 19%-90% of document height
+    # These ratios are measured from actual BPS form samples with ±3% safety margin
+    # Measured from sample: Top=21.9%, Bottom=89.0% → Added ±3% margin
+    TOP_RATIO = 0.19      # BLOK III starts at ~19% from top (measured)
+    BOTTOM_RATIO = 0.90   # BLOK III ends at ~90% from top (measured)
     
     blok3_y_start = int(height * TOP_RATIO)
     blok3_y_end = int(height * BOTTOM_RATIO)

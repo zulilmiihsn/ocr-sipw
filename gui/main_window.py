@@ -314,25 +314,52 @@ class MainWindow(QMainWindow):
         self.table.setColumnCount(17)
         self.table.setRowCount(10)
         
-        # Set headers (column names)
+        # Set headers (column names) - sesuai form asli
         headers = [
-            "No", "Nama Jalan", "RT", "RW", "Nama Kepala Keluarga",
-            "Jumlah Keluarga", "Perkiraan Jumlah Muatan 1", "Perkiraan Jumlah Muatan 2",
-            "Perkiraan Jumlah Muatan 3", "Perkiraan Jumlah Muatan 4", "Waktu Mulai",
-            "Waktu Selesai", "Lama Pengangkutan (Jam)", "Jumlah Armada",
-            "Jumlah Rit", "Jumlah Muatan Bangunan", "Keterangan"
+            "No",
+            "Kode SLS/Non-SLS",
+            "Kode Sub-SLS",
+            "Nama SLS/Non-SLS",
+            "Perkiraan Jumlah Muatan KK (Keluarga)",
+            "Bangunan Tempat Tinggal (BTT)",
+            "Bangunan Tempat Tinggal Kosong (BTT Kosong)",
+            "Bangunan Khusus Usaha (BKU)",
+            "Bangunan Bukan Tempat Tinggal non Usaha",
+            "Perkiraan Jumlah Muatan Usaha",
+            "Total Muatan",
+            "Nama Wilayah Konsentrasi Ekonomi",
+            "Jumlah Shift Pola Kerja Konsentrasi Ekonomi",
+            "Jam Operasional",
+            "Contact Person - Telepon/Email",
+            "Contact Person - Muatan Dominan ?)",
+            "Apakah memiliki perubahan batas (reko)?)\n1 = Ya\n2 = Tidak"
         ]
         self.table.setHorizontalHeaderLabels(headers)
         
-        # Adjust column widths
+        # Adjust column widths based on content
         header = self.table.horizontalHeader()
-        for i in range(17):
-            if i in [0, 2, 3, 5]:  # Small columns
-                header.resizeSection(i, 50)
-            elif i in [1, 4]:  # Name columns
-                header.resizeSection(i, 150)
-            else:
-                header.resizeSection(i, 100)
+        column_widths = [
+            60,   # No
+            120,  # Kode SLS/Non-SLS
+            90,   # Kode Sub-SLS
+            180,  # Nama SLS/Non-SLS
+            140,  # Perkiraan Jumlah Muatan KK
+            120,  # BTT
+            150,  # BTT Kosong
+            120,  # BKU
+            180,  # Bangunan Bukan Tempat Tinggal
+            140,  # Perkiraan Jumlah Muatan Usaha
+            100,  # Total Muatan
+            180,  # Nama Wilayah Konsentrasi
+            150,  # Jumlah Shift
+            120,  # Jam Operasional
+            160,  # Contact - Telepon/Email
+            140,  # Contact - Muatan Dominan
+            120   # Perubahan batas (reko)
+        ]
+        
+        for i, width in enumerate(column_widths):
+            header.resizeSection(i, width)
         
         # Enable editing
         self.table.setEditTriggers(QTableWidget.DoubleClicked | QTableWidget.EditKeyPressed)
@@ -620,14 +647,8 @@ class MainWindow(QMainWindow):
         ws = wb.active
         ws.title = "BLOK III"
         
-        # Headers
-        headers = [
-            "No", "Nama Jalan", "RT", "RW", "Nama Kepala Keluarga",
-            "Jumlah Keluarga", "Perkiraan Jumlah Muatan 1", "Perkiraan Jumlah Muatan 2",
-            "Perkiraan Jumlah Muatan 3", "Perkiraan Jumlah Muatan 4", "Waktu Mulai",
-            "Waktu Selesai", "Lama Pengangkutan (Jam)", "Jumlah Armada",
-            "Jumlah Rit", "Jumlah Muatan Bangunan", "Keterangan"
-        ]
+        # Headers - get from table
+        headers = [self.table.horizontalHeaderItem(i).text() for i in range(17)]
         
         # Write headers
         for col, header in enumerate(headers, 1):

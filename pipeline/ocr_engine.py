@@ -181,11 +181,6 @@ class PaddleOCREngine:
                 
                 # RECOGNITION OPTIMIZATION
                 rec_batch_num=6,           # Process 6 texts at once
-                max_text_length=25,        # Max chars per detection
-                
-                # ACCURACY IMPROVEMENTS
-                use_dilation=True,         # Better for printed text
-                det_db_score_mode='slow',  # More accurate detection
                 
                 # SPEED vs ACCURACY BALANCE
                 drop_score=0.3,            # Drop low-confidence results

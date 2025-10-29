@@ -7,6 +7,9 @@ import json
 import time
 from pathlib import Path
 from typing import Optional, Dict, List
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import os
+from threading import Lock
 
 from PyQt5.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
@@ -50,56 +53,98 @@ class OCRWorker(QThread):
         self.is_cancelled = False
     
     def run(self):
-        """Run OCR pipeline in background (supports multi-file/multi-page)"""
+        """Run OCR pipeline in background (PARALLEL multi-file/multi-page processing)"""
         try:
             start_time = time.time()
-            
-            # Aggregate all results from all files/pages
-            all_results = []
             total_files = len(self.file_paths)
             
-            # Process each file
+            # Stage 1: Load all documents first (sequential, fast)
+            self.progress.emit(5, "Loading documents...")
+            documents = []  # List of (file_name, file_idx, images)
+            
             for file_idx, file_path in enumerate(self.file_paths):
                 if self.is_cancelled:
                     return
                 
-                file_num = file_idx + 1
                 file_name = Path(file_path).name
-                
-                # Stage 1: Load Document (Image or PDF)
                 self.progress.emit(
-                    int(10 + (file_idx / total_files) * 5),
-                    f"[{file_num}/{total_files}] Loading {file_name}..."
+                    int(5 + (file_idx / total_files) * 10),
+                    f"Loading {file_name}..."
                 )
                 
-                # Load document (supports both image and PDF)
-                images, doc_type = load_document(file_path, dpi=300)
+                try:
+                    images, doc_type = load_document(file_path, dpi=300)
+                    documents.append((file_name, file_idx, images))
+                except Exception as e:
+                    print(f"Failed to load {file_name}: {e}")
+                    continue
             
-                # Process all pages from this file
+            if not documents:
+                self.error.emit("Failed to load any documents")
+                return
+            
+            # Stage 2: Prepare all image tasks for parallel processing
+            self.progress.emit(15, "Preparing parallel processing...")
+            tasks = []  # List of (image, file_name, file_idx, page_idx, page_num)
+            
+            for file_name, file_idx, images in documents:
                 for page_idx, image in enumerate(images):
+                    page_num = page_idx + 1
+                    tasks.append((image, file_name, file_idx, page_idx, page_num, len(images)))
+            
+            total_tasks = len(tasks)
+            if total_tasks == 0:
+                self.error.emit("No images to process")
+                return
+            
+            # Stage 3: Process all tasks in parallel with ThreadPoolExecutor
+            self.progress.emit(20, f"Processing {total_tasks} pages in parallel...")
+            
+            all_results = []
+            completed_tasks = 0
+            progress_lock = Lock()
+            
+            # Determine optimal worker count
+            max_workers = min(os.cpu_count() or 4, total_tasks, 8)  # Max 8 threads
+            
+            with ThreadPoolExecutor(max_workers=max_workers) as executor:
+                # Submit all tasks
+                future_to_task = {
+                    executor.submit(
+                        self._process_single_image_wrapper,
+                        image, file_name, file_idx, page_idx, page_num, total_pages
+                    ): (file_name, page_num)
+                    for image, file_name, file_idx, page_idx, page_num, total_pages in tasks
+                }
+                
+                # Process results as they complete
+                for future in as_completed(future_to_task):
                     if self.is_cancelled:
+                        executor.shutdown(wait=False, cancel_futures=True)
                         return
                     
-                    page_num = page_idx + 1
-                    if len(images) > 1:
-                        self.progress.emit(
-                            int(15 + (file_idx / total_files) * 5),
-                            f"[{file_num}/{total_files}] Page {page_num}/{len(images)}..."
-                        )
+                    file_name, page_num = future_to_task[future]
                     
-                    # Process this page/image
-                    page_results = self._process_single_image(
-                        image, file_idx, page_idx, total_files, len(images)
-                    )
-                    
-                    if page_results:
-                        # Add source info to each row
-                        for row in page_results:
-                            row['_source_file'] = file_name
-                            row['_source_page'] = page_num
+                    try:
+                        page_results = future.result()
                         
-                        # Append to aggregated results
-                        all_results.extend(page_results)
+                        if page_results:
+                            # Thread-safe append
+                            with progress_lock:
+                                all_results.extend(page_results)
+                                completed_tasks += 1
+                                
+                                # Update progress
+                                progress = int(20 + (completed_tasks / total_tasks) * 70)
+                                self.progress.emit(
+                                    progress,
+                                    f"Completed {completed_tasks}/{total_tasks} pages ({max_workers} threads)"
+                                )
+                    
+                    except Exception as e:
+                        print(f"Error processing {file_name} page {page_num}: {e}")
+                        with progress_lock:
+                            completed_tasks += 1
             
             # All files/pages processed - now sort and emit
             if not all_results:
@@ -127,30 +172,46 @@ class OCRWorker(QThread):
         except Exception as e:
             self.error.emit(f"OCR Error: {str(e)}")
     
-    def _process_single_image(self, image, file_idx, page_idx, total_files, total_pages):
-        """Process a single image/page and return table rows"""
+    def _process_single_image_wrapper(self, image, file_name, file_idx, page_idx, page_num, total_pages):
+        """Wrapper for parallel processing - adds source metadata to results"""
         try:
-            # Stage 2: Detect BLOK III
-            progress_base = 20 + (file_idx / total_files) * 60
-            self.progress.emit(int(progress_base), "Detecting BLOK III region...")
+            # Process the image
+            page_results = self._process_single_image(image, file_idx, page_idx, 1, total_pages)
+            
+            if page_results:
+                # Add source info to each row
+                for row in page_results:
+                    row['_source_file'] = file_name
+                    row['_source_page'] = page_num
+            
+            return page_results
+        
+        except Exception as e:
+            print(f"Error in wrapper for {file_name} page {page_num}: {e}")
+            return []
+    
+    def _process_single_image(self, image, file_idx, page_idx, total_files, total_pages):
+        """Process a single image/page and return table rows (thread-safe, no progress emit)"""
+        try:
+            # Note: Progress tracking is handled by parallel executor, not here
             if self.is_cancelled:
-                return
+                return []
+            
+            # Detect BLOK III region
             bbox = detect_table_region(image)
             if bbox is None:
-                self.error.emit("Failed to detect BLOK III table region")
-                return
+                print("Warning: Failed to detect BLOK III table region")
+                return []
             cropped = crop_table(image, bbox)
             
-            # Stage 3: OCR Scan (Full Document)
-            self.progress.emit(30, "Stage 3/6: Performing OCR scan...")
+            # OCR Scan
             if self.is_cancelled:
-                return
+                return []
             ocr_results = run_full_document_ocr(cropped)
             
-            # Stage 4: Detect Lines
-            self.progress.emit(70, "Stage 4/6: Detecting table structure...")
+            # Detect Lines
             if self.is_cancelled:
-                return
+                return []
             all_h_lines = detect_horizontal_lines(cropped)
             vertical_lines = detect_vertical_lines(cropped)
             
@@ -245,17 +306,15 @@ class OCRWorker(QThread):
                     y = data_region_start + i * row_height
                     h_lines.append(int(y))
             
-            # Stage 5: Detect Headers and Columns
-            self.progress.emit(80, "Stage 5/6: Learning column structure...")
+            # Detect Headers and Columns
             if self.is_cancelled:
-                return
+                return []
             header_groups = detect_header_rows(ocr_results)
             column_structure = learn_column_structure(header_groups, vertical_lines)
             
-            # Stage 6: Build Table with improved mapping
-            self.progress.emit(90, "Stage 6/6: Building table...")
+            # Build Table
             if self.is_cancelled:
-                return
+                return []
             
             # Build table with center-based detection mapping
             from collections import defaultdict

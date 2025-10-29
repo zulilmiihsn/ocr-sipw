@@ -73,29 +73,46 @@ class PaddleOCREngine:
             from paddleocr import PaddleOCR
             import paddle
             
-            # Enable all performance optimizations
-            paddle.set_device('cpu')  # Use all CPU cores
+            # Auto-detect GPU availability
+            use_gpu = False
+            try:
+                if paddle.device.cuda.device_count() > 0:
+                    use_gpu = True
+                    paddle.set_device('gpu:0')
+                    print(f"✅ GPU detected! Using GPU for acceleration (CUDA devices: {paddle.device.cuda.device_count()})")
+                else:
+                    paddle.set_device('cpu')
+                    print("ℹ️ No GPU detected. Using CPU with all cores.")
+            except:
+                paddle.set_device('cpu')
+                print("ℹ️ GPU check failed. Using CPU with all cores.")
             
-            cls._instance = PaddleOCR(
-                lang=OCRConfig.PADDLE_LANG,
-                # PERFORMANCE OPTIMIZATIONS:
-                use_angle_cls=False,           # Disable angle detection (faster)
-                use_gpu=False,                 # CPU with all cores
-                enable_mkldnn=True,            # Intel MKL-DNN acceleration
-                cpu_threads=0,                 # 0 = use all CPU cores
-                # Model optimizations:
-                det_limit_side_len=1920,       # Larger detection limit (better accuracy)
-                det_limit_type='max',          # Max limit (more aggressive)
-                rec_batch_num=16,              # Larger batch for recognition (faster)
-                max_batch_size=16,             # Process multiple texts in parallel
-                use_dilation=True,             # Better text detection
-                det_db_box_thresh=0.5,         # Detection confidence threshold
-                det_db_unclip_ratio=1.8,       # Text box expansion
-                # Memory optimization (allow heavy usage):
-                total_process_num=1,           # Single process, all threads
-                use_mp=False,                  # No multiprocessing overhead
-                show_log=False                 # Suppress logs for speed
-            )
+            # Build config based on GPU availability
+            ocr_config = {
+                'lang': OCRConfig.PADDLE_LANG,
+                'use_angle_cls': False,           # Disable angle detection (faster)
+                'use_gpu': use_gpu,               # Auto-detected GPU
+                'det_limit_side_len': 1920,       # Larger detection limit
+                'det_limit_type': 'max',          # Max limit
+                'rec_batch_num': 16,              # Batch recognition
+                'max_batch_size': 16,             # Parallel processing
+                'use_dilation': True,             # Better text detection
+                'det_db_box_thresh': 0.5,         # Detection threshold
+                'det_db_unclip_ratio': 1.8,       # Text box expansion
+                'total_process_num': 1,           # Single process
+                'use_mp': False,                  # No multiprocessing overhead
+                'show_log': False                 # Suppress logs
+            }
+            
+            # CPU-specific optimizations
+            if not use_gpu:
+                ocr_config['enable_mkldnn'] = True   # Intel MKL-DNN for CPU
+                ocr_config['cpu_threads'] = 0         # Use all CPU cores
+            else:
+                # GPU-specific optimizations
+                ocr_config['gpu_mem'] = 8000          # GPU memory limit (MB)
+            
+            cls._instance = PaddleOCR(**ocr_config)
         return cls._instance
 
 

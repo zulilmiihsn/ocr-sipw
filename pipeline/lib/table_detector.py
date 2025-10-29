@@ -161,6 +161,52 @@ def _scan_bottom_for_keterangan(image, search_region_bottom, width, height, sear
     }, elapsed
 
 
+def _fallback_ratio_detection(image: np.ndarray, height: int, width: int) -> Optional[Tuple[int, int, int, int]]:
+    """
+    Fallback: Ratio-based BLOK III detection
+    
+    Uses fixed proportional positioning based on typical document layout.
+    Robust for documents with consistent template but varying scales.
+    
+    Args:
+        image: Full document image
+        height: Image height
+        width: Image width
+        
+    Returns:
+        Tuple of (x, y, width, height) or None if invalid
+    """
+    print(f"  📐 RATIO-BASED DETECTION:")
+    print(f"    Document size: {width}x{height}px")
+    
+    # BLOK III typically located at 25%-75% of document height
+    # These ratios are based on standard BPS form layout
+    TOP_RATIO = 0.25      # BLOK III starts at ~25% from top
+    BOTTOM_RATIO = 0.75   # BLOK III ends at ~75% from top
+    
+    blok3_y_start = int(height * TOP_RATIO)
+    blok3_y_end = int(height * BOTTOM_RATIO)
+    blok3_height = blok3_y_end - blok3_y_start
+    
+    # Apply margins (same as keyword detection)
+    blok3_y_start = max(blok3_y_start - 10, 0)           # -10px margin
+    blok3_y_end = min(blok3_y_end + 10, height)          # +10px margin
+    blok3_height = blok3_y_end - blok3_y_start
+    
+    # Validation: BLOK III should be at least 20% of document height
+    min_height = int(height * 0.2)
+    if blok3_height < min_height:
+        print(f"  ✗ FALLBACK FAILED: Height too small ({blok3_height}px < {min_height}px)")
+        return None
+    
+    print(f"    Top ratio: {TOP_RATIO*100:.0f}% → y={blok3_y_start}")
+    print(f"    Bottom ratio: {BOTTOM_RATIO*100:.0f}% → y={blok3_y_end}")
+    print(f"    BLOK III height: {blok3_height}px ({blok3_height/height*100:.1f}% of document)")
+    print(f"  ✓ FALLBACK SUCCESS: Using ratio-based boundaries")
+    
+    return (0, blok3_y_start, width, blok3_height)
+
+
 def detect_table_region(image: np.ndarray) -> Optional[Tuple[int, int, int, int]]:
     """
     Detect BLOK III region using parallel dual-direction OCR scan
@@ -214,10 +260,11 @@ def detect_table_region(image: np.ndarray) -> Optional[Tuple[int, int, int, int]
         
         elapsed_total = time.time() - start_total
         
-        # Process results
+        # Process results with FALLBACK
         if result_top is None:
             print(f"  ✗ 'Rekapitulasi' not found in top 30%")
-            return None
+            print(f"  🔄 FALLBACK: Using ratio-based detection...")
+            return _fallback_ratio_detection(image, height, width)
         
         best_top = result_top['best']
         blok3_y_start = result_top['y_start']

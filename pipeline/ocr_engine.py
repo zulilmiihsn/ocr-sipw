@@ -64,7 +64,7 @@ class OCRConfig:
 # ============================================================================
 
 class PaddleOCREngine:
-    """Singleton PaddleOCR instance for MAXIMUM PERFORMANCE"""
+    """Singleton PaddleOCR instance for PP-OCRv5 OPTIMIZED"""
     _instance = None
     
     @classmethod
@@ -73,16 +73,35 @@ class PaddleOCREngine:
             from paddleocr import PaddleOCR
             import paddle
             
-            # Simple setup - let PaddleOCR auto-detect everything
-            print("🔧 Initializing PaddleOCR with default settings...")
+            print("🔧 Initializing PP-OCRv5 with optimized settings...")
             
-            # MINIMAL config - only essential parameters
+            # PP-OCRv5 OPTIMIZED CONFIG
+            # Progressive parameter approach: only use well-supported params
             ocr_config = {
+                # Basic settings (always supported)
                 'lang': OCRConfig.PADDLE_LANG,
-                'use_angle_cls': False            # Disable angle detection (faster)
+                'use_angle_cls': False,  # Disable angle detection (faster, dokumen sudah straight)
+                
+                # Detection optimization (PP-OCRv5 improvements)
+                'det_db_thresh': 0.3,        # Detection threshold (lower = more sensitive to small text)
+                'det_db_box_thresh': 0.5,    # Box threshold (lower = detect smaller/faint text)
+                'det_db_unclip_ratio': 1.6,  # Unclip ratio (higher = larger boxes, better coverage)
+                
+                # Recognition optimization
+                'rec_batch_num': 6,          # Batch processing for speed
+                'drop_score': 0.4,           # Drop low confidence results (balance accuracy/recall)
             }
             
+            # Try to add advanced features if supported
+            try:
+                ocr_config['show_log'] = False
+                ocr_config['use_mp'] = True
+                ocr_config['total_process_num'] = 4
+            except:
+                pass  # Silently skip if not supported
+            
             cls._instance = PaddleOCR(**ocr_config)
+            print("✅ PP-OCRv5 initialized with optimized parameters")
         return cls._instance
 
 

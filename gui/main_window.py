@@ -77,29 +77,93 @@ class OCRWorker(QThread):
             all_h_lines = detect_horizontal_lines(cropped)
             vertical_lines = detect_vertical_lines(cropped)
             
-            # Smart row detection: Force exactly 10 data rows
+            # Improved smart row detection using Y-clustering from OCR
             image_height = cropped.shape[0]
-            lines = sorted(all_h_lines)
             
-            # Find header end
-            header_candidates = [y for y in lines if y < image_height * 0.25]
-            if len(header_candidates) >= 2:
-                header_end = max(header_candidates)
+            # Find header end by detecting header keywords
+            header_y_max = 0
+            for det in ocr_results:
+                y_center = (det['y_min'] + det['y_max']) / 2
+                if y_center < image_height * 0.25:  # Header region
+                    header_y_max = max(header_y_max, det['y_max'])
+            
+            # If no header detected, use horizontal lines
+            if header_y_max == 0:
+                lines = sorted(all_h_lines)
+                header_candidates = [y for y in lines if y < image_height * 0.25]
+                header_y_max = max(header_candidates) if header_candidates else (lines[0] if lines else 0)
+            
+            # Collect Y-centers of data detections (below header)
+            data_y_centers = []
+            for det in ocr_results:
+                y_center = (det['y_min'] + det['y_max']) / 2
+                if y_center > header_y_max + 10:  # Below header with margin
+                    data_y_centers.append(y_center)
+            
+            if len(data_y_centers) > 0:
+                # Cluster Y positions into rows
+                data_y_centers = sorted(data_y_centers)
+                
+                # Group detections that are close together (same row)
+                row_groups = []
+                current_group = [data_y_centers[0]]
+                tolerance = 15  # pixels tolerance for same row
+                
+                for y in data_y_centers[1:]:
+                    if y - current_group[-1] <= tolerance:
+                        current_group.append(y)
+                    else:
+                        row_groups.append(current_group)
+                        current_group = [y]
+                row_groups.append(current_group)
+                
+                # Get average Y for each row group
+                row_y_positions = [sum(group) / len(group) for group in row_groups]
+                
+                # Force exactly 10 rows by merging or splitting
+                if len(row_y_positions) > 10:
+                    # Too many rows, keep first 10
+                    row_y_positions = row_y_positions[:10]
+                elif len(row_y_positions) < 10:
+                    # Too few rows, interpolate missing ones
+                    if len(row_y_positions) >= 2:
+                        start_y = row_y_positions[0]
+                        end_y = row_y_positions[-1]
+                        step = (end_y - start_y) / 9
+                        row_y_positions = [start_y + i * step for i in range(10)]
+                
+                # Create horizontal lines from row positions
+                h_lines = [int(header_y_max + 10)]  # Start line
+                for y in row_y_positions:
+                    h_lines.append(int(y))
+                
+                # Add end line
+                lines = sorted(all_h_lines)
+                bottom_line = max(lines) if lines else image_height
+                h_lines.append(int(bottom_line))
+                
+                # Remove duplicates and sort
+                h_lines = sorted(list(set(h_lines)))
+                
+                # Ensure exactly 11 lines for 10 rows
+                if len(h_lines) > 11:
+                    # Keep first and last, interpolate middle
+                    start = h_lines[0]
+                    end = h_lines[-1]
+                    step = (end - start) / 10
+                    h_lines = [int(start + i * step) for i in range(11)]
             else:
-                header_end = lines[0] if lines else 0
-            
-            # Create exactly 10 equal rows
-            data_region_start = header_end
-            data_region_end = max(lines) if lines else image_height
-            data_height = data_region_end - data_region_start
-            row_height = data_height / 10
-            
-            h_lines = []
-            for i in range(11):
-                y = data_region_start + i * row_height
-                h_lines.append(int(y))
-            
-            header_y_max = header_end
+                # Fallback: equal division
+                lines = sorted(all_h_lines)
+                data_region_start = header_y_max + 10
+                data_region_end = max(lines) if lines else image_height
+                data_height = data_region_end - data_region_start
+                row_height = data_height / 10
+                
+                h_lines = []
+                for i in range(11):
+                    y = data_region_start + i * row_height
+                    h_lines.append(int(y))
             
             # Stage 5: Detect Headers and Columns
             self.progress.emit(80, "Stage 5/6: Learning column structure...")

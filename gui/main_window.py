@@ -354,6 +354,53 @@ class OCRWorker(QThread):
         self.is_cancelled = True
 
 
+class CustomTableWidget(QTableWidget):
+    """Custom table widget with arrow key navigation"""
+    
+    def keyPressEvent(self, event):
+        """Override key press to handle arrow navigation with wrapping"""
+        current_row = self.currentRow()
+        current_col = self.currentColumn()
+        
+        # Arrow key navigation with wrapping
+        if event.key() == Qt.Key_Up:
+            # Move up with wrapping
+            new_row = current_row - 1 if current_row > 0 else 9
+            self.setCurrentCell(new_row, current_col)
+            return
+        
+        elif event.key() == Qt.Key_Down:
+            # Move down with wrapping
+            new_row = current_row + 1 if current_row < 9 else 0
+            self.setCurrentCell(new_row, current_col)
+            return
+        
+        elif event.key() == Qt.Key_Left:
+            # Move left with wrapping
+            new_col = current_col - 1 if current_col > 0 else 15
+            self.setCurrentCell(current_row, new_col)
+            return
+        
+        elif event.key() == Qt.Key_Right:
+            # Move right with wrapping
+            new_col = current_col + 1 if current_col < 15 else 0
+            self.setCurrentCell(current_row, new_col)
+            return
+        
+        elif event.key() in (Qt.Key_Return, Qt.Key_Enter):
+            # Enter: move to next cell (right, then down)
+            if current_col < 15:
+                self.setCurrentCell(current_row, current_col + 1)
+            elif current_row < 9:
+                self.setCurrentCell(current_row + 1, 0)
+            else:
+                self.setCurrentCell(0, 0)
+            return
+        
+        # Pass other keys to default handler
+        super().keyPressEvent(event)
+
+
 class MainWindow(QMainWindow):
     """Main application window"""
     
@@ -473,8 +520,8 @@ class MainWindow(QMainWindow):
         group = QGroupBox("HASIL EKSTRAKSI TABEL")
         layout = QVBoxLayout()
         
-        # Create table widget (16 columns, removed "No" column)
-        self.table = QTableWidget()
+        # Create custom table widget with arrow key navigation
+        self.table = CustomTableWidget()
         self.table.setColumnCount(16)
         self.table.setRowCount(10)
         
@@ -536,8 +583,7 @@ class MainWindow(QMainWindow):
         )
         self.table.itemChanged.connect(self.on_cell_edited)
         
-        # Install event filter for Enter key navigation
-        self.table.installEventFilter(self)
+        # Navigation handled by CustomTableWidget.keyPressEvent
         
         layout.addWidget(self.table)
         
@@ -972,68 +1018,6 @@ class MainWindow(QMainWindow):
             "Semua data telah dihapus.\n\nAnda dapat memilih file baru untuk diproses."
         )
     
-    def eventFilter(self, source, event):
-        """Handle keyboard navigation in table"""
-        from PyQt5.QtCore import QEvent
-        from PyQt5.QtGui import QKeyEvent
-        
-        if source == self.table and event.type() == QEvent.KeyPress:
-            key_event = event
-            current_row = self.table.currentRow()
-            current_col = self.table.currentColumn()
-            
-            # Arrow key navigation
-            if key_event.key() == Qt.Key_Up:
-                # Move up
-                if current_row > 0:
-                    self.table.setCurrentCell(current_row - 1, current_col)
-                else:
-                    # Wrap to bottom
-                    self.table.setCurrentCell(9, current_col)
-                return True
-            
-            elif key_event.key() == Qt.Key_Down:
-                # Move down
-                if current_row < 9:
-                    self.table.setCurrentCell(current_row + 1, current_col)
-                else:
-                    # Wrap to top
-                    self.table.setCurrentCell(0, current_col)
-                return True
-            
-            elif key_event.key() == Qt.Key_Left:
-                # Move left
-                if current_col > 0:
-                    self.table.setCurrentCell(current_row, current_col - 1)
-                else:
-                    # Wrap to last column
-                    self.table.setCurrentCell(current_row, 15)
-                return True
-            
-            elif key_event.key() == Qt.Key_Right:
-                # Move right
-                if current_col < 15:
-                    self.table.setCurrentCell(current_row, current_col + 1)
-                else:
-                    # Wrap to first column
-                    self.table.setCurrentCell(current_row, 0)
-                return True
-            
-            # Enter or NumPad Enter - move to next cell (Excel-like)
-            elif key_event.key() in (Qt.Key_Return, Qt.Key_Enter):
-                # Move to next cell (right, then down to next row)
-                if current_col < 15:  # Not last column (16 columns, 0-15)
-                    self.table.setCurrentCell(current_row, current_col + 1)
-                elif current_row < 9:  # Not last row (10 rows, 0-9)
-                    self.table.setCurrentCell(current_row + 1, 0)  # Go to first column of next row
-                else:
-                    # Last cell, wrap to first cell
-                    self.table.setCurrentCell(0, 0)
-                
-                return True  # Event handled
-        
-        # Pass event to parent
-        return super().eventFilter(source, event)
     
     def closeEvent(self, event):
         """Handle window close"""

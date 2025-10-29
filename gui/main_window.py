@@ -237,12 +237,12 @@ class OCRWorker(QThread):
                 # 4. Confidence weight (10%)
                 conf_score = confidence
                 
-                # Weighted combination
+                # Weighted combination (STRICTER: More weight on center position)
                 total_score = (
-                    center_score * 0.40 +
-                    iou * 0.30 +
-                    distance_score * 0.20 +
-                    conf_score * 0.10
+                    center_score * 0.50 +    # Increased from 40% to 50%
+                    iou * 0.25 +             # Decreased from 30% to 25%
+                    distance_score * 0.15 +  # Decreased from 20% to 15%
+                    conf_score * 0.10        # Kept at 10%
                 )
                 
                 return total_score
@@ -264,8 +264,8 @@ class OCRWorker(QThread):
                     row_y_min = h_lines[i]
                     row_y_max = h_lines[i + 1]
                     
-                    # Skip if detection is far from this row
-                    if y_center < row_y_min - 20 or y_center > row_y_max + 20:
+                    # Skip if detection is far from this row (STRICTER: 10px tolerance)
+                    if y_center < row_y_min - 10 or y_center > row_y_max + 10:
                         continue
                     
                     for j in range(len(column_structure)):
@@ -277,7 +277,7 @@ class OCRWorker(QThread):
                         # Calculate fuzzy score
                         score = fuzzy_score(det, cell_box, det['confidence'])
                         
-                        if score > best_score and score > 0.3:  # Minimum threshold
+                        if score > best_score and score > 0.4:  # STRICTER: 40% minimum threshold
                             best_score = score
                             best_row = i
                             best_col = j

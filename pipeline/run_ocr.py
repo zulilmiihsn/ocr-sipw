@@ -224,10 +224,10 @@ print("=" * 100)
 for i, row in enumerate(rows[:3], start=1):
     print(f"\nRow {i}:")
     for col_idx in range(min(5, len(columns))):
-        if str(col_idx) in row['cells']:
-            cell = row['cells'][str(col_idx)]
+        if col_idx in row['cells']:
+            cell = row['cells'][col_idx]
             col_name = columns[col_idx]['name'][:25].ljust(25)
-            text = cell.get('text_final', '')[:20].ljust(20)
+            text = cell.get('text_final', cell.get('text', ''))[:20].ljust(20)
             conf = cell.get('confidence', 0.0)
             print(f"  {col_name}: \"{text}\" (conf: {conf:.1%})")
 

@@ -3,10 +3,9 @@
 <div align="center">
 
 ![Accuracy](https://img.shields.io/badge/Accuracy-95.0%25-brightgreen?style=for-the-badge)
-![Version](https://img.shields.io/badge/Version-4.1.0-blue?style=for-the-badge)
+![Version](https://img.shields.io/badge/Version-3.1.0-blue?style=for-the-badge)
 ![Python](https://img.shields.io/badge/Python-3.8+-yellow?style=for-the-badge)
 ![Status](https://img.shields.io/badge/Status-Production%20Ready-success?style=for-the-badge)
-![Speed](https://img.shields.io/badge/Speed-2x%20Faster-orange?style=for-the-badge)
 
 **High-accuracy OCR system with GUI for extracting BLOK III table data from statistical forms**
 
@@ -20,18 +19,12 @@
 
 Lab OCR adalah sistem OCR (Optical Character Recognition) yang dirancang khusus untuk mengekstrak data dari tabel **BLOK III** pada formulir statistik dengan akurasi tinggi.
 
-**NEW! ⚡ Phase 1 Optimizations** - 2x faster processing dengan akurasi lebih tinggi:
-- 🚀 Smart resize (1.5-2x speed boost)
-- 🎯 Adaptive preprocessing (+10-15% accuracy)
-- 🔧 CPU-optimized PaddleOCR config
-- ⏱️ ~40-50s processing time (down from ~70s)
-
-**🎨 GUI Application** - Aplikasi GUI yang user-friendly:
-- 📁 Auto-start OCR on file selection
-- 🔄 Real-time progress tracking
+**NEW! 🎨 GUI Application** - Kini tersedia aplikasi GUI yang user-friendly dengan fitur:
+- 📁 File browser untuk pilih PDF/Image
+- 🔄 Progress bar real-time
 - 📊 Interactive editable table
-- 💾 Export to Excel/CSV/JSON/HTML
-- 🎨 Professional minimal UI
+- 💾 Multiple export formats (Excel, CSV, JSON, HTML)
+- 🎯 Color-coded confidence levels
 
 ### 🎯 Key Achievements
 - ✅ **95.0% Overall Accuracy** (152/160 cells correct)
@@ -51,8 +44,8 @@ Lab OCR adalah sistem OCR (Optical Character Recognition) yang dirancang khusus 
 git clone https://github.com/zulilmiihsn/lab-ocr.git
 cd lab-ocr
 
-# Install dependencies
-pip install -r requirements.txt
+# Install GUI dependencies
+pip install -r requirements-gui.txt
 
 # Run GUI app
 python app.py

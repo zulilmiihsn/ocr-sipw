@@ -77,15 +77,7 @@ class OCRWorker(QThread):
             all_h_lines = detect_horizontal_lines(cropped)
             vertical_lines = detect_vertical_lines(cropped)
             
-            # ═══════════════════════════════════════════════════════════════════════════
-            # HYPER-SENSITIVE ROW DETECTION
-            # ═══════════════════════════════════════════════════════════════════════════
-            # Strategy: Detect separate rows even with minimal vertical gap or overlap
-            # - Analyze bounding boxes (not just centers)
-            # - Ultra-small tolerance (2-5px)
-            # - Detect overlaps as separate rows
-            # ═══════════════════════════════════════════════════════════════════════════
-            
+            # Improved smart row detection using Y-clustering from OCR
             image_height = cropped.shape[0]
             
             # Find header end by detecting header keywords
@@ -101,218 +93,77 @@ class OCRWorker(QThread):
                 header_candidates = [y for y in lines if y < image_height * 0.25]
                 header_y_max = max(header_candidates) if header_candidates else (lines[0] if lines else 0)
             
-            # ═══════════════════════════════════════════════════════════════════════════
-            # STEP 1: DETECT ROW NUMBERS (1-10) from leftmost column
-            # ═══════════════════════════════════════════════════════════════════════════
-            # This is the ANCHOR for robust row detection!
-            # ═══════════════════════════════════════════════════════════════════════════
-            
-            import re
-            
-            # Find leftmost X position (first column = "No" column)
-            if len(vertical_lines) > 0:
-                first_col_x_max = sorted(vertical_lines)[0] if len(vertical_lines) > 1 else cropped.shape[1] * 0.1
-            else:
-                first_col_x_max = cropped.shape[1] * 0.1
-            
-            # Extract row numbers from first column
-            row_number_detections = []
-            for det in ocr_results:
-                y_center = (det['y_min'] + det['y_max']) / 2
-                x_center = (det['x_min'] + det['x_max']) / 2
-                
-                # Must be below header and in first column
-                if y_center > header_y_max + 10 and x_center < first_col_x_max:
-                    # Check if text is a number 1-10
-                    text = det['text'].strip()
-                    
-                    # Try to extract number (handle OCR errors like "1O" → "10")
-                    text_clean = text.replace('O', '0').replace('o', '0').replace('l', '1').replace('I', '1')
-                    
-                    # Check if it's a valid row number (1-10)
-                    if re.match(r'^[1-9]$|^10$', text_clean):
-                        row_num = int(text_clean)
-                        row_number_detections.append({
-                            'row_number': row_num,
-                            'y_min': det['y_min'],
-                            'y_max': det['y_max'],
-                            'y_center': y_center,
-                            'text_original': text,
-                            'confidence': det['confidence']
-                        })
-            
-            # Sort by row number
-            row_number_detections = sorted(row_number_detections, key=lambda x: x['row_number'])
-            
-            # ═══════════════════════════════════════════════════════════════════════════
-            # STEP 2: BUILD ROW BOUNDARIES using detected numbers as anchors
-            # ═══════════════════════════════════════════════════════════════════════════
-            
-            # Collect all data detections (for fallback)
-            data_boxes = []
+            # Collect Y-centers of data detections (below header)
+            data_y_centers = []
             for det in ocr_results:
                 y_center = (det['y_min'] + det['y_max']) / 2
                 if y_center > header_y_max + 10:  # Below header with margin
-                    data_boxes.append({
-                        'y_min': det['y_min'],
-                        'y_max': det['y_max'],
-                        'y_center': y_center,
-                        'height': det['y_max'] - det['y_min']
-                    })
+                    data_y_centers.append(y_center)
             
-            if len(row_number_detections) >= 8:  # At least 8 numbers detected → reliable!
-                # ═══════════════════════════════════════════════════════════════════════
-                # NUMBER-ANCHORED ROW DETECTION (Ultra Robust!)
-                # ═══════════════════════════════════════════════════════════════════════
-                # Use detected row numbers (1-10) to determine exact row positions
-                # ═══════════════════════════════════════════════════════════════════════
+            if len(data_y_centers) > 0:
+                # Cluster Y positions into rows
+                data_y_centers = sorted(data_y_centers)
                 
-                self.progress.emit(75, f"Stage 4/6: ✅ {len(row_number_detections)} row numbers detected! Using number-anchored mapping...")
-                
-                # Build a map: row_number → Y position
-                number_to_y = {}
-                for det in row_number_detections:
-                    number_to_y[det['row_number']] = det['y_center']
-                
-                # Fill in missing numbers (1-10) by interpolation
-                detected_numbers = sorted(number_to_y.keys())
-                
-                # If we have at least 2 numbers, interpolate missing ones
-                if len(detected_numbers) >= 2:
-                    for num in range(1, 11):
-                        if num not in number_to_y:
-                            # Find closest detected numbers before and after
-                            before = [n for n in detected_numbers if n < num]
-                            after = [n for n in detected_numbers if n > num]
-                            
-                            if before and after:
-                                # Interpolate between them
-                                n1 = before[-1]
-                                n2 = after[0]
-                                y1 = number_to_y[n1]
-                                y2 = number_to_y[n2]
-                                
-                                # Linear interpolation
-                                ratio = (num - n1) / (n2 - n1)
-                                y_interpolated = y1 + ratio * (y2 - y1)
-                                number_to_y[num] = y_interpolated
-                            elif before:
-                                # Extrapolate from before
-                                n1 = before[-2] if len(before) >= 2 else before[-1]
-                                n2 = before[-1]
-                                y1 = number_to_y[n1]
-                                y2 = number_to_y[n2]
-                                step = (y2 - y1) / (n2 - n1) if n2 != n1 else 0
-                                number_to_y[num] = y2 + step * (num - n2)
-                            elif after:
-                                # Extrapolate from after
-                                n1 = after[0]
-                                n2 = after[1] if len(after) >= 2 else after[0]
-                                y1 = number_to_y[n1]
-                                y2 = number_to_y[n2]
-                                step = (y2 - y1) / (n2 - n1) if n2 != n1 else 0
-                                number_to_y[num] = y1 - step * (n1 - num)
-                
-                # Now we have Y positions for all 10 rows!
-                row_y_positions = [number_to_y[i] for i in range(1, 11)]
-            
-            elif len(data_boxes) > 0:
-                # ═══════════════════════════════════════════════════════════════════════
-                # FALLBACK: HYPER-SENSITIVE CLUSTERING (if numbers not detected reliably)
-                # ═══════════════════════════════════════════════════════════════════════
-                
-                self.progress.emit(75, f"Stage 4/6: ⚠️ Only {len(row_number_detections)} numbers detected. Using hyper-sensitive clustering...")
-                
-                # Sort by Y position
-                data_boxes = sorted(data_boxes, key=lambda b: b['y_center'])
-                
+                # Group detections that are close together (same row)
                 row_groups = []
-                current_group = [data_boxes[0]]
+                current_group = [data_y_centers[0]]
+                tolerance = 15  # pixels tolerance for same row
                 
-                ULTRA_SENSITIVE_TOLERANCE = 3  # 3px tolerance (hyper-sensitive!)
-                
-                for box in data_boxes[1:]:
-                    prev_box = current_group[-1]
-                    gap = box['y_min'] - prev_box['y_max']
-                    
-                    if gap > ULTRA_SENSITIVE_TOLERANCE:
-                        row_groups.append(current_group)
-                        current_group = [box]
-                    elif gap < -5:
-                        row_groups.append(current_group)
-                        current_group = [box]
+                for y in data_y_centers[1:]:
+                    if y - current_group[-1] <= tolerance:
+                        current_group.append(y)
                     else:
-                        current_group.append(box)
-                
+                        row_groups.append(current_group)
+                        current_group = [y]
                 row_groups.append(current_group)
                 
-                # Calculate row centers
-                row_y_positions = []
-                for group in row_groups:
-                    y_centers = [b['y_center'] for b in group]
-                    row_y_positions.append(sum(y_centers) / len(y_centers))
+                # Get average Y for each row group
+                row_y_positions = [sum(group) / len(group) for group in row_groups]
                 
-                # Enforce exactly 10 rows
+                # Force exactly 10 rows by merging or splitting
                 if len(row_y_positions) > 10:
-                    while len(row_y_positions) > 10:
-                        min_gap = float('inf')
-                        merge_idx = 0
-                        for i in range(len(row_y_positions) - 1):
-                            gap = row_y_positions[i+1] - row_y_positions[i]
-                            if gap < min_gap:
-                                min_gap = gap
-                                merge_idx = i
-                        new_y = (row_y_positions[merge_idx] + row_y_positions[merge_idx + 1]) / 2
-                        row_y_positions[merge_idx] = new_y
-                        row_y_positions.pop(merge_idx + 1)
-                
+                    # Too many rows, keep first 10
+                    row_y_positions = row_y_positions[:10]
                 elif len(row_y_positions) < 10:
+                    # Too few rows, interpolate missing ones
                     if len(row_y_positions) >= 2:
                         start_y = row_y_positions[0]
                         end_y = row_y_positions[-1]
                         step = (end_y - start_y) / 9
                         row_y_positions = [start_y + i * step for i in range(10)]
-                    else:
-                        lines = sorted(all_h_lines)
-                        data_region_start = header_y_max + 10
-                        data_region_end = max(lines) if lines else image_height
-                        data_height = data_region_end - data_region_start
-                        row_height = data_height / 10
-                        row_y_positions = [data_region_start + i * row_height for i in range(10)]
-            
+                
+                # Create horizontal lines from row positions
+                h_lines = [int(header_y_max + 10)]  # Start line
+                for y in row_y_positions:
+                    h_lines.append(int(y))
+                
+                # Add end line
+                lines = sorted(all_h_lines)
+                bottom_line = max(lines) if lines else image_height
+                h_lines.append(int(bottom_line))
+                
+                # Remove duplicates and sort
+                h_lines = sorted(list(set(h_lines)))
+                
+                # Ensure exactly 11 lines for 10 rows
+                if len(h_lines) > 11:
+                    # Keep first and last, interpolate middle
+                    start = h_lines[0]
+                    end = h_lines[-1]
+                    step = (end - start) / 10
+                    h_lines = [int(start + i * step) for i in range(11)]
             else:
-                # Last resort: equal division
-                row_y_positions = []
+                # Fallback: equal division
                 lines = sorted(all_h_lines)
                 data_region_start = header_y_max + 10
                 data_region_end = max(lines) if lines else image_height
                 data_height = data_region_end - data_region_start
                 row_height = data_height / 10
-                row_y_positions = [data_region_start + i * row_height for i in range(10)]
-            
-            # ═══════════════════════════════════════════════════════════════════════════
-            # FINALIZE ROW BOUNDARIES
-            # ═══════════════════════════════════════════════════════════════════════════
-            
-            # Create horizontal lines from row positions
-            h_lines = [int(header_y_max + 10)]  # Start line (after header)
-            for y in row_y_positions:
-                h_lines.append(int(y))
-            
-            # Add end line
-            lines = sorted(all_h_lines)
-            bottom_line = max(lines) if lines else image_height
-            h_lines.append(int(bottom_line))
-            
-            # Remove duplicates and sort
-            h_lines = sorted(list(set(h_lines)))
-            
-            # Ensure exactly 11 lines for 10 rows
-            if len(h_lines) != 11:
-                start = h_lines[0]
-                end = h_lines[-1]
-                step = (end - start) / 10
-                h_lines = [int(start + i * step) for i in range(11)]
+                
+                h_lines = []
+                for i in range(11):
+                    y = data_region_start + i * row_height
+                    h_lines.append(int(y))
             
             # Stage 5: Detect Headers and Columns
             self.progress.emit(80, "Stage 5/6: Learning column structure...")
@@ -413,10 +264,8 @@ class OCRWorker(QThread):
                     row_y_min = h_lines[i]
                     row_y_max = h_lines[i + 1]
                     
-                    # HYPER-STRICT ROW ASSIGNMENT (NO tolerance zone!)
-                    # Detection MUST be within row boundaries (no overflow allowed)
-                    # This ensures even closely-spaced rows are properly separated
-                    if y_center < row_y_min or y_center > row_y_max:
+                    # Skip if detection is far from this row (STRICTER: 10px tolerance)
+                    if y_center < row_y_min - 10 or y_center > row_y_max + 10:
                         continue
                     
                     for j in range(len(column_structure)):

@@ -444,7 +444,7 @@ class MainWindow(QMainWindow):
         """Initialize the user interface"""
         self.setWindowTitle("Lab-untuk-OCR - Ekstraksi Tabel BLOK III")
         self.setMinimumSize(1280, 800)
-        self.setWindowIcon(self._get_icon('fa5s.table', color='white'))
+        self.setWindowIcon(self._get_icon('fa5s.table', color='#2563EB'))
         
         # Load QSS stylesheet
         self.load_stylesheet()
@@ -472,9 +472,9 @@ class MainWindow(QMainWindow):
         self.progress_bar.setTextVisible(True)
         main_layout.addWidget(self.progress_bar)
         
-        # Single Export button
+        # Export button
         export_btn = QPushButton(" Ekspor Hasil")
-        export_btn.setIcon(self._get_icon('fa5s.download', color='white'))
+        export_btn.setIcon(self._get_icon('fa5s.file-export', color='white'))
         export_btn.setObjectName("exportButton")
         export_btn.clicked.connect(self.export_results)
         export_btn.setEnabled(False)
@@ -495,33 +495,33 @@ class MainWindow(QMainWindow):
         
         # File label with icon
         file_icon = QLabel()
-        file_icon.setPixmap(self._get_icon('fa5s.file-image', color='#64748B').pixmap(24, 24))
+        file_icon.setPixmap(self._get_icon('fa5s.file-alt', color='#94A3B8').pixmap(20, 20))
         layout.addWidget(file_icon)
         
         self.file_label = QLabel("Belum ada file dipilih")
-        self.file_label.setStyleSheet("font-size: 10pt; color: #64748B; font-weight: 500;")
+        self.file_label.setStyleSheet("font-size: 9pt; color: #94A3B8; font-weight: 400;")
         layout.addWidget(self.file_label, 1)
         
         # Browse button
         browse_btn = QPushButton(" Pilih File")
-        browse_btn.setIcon(self._get_icon('fa5s.folder-open', color='#2563EB'))
+        browse_btn.setIcon(self._get_icon('fa5s.folder-open', color='#64748B'))
         browse_btn.setObjectName("browse_btn")
         browse_btn.clicked.connect(self.browse_file)
-        browse_btn.setMinimumWidth(140)
+        browse_btn.setMinimumWidth(120)
         layout.addWidget(browse_btn)
         
         # Start OCR button
         self.start_btn = QPushButton(" Mulai OCR")
-        self.start_btn.setIcon(self._get_icon('fa5s.play-circle', color='white'))
+        self.start_btn.setIcon(self._get_icon('fa5s.play', color='white'))
         self.start_btn.setObjectName("start_btn")
         self.start_btn.clicked.connect(self.start_ocr)
         self.start_btn.setEnabled(False)  # Disabled until file selected
-        self.start_btn.setMinimumWidth(140)
+        self.start_btn.setMinimumWidth(120)
         layout.addWidget(self.start_btn)
         
         # Reset button
         self.reset_btn = QPushButton(" Reset")
-        self.reset_btn.setIcon(self._get_icon('fa5s.redo-alt', color='#2563EB'))
+        self.reset_btn.setIcon(self._get_icon('fa5s.redo', color='#64748B'))
         self.reset_btn.setObjectName("reset_btn")
         self.reset_btn.clicked.connect(self.reset_all)
         self.reset_btn.setEnabled(False)  # Disabled initially

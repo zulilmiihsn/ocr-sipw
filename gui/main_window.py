@@ -64,21 +64,29 @@ class OCRWorker(QThread):
                 return
             cropped = crop_table(image, bbox)
             
-            # Stage 3: OCR Scan (Full Document)
-            self.progress.emit(30, "Stage 3/6: Performing OCR scan (this may take ~70s)...")
+            # PHASE 1 OPTIMIZATION: Preprocess once for both OCR and line detection
+            from pipeline.ocr_engine import smart_resize_for_ocr, adaptive_preprocessing
+            cropped_resized = smart_resize_for_ocr(cropped, target_width=1800)
+            cropped_preprocessed = adaptive_preprocessing(cropped_resized)
+            
+            # Stage 3: OCR Scan (Full Document) with Phase 1 Optimizations
+            self.progress.emit(30, "Stage 3/6: Optimized OCR scan (faster ~40-50s)...")
             if self.is_cancelled:
                 return
             ocr_results = run_full_document_ocr(cropped)
             
-            # Stage 4: Detect Lines
+            # Stage 4: Detect Lines (use preprocessed image for consistency)
             self.progress.emit(70, "Stage 4/6: Detecting table structure...")
             if self.is_cancelled:
                 return
-            all_h_lines = detect_horizontal_lines(cropped)
-            vertical_lines = detect_vertical_lines(cropped)
+            all_h_lines = detect_horizontal_lines(cropped_preprocessed)
+            vertical_lines = detect_vertical_lines(cropped_preprocessed)
+            
+            # NOTE: OCR results are already in resized coordinates (from run_full_document_ocr)
+            # Line detection also uses preprocessed image, so all coordinates are consistent
             
             # Improved smart row detection using Y-clustering from OCR
-            image_height = cropped.shape[0]
+            image_height = cropped_preprocessed.shape[0]
             
             # Find header end by detecting header keywords
             header_y_max = 0

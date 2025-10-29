@@ -331,15 +331,100 @@ def build_table(detections, columns, h_lines, v_lines, header_y_max):
 
 
 # ============================================================================
-# STEP 5: Post-Processing
+# STEP 5: Post-Processing with Template Validation
 # ============================================================================
+
+def validate_and_correct_by_template(text, column_index):
+    """
+    Validate and correct text based on BLOK III template rules
+    
+    Template Rules (0-indexed):
+        Col 0: 4 digits (Kode SLS)
+        Col 1: 2 digits (Kode Sub-SLS)
+        Col 2: RT/RW format (e.g., "RT 001 RW 002")
+        Col 3-9: Numbers (any digits) - BTT, BTT Kosong, BKU, BBTT, Muatan, Total
+        Col 10: Text (Nama Wilayah)
+        Col 11: Number (Jumlah Shift)
+        Col 12-13: Free (Jam Operasional, Contact)
+        Col 14: Number (Muatan Dominan)
+        Col 15: Number 1 or 2 only (Perubahan batas)
+    """
+    if not text:
+        return ''
+    
+    # Clean whitespace
+    text = ' '.join(text.split())
+    
+    # Column 0: Kode SLS (4 digits, force format)
+    if column_index == 0:
+        digits = ''.join(c for c in text if c.isdigit())
+        if len(digits) >= 4:
+            return digits[:4]
+        return digits.zfill(4) if digits else '0000'
+    
+    # Column 1: Kode Sub-SLS (2 digits, force format)
+    elif column_index == 1:
+        digits = ''.join(c for c in text if c.isdigit())
+        if len(digits) >= 2:
+            return digits[:2]
+        return digits.zfill(2) if digits else '00'
+    
+    # Column 2: RT/RW format
+    elif column_index == 2:
+        import re
+        rt_match = re.search(r'RT[\s\.]?(\d+)', text.upper())
+        rw_match = re.search(r'RW[\s\.]?(\d+)', text.upper())
+        
+        if rt_match and rw_match:
+            rt_num = rt_match.group(1).zfill(3)
+            rw_num = rw_match.group(1).zfill(3)
+            return f"RT {rt_num} RW {rw_num}"
+        return text  # Keep original if pattern not found
+    
+    # Column 3-9: Numbers (BTT, BTT Kosong, BKU, BBTT, Muatan, Total)
+    elif column_index in [3, 4, 5, 6, 7, 8, 9]:
+        digits = ''.join(c for c in text if c.isdigit())
+        return digits if digits else '0'
+    
+    # Column 10: Text only (Nama Wilayah)
+    elif column_index == 10:
+        # Remove numbers, keep letters and spaces
+        text = ''.join(c for c in text if c.isalpha() or c.isspace())
+        return text.strip()
+    
+    # Column 11: Number (Jumlah Shift)
+    elif column_index == 11:
+        digits = ''.join(c for c in text if c.isdigit())
+        return digits if digits else '0'
+    
+    # Column 12-13: Free (Jam Operasional, Contact)
+    elif column_index in [12, 13]:
+        # Clean artifacts but keep content
+        text = text.replace('|', '').replace('_', '').replace('[', '').replace(']', '')
+        return text.strip()
+    
+    # Column 14: Number (Muatan Dominan)
+    elif column_index == 14:
+        digits = ''.join(c for c in text if c.isdigit())
+        return digits if digits else '0'
+    
+    # Column 15: Must be 1 or 2 only (Perubahan batas)
+    elif column_index == 15:
+        # Force to 1 or 2
+        if '2' in text:
+            return '2'
+        elif '1' in text or any(c.isdigit() for c in text):
+            return '1'
+        return '1'  # Default
+    
+    # Fallback
+    return text.strip()
+
 
 def post_process_text(text, column_name):
     """
-    Clean up text:
-    - Remove bracket artifacts
-    - Clean whitespace
-    - Apply column-specific rules
+    LEGACY: Basic text cleaning
+    Note: validate_and_correct_by_template is now preferred for BLOK III
     """
     if not text:
         return ''
@@ -425,12 +510,13 @@ def process_table(image_path, output_path=None, verbose=True):
     if verbose:
         print(f'  ✓ Created {len(rows)} data rows')
     
-    # Post-process
+    # Post-process with template validation
     if verbose:
-        print('\n[6/6] Post-processing...')
+        print('\n[6/6] Post-processing with template validation...')
     for row in rows:
         for col_idx, cell in row['cells'].items():
-            cell['text_final'] = post_process_text(cell['text'], columns[col_idx]['name'])
+            # Use template-based validation for accuracy improvement
+            cell['text_final'] = validate_and_correct_by_template(cell['text'], col_idx)
     if verbose:
         print('  ✓ Complete')
     

@@ -34,8 +34,58 @@ from pipeline.lib.pdf_handler import load_document, is_pdf
 from pipeline.ocr_engine import (
     run_full_document_ocr, detect_vertical_lines, detect_horizontal_lines,
     detect_header_rows, learn_column_structure, build_table,
-    validate_and_correct_by_template
+    validate_and_correct_by_template, PaddleOCREngine
 )
+
+
+class WarmUpWorker(QThread):
+    """Worker thread for warming up PaddleOCR instances"""
+    progress = pyqtSignal(int, str)
+    finished = pyqtSignal()
+    error = pyqtSignal(str)
+    
+    def __init__(self, num_instances=4):
+        super().__init__()
+        self.num_instances = num_instances
+    
+    def run(self):
+        """Pre-initialize PaddleOCR instances in thread pool"""
+        try:
+            from concurrent.futures import ThreadPoolExecutor
+            import numpy as np
+            
+            self.progress.emit(10, f"Memuat {self.num_instances} model OCR...")
+            
+            def init_ocr_instance(idx):
+                """Initialize OCR instance in thread"""
+                # Create dummy image for initialization
+                dummy_image = np.ones((100, 100, 3), dtype=np.uint8) * 255
+                
+                # Get OCR instance (triggers initialization)
+                ocr = PaddleOCREngine.get_instance()
+                
+                # Do a dummy prediction to fully initialize
+                try:
+                    ocr.predict(dummy_image)
+                except:
+                    pass  # Ignore errors, just for warm-up
+                
+                return idx
+            
+            # Initialize instances in parallel
+            with ThreadPoolExecutor(max_workers=self.num_instances) as executor:
+                futures = [executor.submit(init_ocr_instance, i) for i in range(self.num_instances)]
+                
+                for i, future in enumerate(futures):
+                    future.result()
+                    progress = int(10 + (i + 1) / self.num_instances * 80)
+                    self.progress.emit(progress, f"Model {i+1}/{self.num_instances} siap...")
+            
+            self.progress.emit(100, "Semua model siap!")
+            self.finished.emit()
+            
+        except Exception as e:
+            self.error.emit(f"Warm-up error: {str(e)}")
 
 
 class OCRWorker(QThread):
@@ -568,12 +618,17 @@ class MainWindow(QMainWindow):
     
     def __init__(self):
         super().__init__()
-        self.current_file = None
+        self.current_files = None
         self.ocr_results = None
         self.ocr_worker = None
+        self.warmup_worker = None
+        self.is_warmed_up = False  # Track if models are pre-loaded
         self.edited_cells = {}  # Track edited cells
         
         self.init_ui()
+        
+        # Start warm-up initialization in background
+        QTimer.singleShot(500, self.start_warmup)
     
     def _get_icon(self, name: str, **kwargs):
         """Get icon from QtAwesome"""
@@ -755,6 +810,52 @@ class MainWindow(QMainWindow):
         group.setLayout(layout)
         return group
     
+    def start_warmup(self):
+        """Start warm-up initialization of PaddleOCR instances"""
+        if self.warmup_worker and self.warmup_worker.isRunning():
+            return
+        
+        # Show progress bar for warm-up
+        self.progress_bar.setVisible(True)
+        self.progress_bar.setFormat("Memuat model OCR... %p%")
+        
+        # Disable buttons during warm-up
+        self.start_btn.setEnabled(False)
+        
+        # Create and start warm-up worker
+        self.warmup_worker = WarmUpWorker(num_instances=4)
+        self.warmup_worker.progress.connect(self.on_warmup_progress)
+        self.warmup_worker.finished.connect(self.on_warmup_finished)
+        self.warmup_worker.error.connect(self.on_warmup_error)
+        self.warmup_worker.start()
+    
+    def on_warmup_progress(self, percentage, message):
+        """Update progress during warm-up"""
+        self.progress_bar.setValue(percentage)
+        self.progress_bar.setFormat(f"{message} %p%")
+    
+    def on_warmup_finished(self):
+        """Handle warm-up completion"""
+        self.is_warmed_up = True
+        self.progress_bar.setVisible(False)
+        self.start_btn.setEnabled(True)
+        self.update_status("✓ Model OCR siap! Pilih file untuk memulai.")
+        
+        # Show info message
+        QMessageBox.information(
+            self,
+            "Model Siap",
+            "Model OCR telah dimuat ke memory!\n\n"
+            "Proses OCR sekarang akan jauh lebih cepat.\n"
+            "Silakan pilih file untuk memulai."
+        )
+    
+    def on_warmup_error(self, error_msg):
+        """Handle warm-up error"""
+        self.progress_bar.setVisible(False)
+        self.start_btn.setEnabled(True)
+        self.update_status(f"⚠ Warm-up error: {error_msg}")
+        print(f"Warm-up error: {error_msg}")
     
     def browse_file(self):
         """Open file browser dialog (supports multi-select)"""

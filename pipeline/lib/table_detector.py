@@ -237,9 +237,9 @@ def detect_table_region(image: np.ndarray) -> Optional[Tuple[int, int, int, int]
         
         blok3_height = blok3_y_end - blok3_y_start
         
-        # Apply horizontal margins (crop 30px from left and right)
-        horizontal_margin = 30
-        blok3_x_start = min(horizontal_margin, width // 2)  # Safety: max 50% of width
+        # Apply horizontal margins (crop 10px from left and right)
+        horizontal_margin = 10
+        blok3_x_start = min(horizontal_margin, width // 4)  # Safety: max 25% of width
         blok3_width = max(width - (2 * horizontal_margin), width // 2)  # Safety: min 50% of width
         
         # Calculate speedup

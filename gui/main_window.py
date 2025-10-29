@@ -269,8 +269,8 @@ class OCRWorker(QThread):
                         continue
                     
                     for j in range(len(column_structure)):
-                        col_x_min = column_structure[j]['x_start']
-                        col_x_max = column_structure[j]['x_end']
+                        col_x_min = column_structure[j]['x_left']
+                        col_x_max = column_structure[j]['x_right']
                         
                         cell_box = (col_x_min, row_y_min, col_x_max, row_y_max)
                         

@@ -2,8 +2,8 @@
   "metadata": {
     "method": "Adaptive v2.1 - Smart Row Detection",
     "input": "contoh gambar/1.png",
-    "total_time": "76.83s",
-    "detections": 245,
+    "total_time": "89.14s",
+    "detections": 227,
     "columns": 17,
     "data_rows": 10,
     "strategy": "Force exactly 10 data rows with equal spacing"
@@ -133,7 +133,7 @@
     {
       "row_index": 0,
       "y_top": 194,
-      "y_bottom": 265,
+      "y_bottom": 258,
       "cells": {
         "0": {
           "text": "",
@@ -142,90 +142,90 @@
         },
         "1": {
           "text": "0001",
-          "confidence": 0.9999860525131226,
+          "confidence": 0.9999815225601196,
           "text_final": "0001"
         },
         "2": {
           "text": "00",
-          "confidence": 0.9997377991676331,
+          "confidence": 0.9996837377548218,
           "text_final": "00"
         },
         "3": {
           "text": "RT 001 RW 001",
-          "confidence": 0.9873835444450378,
+          "confidence": 0.9972683191299438,
           "text_final": "RT 001 RW 001"
         },
         "4": {
           "text": "90",
-          "confidence": 0.9999485611915588,
+          "confidence": 0.9999661445617676,
           "text_final": "90"
         },
         "5": {
           "text": "14",
-          "confidence": 0.9998629689216614,
+          "confidence": 0.9999383687973022,
           "text_final": "14"
         },
         "6": {
           "text": "15",
-          "confidence": 0.9990607500076294,
+          "confidence": 0.9994547367095947,
           "text_final": "15"
         },
         "7": {
           "text": "21",
-          "confidence": 0.9773169755935669,
+          "confidence": 0.9963376522064209,
           "text_final": "21"
         },
         "8": {
           "text": "11",
-          "confidence": 0.9995105266571045,
+          "confidence": 0.9997434616088867,
           "text_final": "11"
         },
         "9": {
           "text": "20",
-          "confidence": 0.9983271956443787,
+          "confidence": 0.9974443912506104,
           "text_final": "20"
         },
         "10": {
           "text": "75",
-          "confidence": 0.999781608581543,
+          "confidence": 0.9998968839645386,
           "text_final": "75"
         },
         "11": {
           "text": "Madong",
-          "confidence": 0.9994298815727234,
+          "confidence": 0.9995980262756348,
           "text_final": "Madong"
         },
         "12": {
           "text": "5",
-          "confidence": 0.9995556473731995,
+          "confidence": 0.9996410608291626,
           "text_final": "5"
         },
         "13": {
           "text": "8.00-22.00",
-          "confidence": 0.997515082359314,
+          "confidence": 0.9993184208869934,
           "text_final": "8.00-22.00"
         },
         "14": {
           "text": "0823456789/zul",
-          "confidence": 0.9998103380203247,
+          "confidence": 0.9999103546142578,
           "text_final": "0823456789/zul"
         },
         "15": {
           "text": "3",
-          "confidence": 0.9995811581611633,
+          "confidence": 0.9996762275695801,
           "text_final": "3"
         },
         "16": {
           "text": "1",
-          "confidence": 0.9996458292007446,
+          "confidence": 0.9997367262840271,
           "text_final": "1"
         }
       }
     },
     {
       "row_index": 1,
-      "y_top": 265,
-      "y_bottom": 336,
+      "y_top": 258,
+      "y_bottom": 322,
       "cells": {
         "0": {
           "text": "",
@@ -234,90 +234,90 @@
         },
         "1": {
           "text": "0002",
-          "confidence": 0.9990633130073547,
+          "confidence": 0.9990854263305664,
           "text_final": "0002"
         },
         "2": {
           "text": "00",
-          "confidence": 0.9993599653244019,
+          "confidence": 0.9991831183433533,
           "text_final": "00"
         },
         "3": {
           "text": "RT 002 RW 002",
-          "confidence": 0.9640354514122009,
+          "confidence": 0.9612324833869934,
           "text_final": "RT 002 RW 002"
         },
         "4": {
           "text": "23",
-          "confidence": 0.9887866973876953,
+          "confidence": 0.988709568977356,
           "text_final": "23"
         },
         "5": {
           "text": "23",
-          "confidence": 0.9884541034698486,
+          "confidence": 0.9977453947067261,
           "text_final": "23"
         },
         "6": {
-          "text": "[56",
-          "confidence": 0.8644788265228271,
+          "text": "56",
+          "confidence": 0.9986281991004944,
           "text_final": "56"
         },
         "7": {
           "text": "23",
-          "confidence": 0.9930747151374817,
+          "confidence": 0.9924992322921753,
           "text_final": "23"
         },
         "8": {
           "text": "8",
-          "confidence": 0.9999175071716309,
+          "confidence": 0.9998778104782104,
           "text_final": "8"
         },
         "9": {
           "text": "9",
-          "confidence": 0.9952174425125122,
+          "confidence": 0.9991821646690369,
           "text_final": "9"
         },
         "10": {
           "text": "101",
-          "confidence": 0.9999299049377441,
+          "confidence": 0.9999359250068665,
           "text_final": "101"
         },
         "11": {
           "text": "Eropa",
-          "confidence": 0.9995964169502258,
+          "confidence": 0.999790370464325,
           "text_final": "Eropa"
         },
         "12": {
           "text": "12",
-          "confidence": 0.9995885491371155,
+          "confidence": 0.9994686245918274,
           "text_final": "12"
         },
         "13": {
           "text": "10.00-16.00",
-          "confidence": 0.998304009437561,
+          "confidence": 0.9998204708099365,
           "text_final": "10.00-16.00"
         },
         "14": {
           "text": "12344512",
-          "confidence": 0.9717496633529663,
+          "confidence": 0.9996252059936523,
           "text_final": "12344512"
         },
         "15": {
           "text": "1",
-          "confidence": 0.9997830986976624,
+          "confidence": 0.99968421459198,
           "text_final": "1"
         },
         "16": {
           "text": "1",
-          "confidence": 0.9997959733009338,
+          "confidence": 0.9997881054878235,
           "text_final": "1"
         }
       }
     },
     {
       "row_index": 2,
-      "y_top": 336,
-      "y_bottom": 407,
+      "y_top": 322,
+      "y_bottom": 386,
       "cells": {
         "0": {
           "text": "",
@@ -326,62 +326,62 @@
         },
         "1": {
           "text": "0003",
-          "confidence": 0.9998739361763,
+          "confidence": 0.9998561143875122,
           "text_final": "0003"
         },
         "2": {
           "text": "00",
-          "confidence": 0.9995487928390503,
+          "confidence": 0.9992175102233887,
           "text_final": "00"
         },
         "3": {
           "text": "RT 003 RW 001",
-          "confidence": 0.9917924404144287,
+          "confidence": 0.9600862264633179,
           "text_final": "RT 003 RW 001"
         },
         "4": {
           "text": "121",
-          "confidence": 0.999748945236206,
+          "confidence": 0.9994290471076965,
           "text_final": "121"
         },
         "5": {
           "text": "32",
-          "confidence": 0.996213436126709,
+          "confidence": 0.9968775510787964,
           "text_final": "32"
         },
         "6": {
-          "text": "55",
-          "confidence": 0.999862790107727,
+          "text": "[55",
+          "confidence": 0.9774463772773743,
           "text_final": "55"
         },
         "7": {
           "text": "56",
-          "confidence": 0.9999216198921204,
+          "confidence": 0.9999406337738037,
           "text_final": "56"
         },
         "8": {
           "text": "78",
-          "confidence": 0.9999252557754517,
+          "confidence": 0.9999077916145325,
           "text_final": "78"
         },
         "9": {
           "text": "99",
-          "confidence": 0.9997591972351074,
+          "confidence": 0.9997262358665466,
           "text_final": "99"
         },
         "10": {
           "text": "100",
-          "confidence": 0.9999728202819824,
+          "confidence": 0.9999797940254211,
           "text_final": "100"
         },
         "11": {
           "text": "Barat",
-          "confidence": 0.9988695383071899,
+          "confidence": 0.999485969543457,
           "text_final": "Barat"
         },
         "12": {
           "text": "1",
-          "confidence": 0.9997468590736389,
+          "confidence": 0.9997863173484802,
           "text_final": "1"
         },
         "13": {
@@ -408,8 +408,8 @@
     },
     {
       "row_index": 3,
-      "y_top": 407,
-      "y_bottom": 478,
+      "y_top": 386,
+      "y_bottom": 450,
       "cells": {
         "0": {
           "text": "",
@@ -418,90 +418,90 @@
         },
         "1": {
           "text": "0004",
-          "confidence": 0.9999766945838928,
+          "confidence": 0.9999680519104004,
           "text_final": "0004"
         },
         "2": {
           "text": "03",
-          "confidence": 0.9998536109924316,
+          "confidence": 0.9998793601989746,
           "text_final": "03"
         },
         "3": {
           "text": "RT 004 RW 001",
-          "confidence": 0.9983562231063843,
+          "confidence": 0.9992482662200928,
           "text_final": "RT 004 RW 001"
         },
         "4": {
           "text": "86",
-          "confidence": 0.9999532699584961,
+          "confidence": 0.9999386668205261,
           "text_final": "86"
         },
         "5": {
           "text": "12",
-          "confidence": 0.9994200468063354,
+          "confidence": 0.9993636608123779,
           "text_final": "12"
         },
         "6": {
           "text": "11",
-          "confidence": 0.9994706511497498,
+          "confidence": 0.9993155002593994,
           "text_final": "11"
         },
         "7": {
           "text": "2",
-          "confidence": 0.9467807412147522,
+          "confidence": 0.9741378426551819,
           "text_final": "2"
         },
         "8": {
           "text": "14",
-          "confidence": 0.9999107122421265,
+          "confidence": 0.9999223351478577,
           "text_final": "14"
         },
         "9": {
           "text": "5",
-          "confidence": 0.9996115565299988,
+          "confidence": 0.9996968507766724,
           "text_final": "5"
         },
         "10": {
           "text": "76",
-          "confidence": 0.9999149441719055,
+          "confidence": 0.9999674558639526,
           "text_final": "76"
         },
         "11": {
           "text": "Limapuluh",
-          "confidence": 0.9996392130851746,
+          "confidence": 0.9989900588989258,
           "text_final": "Limapuluh"
         },
         "12": {
           "text": "1",
-          "confidence": 0.9996645450592041,
+          "confidence": 0.9995529055595398,
           "text_final": "1"
         },
         "13": {
           "text": "17.00",
-          "confidence": 0.9998728036880493,
+          "confidence": 0.999005913734436,
           "text_final": "17.00"
         },
         "14": {
           "text": "jauhari",
-          "confidence": 0.923804759979248,
+          "confidence": 0.9833130240440369,
           "text_final": "jauhari"
         },
         "15": {
           "text": "1",
-          "confidence": 0.9997552037239075,
+          "confidence": 0.9998340606689453,
           "text_final": "1"
         },
         "16": {
           "text": "1",
-          "confidence": 0.9996904134750366,
+          "confidence": 0.9996742010116577,
           "text_final": "1"
         }
       }
     },
     {
       "row_index": 4,
-      "y_top": 478,
-      "y_bottom": 549,
+      "y_top": 450,
+      "y_bottom": 514,
       "cells": {
         "0": {
           "text": "",
@@ -510,90 +510,90 @@
         },
         "1": {
           "text": "0004",
-          "confidence": 0.9999814629554749,
+          "confidence": 0.9999221563339233,
           "text_final": "0004"
         },
         "2": {
           "text": "02",
-          "confidence": 0.9993801116943359,
+          "confidence": 0.9979743957519531,
           "text_final": "02"
         },
         "3": {
           "text": "RT 004 RW 001",
-          "confidence": 0.9556427597999573,
+          "confidence": 0.9621580839157104,
           "text_final": "RT 004 RW 001"
         },
         "4": {
           "text": "8",
-          "confidence": 0.9998807907104492,
+          "confidence": 0.9998995065689087,
           "text_final": "8"
         },
         "5": {
           "text": "14",
-          "confidence": 0.9999682307243347,
+          "confidence": 0.9999644160270691,
           "text_final": "14"
         },
         "6": {
           "text": "4",
-          "confidence": 0.9998440742492676,
+          "confidence": 0.9998655319213867,
           "text_final": "4"
         },
         "7": {
           "text": "4",
-          "confidence": 0.9996806383132935,
+          "confidence": 0.9998098015785217,
           "text_final": "4"
         },
         "8": {
           "text": "4",
-          "confidence": 0.9997569918632507,
+          "confidence": 0.9997010231018066,
           "text_final": "4"
         },
         "9": {
           "text": "10",
-          "confidence": 0.9999127388000488,
+          "confidence": 0.9999136924743652,
           "text_final": "10"
         },
         "10": {
           "text": "15",
-          "confidence": 0.9996023178100586,
+          "confidence": 0.9996674656867981,
           "text_final": "15"
         },
         "11": {
           "text": "Emyu",
-          "confidence": 0.9994782209396362,
+          "confidence": 0.9996391534805298,
           "text_final": "Emyu"
         },
         "12": {
           "text": "1",
-          "confidence": 0.9998051524162292,
+          "confidence": 0.9997221827507019,
           "text_final": "1"
         },
         "13": {
           "text": "12.00-10.00",
-          "confidence": 0.9820358157157898,
+          "confidence": 0.9889629483222961,
           "text_final": "12.00-10.00"
         },
         "14": {
           "text": "jauhariya",
-          "confidence": 0.9052143096923828,
+          "confidence": 0.9929644465446472,
           "text_final": "jauhariya"
         },
         "15": {
           "text": "1",
-          "confidence": 0.9996299743652344,
+          "confidence": 0.9997683167457581,
           "text_final": "1"
         },
         "16": {
           "text": "1",
-          "confidence": 0.999336302280426,
+          "confidence": 0.9996147155761719,
           "text_final": "1"
         }
       }
     },
     {
       "row_index": 5,
-      "y_top": 549,
-      "y_bottom": 620,
+      "y_top": 514,
+      "y_bottom": 578,
       "cells": {
         "0": {
           "text": "",
@@ -602,62 +602,62 @@
         },
         "1": {
           "text": "0004",
-          "confidence": 0.9999750852584839,
+          "confidence": 0.9999440908432007,
           "text_final": "0004"
         },
         "2": {
           "text": "01",
-          "confidence": 0.9998875856399536,
+          "confidence": 0.9998691082000732,
           "text_final": "01"
         },
         "3": {
           "text": "RT 004 RW 001",
-          "confidence": 0.9473313093185425,
+          "confidence": 0.9730663299560547,
           "text_final": "RT 004 RW 001"
         },
         "4": {
           "text": "64",
-          "confidence": 0.9999307990074158,
+          "confidence": 0.9998891353607178,
           "text_final": "64"
         },
         "5": {
           "text": "77",
-          "confidence": 0.9990920424461365,
+          "confidence": 0.9986920356750488,
           "text_final": "77"
         },
         "6": {
           "text": "551",
-          "confidence": 0.9999025464057922,
+          "confidence": 0.9999048113822937,
           "text_final": "551"
         },
         "7": {
           "text": "12",
-          "confidence": 0.9992736577987671,
+          "confidence": 0.9991793036460876,
           "text_final": "12"
         },
         "8": {
           "text": "14",
-          "confidence": 0.9999323487281799,
+          "confidence": 0.9998723268508911,
           "text_final": "14"
         },
         "9": {
           "text": "9",
-          "confidence": 0.9992524981498718,
+          "confidence": 0.9978364109992981,
           "text_final": "9"
         },
         "10": {
           "text": "10",
-          "confidence": 0.9998809695243835,
+          "confidence": 0.9998957514762878,
           "text_final": "10"
         },
         "11": {
           "text": "timtim",
-          "confidence": 0.9990549087524414,
+          "confidence": 0.9993842244148254,
           "text_final": "timtim"
         },
         "12": {
           "text": "2",
-          "confidence": 0.9761990308761597,
+          "confidence": 0.982826292514801,
           "text_final": "2"
         },
         "13": {
@@ -672,20 +672,20 @@
         },
         "15": {
           "text": "1",
-          "confidence": 0.9992995262145996,
+          "confidence": 0.9994189739227295,
           "text_final": "1"
         },
         "16": {
           "text": "1",
-          "confidence": 0.9994775652885437,
+          "confidence": 0.9994333386421204,
           "text_final": "1"
         }
       }
     },
     {
       "row_index": 6,
-      "y_top": 620,
-      "y_bottom": 691,
+      "y_top": 578,
+      "y_bottom": 642,
       "cells": {
         "0": {
           "text": "",
@@ -694,90 +694,90 @@
         },
         "1": {
           "text": "0005",
-          "confidence": 0.9999534487724304,
+          "confidence": 0.999951183795929,
           "text_final": "0005"
         },
         "2": {
           "text": "00",
-          "confidence": 0.9994423389434814,
+          "confidence": 0.9989020824432373,
           "text_final": "00"
         },
         "3": {
           "text": "RT 005 RW 001",
-          "confidence": 0.9734178185462952,
+          "confidence": 0.9780367612838745,
           "text_final": "RT 005 RW 001"
         },
         "4": {
           "text": "14",
-          "confidence": 0.9999238848686218,
+          "confidence": 0.9999116063117981,
           "text_final": "14"
         },
         "5": {
           "text": "15",
-          "confidence": 0.9998526573181152,
+          "confidence": 0.9999296069145203,
           "text_final": "15"
         },
         "6": {
           "text": "16",
-          "confidence": 0.9993964433670044,
+          "confidence": 0.9971765279769897,
           "text_final": "16"
         },
         "7": {
           "text": "17",
-          "confidence": 0.999767005443573,
+          "confidence": 0.9998712539672852,
           "text_final": "17"
         },
         "8": {
           "text": "18",
-          "confidence": 0.9999624490737915,
+          "confidence": 0.9999856948852539,
           "text_final": "18"
         },
         "9": {
           "text": "19",
-          "confidence": 0.9999215006828308,
+          "confidence": 0.9999725818634033,
           "text_final": "19"
         },
         "10": {
           "text": "20",
-          "confidence": 0.9992406368255615,
+          "confidence": 0.9990438222885132,
           "text_final": "20"
         },
         "11": {
           "text": "jerman",
-          "confidence": 0.9991421699523926,
+          "confidence": 0.9989042282104492,
           "text_final": "jerman"
         },
         "12": {
           "text": "2",
-          "confidence": 0.990985631942749,
+          "confidence": 0.970636785030365,
           "text_final": "2"
         },
         "13": {
           "text": "8.00-22.00",
-          "confidence": 0.9950227737426758,
+          "confidence": 0.9989174008369446,
           "text_final": "8.00-22.00"
         },
         "14": {
           "text": "surya",
-          "confidence": 0.9529571533203125,
+          "confidence": 0.9600815773010254,
           "text_final": "surya"
         },
         "15": {
           "text": "1",
-          "confidence": 0.9993972778320312,
+          "confidence": 0.9997943043708801,
           "text_final": "1"
         },
         "16": {
           "text": "1",
-          "confidence": 0.9995926022529602,
+          "confidence": 0.9997320771217346,
           "text_final": "1"
         }
       }
     },
     {
       "row_index": 7,
-      "y_top": 691,
-      "y_bottom": 762,
+      "y_top": 642,
+      "y_bottom": 706,
       "cells": {
         "0": {
           "text": "",
@@ -786,90 +786,90 @@
         },
         "1": {
           "text": "0006",
-          "confidence": 0.9998598098754883,
+          "confidence": 0.9999056458473206,
           "text_final": "0006"
         },
         "2": {
           "text": "00",
-          "confidence": 0.9994089603424072,
+          "confidence": 0.99952232837677,
           "text_final": "00"
         },
         "3": {
           "text": "RT 012 RW 001",
-          "confidence": 0.9657354950904846,
+          "confidence": 0.9932259917259216,
           "text_final": "RT 012 RW 001"
         },
         "4": {
           "text": "56",
-          "confidence": 0.9999133944511414,
+          "confidence": 0.9999204874038696,
           "text_final": "56"
         },
         "5": {
           "text": "14",
-          "confidence": 0.9999560713768005,
+          "confidence": 0.999848484992981,
           "text_final": "14"
         },
         "6": {
           "text": "7",
-          "confidence": 0.999390721321106,
+          "confidence": 0.998956561088562,
           "text_final": "7"
         },
         "7": {
           "text": "21",
-          "confidence": 0.9761648178100586,
+          "confidence": 0.9965004920959473,
           "text_final": "21"
         },
         "8": {
           "text": "23",
-          "confidence": 0.990774393081665,
+          "confidence": 0.9826345443725586,
           "text_final": "23"
         },
         "9": {
           "text": "20",
-          "confidence": 0.9984941482543945,
+          "confidence": 0.9978570342063904,
           "text_final": "20"
         },
         "10": {
           "text": "75",
-          "confidence": 0.9997710585594177,
+          "confidence": 0.9996303915977478,
           "text_final": "75"
         },
         "11": {
           "text": "Madong",
-          "confidence": 0.9986727833747864,
+          "confidence": 0.9992287755012512,
           "text_final": "Madong"
         },
         "12": {
           "text": "5",
-          "confidence": 0.9994745850563049,
+          "confidence": 0.999797523021698,
           "text_final": "5"
         },
         "13": {
           "text": "8.00-22.00",
-          "confidence": 0.9997340440750122,
+          "confidence": 0.9973608255386353,
           "text_final": "8.00-22.00"
         },
         "14": {
           "text": "0823456789/zul",
-          "confidence": 0.9998784065246582,
+          "confidence": 0.9998000264167786,
           "text_final": "0823456789/zul"
         },
         "15": {
           "text": "3",
-          "confidence": 0.9996337890625,
+          "confidence": 0.9996153116226196,
           "text_final": "3"
         },
         "16": {
           "text": "1",
-          "confidence": 0.999538779258728,
+          "confidence": 0.9992934465408325,
           "text_final": "1"
         }
       }
     },
     {
       "row_index": 8,
-      "y_top": 762,
-      "y_bottom": 833,
+      "y_top": 706,
+      "y_bottom": 770,
       "cells": {
         "0": {
           "text": "",
@@ -877,91 +877,91 @@
           "text_final": ""
         },
         "1": {
-          "text": "0007",
-          "confidence": 0.9999555349349976,
-          "text_final": "0007"
+          "text": "",
+          "confidence": 0.0,
+          "text_final": ""
         },
         "2": {
-          "text": "00",
-          "confidence": 0.9997687339782715,
-          "text_final": "00"
+          "text": "",
+          "confidence": 0.0,
+          "text_final": ""
         },
         "3": {
-          "text": "RT 015 RW 001",
-          "confidence": 0.9704803824424744,
-          "text_final": "RT 015 RW 001"
+          "text": "",
+          "confidence": 0.0,
+          "text_final": ""
         },
         "4": {
-          "text": "8",
-          "confidence": 0.9999172687530518,
-          "text_final": "8"
+          "text": "",
+          "confidence": 0.0,
+          "text_final": ""
         },
         "5": {
-          "text": "21",
-          "confidence": 0.9904099702835083,
-          "text_final": "21"
+          "text": "",
+          "confidence": 0.0,
+          "text_final": ""
         },
         "6": {
-          "text": "4",
-          "confidence": 0.9998243451118469,
-          "text_final": "4"
+          "text": "",
+          "confidence": 0.0,
+          "text_final": ""
         },
         "7": {
-          "text": "5",
-          "confidence": 0.9997764229774475,
-          "text_final": "5"
+          "text": "",
+          "confidence": 0.0,
+          "text_final": ""
         },
         "8": {
-          "text": "11",
-          "confidence": 0.9998267889022827,
-          "text_final": "11"
+          "text": "",
+          "confidence": 0.0,
+          "text_final": ""
         },
         "9": {
-          "text": "20",
-          "confidence": 0.9973037242889404,
-          "text_final": "20"
+          "text": "",
+          "confidence": 0.0,
+          "text_final": ""
         },
         "10": {
-          "text": "75",
-          "confidence": 0.9997801780700684,
-          "text_final": "75"
+          "text": "",
+          "confidence": 0.0,
+          "text_final": ""
         },
         "11": {
-          "text": "Madong",
-          "confidence": 0.9992339015007019,
-          "text_final": "Madong"
+          "text": "",
+          "confidence": 0.0,
+          "text_final": ""
         },
         "12": {
-          "text": "5",
-          "confidence": 0.9997813105583191,
-          "text_final": "5"
+          "text": "",
+          "confidence": 0.0,
+          "text_final": ""
         },
         "13": {
           "text": "8.00-22.00",
-          "confidence": 0.9996919631958008,
+          "confidence": 0.9722005128860474,
           "text_final": "8.00-22.00"
         },
         "14": {
           "text": "0823456789/zul",
-          "confidence": 0.9998321533203125,
+          "confidence": 0.9998725652694702,
           "text_final": "0823456789/zul"
         },
         "15": {
           "text": "3",
-          "confidence": 0.9996041655540466,
+          "confidence": 0.9996609687805176,
           "text_final": "3"
         },
         "16": {
           "text": "1",
-          "confidence": 0.9994569420814514,
+          "confidence": 0.9997715353965759,
           "text_final": "1"
         }
       }
     },
     {
       "row_index": 9,
-      "y_top": 833,
-      "y_bottom": 905,
+      "y_top": 770,
+      "y_bottom": 835,
       "cells": {
         "0": {
           "text": "",
@@ -969,83 +969,83 @@
           "text_final": ""
         },
         "1": {
-          "text": "0008",
-          "confidence": 0.9998853802680969,
-          "text_final": "0008"
+          "text": "0008 0007",
+          "confidence": 0.9999046623706818,
+          "text_final": "0008 0007"
         },
         "2": {
-          "text": "00",
-          "confidence": 0.9997276067733765,
-          "text_final": "00"
+          "text": "00 00",
+          "confidence": 0.999076634645462,
+          "text_final": "00 00"
         },
         "3": {
-          "text": "RT 016 RW 001",
-          "confidence": 0.9919726848602295,
-          "text_final": "RT 016 RW 001"
+          "text": "DT. 01C RT 015 RW 001",
+          "confidence": 0.8441582918167114,
+          "text_final": "DT. 01C RT 015 RW 001"
         },
         "4": {
-          "text": "90",
-          "confidence": 0.9999442100524902,
-          "text_final": "90"
+          "text": "8 90",
+          "confidence": 0.9997327923774719,
+          "text_final": "8 90"
         },
         "5": {
-          "text": "14 15",
-          "confidence": 0.9992868602275848,
-          "text_final": "14 15"
+          "text": "21 14 45",
+          "confidence": 0.951623817284902,
+          "text_final": "21 14 45"
         },
         "6": {
-          "text": "",
-          "confidence": 0.0,
-          "text_final": ""
+          "text": "4",
+          "confidence": 0.9998433589935303,
+          "text_final": "4"
         },
         "7": {
-          "text": "21",
-          "confidence": 0.9517953395843506,
-          "text_final": "21"
+          "text": "5",
+          "confidence": 0.9997219443321228,
+          "text_final": "5"
         },
         "8": {
           "text": "11",
-          "confidence": 0.9998561143875122,
+          "confidence": 0.999022901058197,
           "text_final": "11"
         },
         "9": {
           "text": "20",
-          "confidence": 0.9972736835479736,
+          "confidence": 0.9995075464248657,
           "text_final": "20"
         },
         "10": {
           "text": "75",
-          "confidence": 0.9998542070388794,
+          "confidence": 0.9997555017471313,
           "text_final": "75"
         },
         "11": {
-          "text": "Madong",
-          "confidence": 0.9992976188659668,
-          "text_final": "Madong"
+          "text": "M- Madong",
+          "confidence": 0.9514353275299072,
+          "text_final": "M- Madong"
         },
         "12": {
-          "text": "5",
-          "confidence": 0.9996949434280396,
-          "text_final": "5"
+          "text": "5 5",
+          "confidence": 0.9997489750385284,
+          "text_final": "5 5"
         },
         "13": {
           "text": "8.00-22.00",
-          "confidence": 0.9980717897415161,
+          "confidence": 0.9893854856491089,
           "text_final": "8.00-22.00"
         },
         "14": {
           "text": "0823456789/zul",
-          "confidence": 0.9999140501022339,
+          "confidence": 0.9961795210838318,
           "text_final": "0823456789/zul"
         },
         "15": {
           "text": "3",
-          "confidence": 0.9995501637458801,
+          "confidence": 0.9995700716972351,
           "text_final": "3"
         },
         "16": {
           "text": "1",
-          "confidence": 0.9993211030960083,
+          "confidence": 0.9995418787002563,
           "text_final": "1"
         }
       }

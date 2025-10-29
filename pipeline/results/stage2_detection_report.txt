@@ -16,7 +16,7 @@ RESULTS:
   Upper boundary (Rekapitulasi): y = 289
   Lower boundary (Keterangan):   y = 1125
   BLOK III height:               836 pixels
-  Processing time:               4.59 seconds
+  Processing time:               3.39 seconds
 
 COMPARISON WITH OLD METHOD:
   Old method (single direction):

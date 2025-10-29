@@ -402,10 +402,11 @@ class MainWindow(QMainWindow):
         main_layout.addWidget(self.progress_bar)
         
         # Single Export button
-        export_btn = QPushButton("💾 Export Results")
+        export_btn = QPushButton("Export Results")
         export_btn.setObjectName("exportButton")
         export_btn.clicked.connect(self.export_results)
         export_btn.setEnabled(False)
+        export_btn.setCursor(Qt.PointingHandCursor)
         self.export_button = export_btn
         main_layout.addWidget(export_btn)
         
@@ -417,36 +418,44 @@ class MainWindow(QMainWindow):
     
     def create_file_selection_group(self):
         """Create file selection UI group with Start button"""
-        group = QGroupBox("📁 File Selection & Processing")
+        group = QGroupBox("File Selection & Processing")
         layout = QHBoxLayout()
-        layout.setSpacing(12)
+        layout.setSpacing(16)
         
-        # File label
+        # File label with better styling
         self.file_label = QLabel("No file selected")
-        self.file_label.setStyleSheet("font-size: 11pt; color: #6B7280;")
+        self.file_label.setStyleSheet(
+            "font-size: 11pt; "
+            "color: #64748B; "
+            "font-weight: 500; "
+            "padding: 8px;"
+        )
         layout.addWidget(self.file_label, 1)
         
         # Browse button
-        browse_btn = QPushButton("📂 Browse File...")
+        browse_btn = QPushButton("Browse File")
         browse_btn.setObjectName("browse_btn")
         browse_btn.clicked.connect(self.browse_file)
         browse_btn.setMinimumWidth(140)
+        browse_btn.setCursor(Qt.PointingHandCursor)
         layout.addWidget(browse_btn)
         
         # Start OCR button
-        self.start_btn = QPushButton("▶ Start OCR")
+        self.start_btn = QPushButton("Start OCR")
         self.start_btn.setObjectName("start_btn")
         self.start_btn.clicked.connect(self.start_ocr)
         self.start_btn.setEnabled(False)  # Disabled until file selected
         self.start_btn.setMinimumWidth(140)
+        self.start_btn.setCursor(Qt.PointingHandCursor)
         layout.addWidget(self.start_btn)
         
         # Reset button
-        self.reset_btn = QPushButton("🔄 Reset")
+        self.reset_btn = QPushButton("Reset")
         self.reset_btn.setObjectName("reset_btn")
         self.reset_btn.clicked.connect(self.reset_all)
         self.reset_btn.setEnabled(False)  # Disabled initially
         self.reset_btn.setMinimumWidth(140)
+        self.reset_btn.setCursor(Qt.PointingHandCursor)
         layout.addWidget(self.reset_btn)
         
         group.setLayout(layout)
@@ -454,7 +463,7 @@ class MainWindow(QMainWindow):
     
     def create_table_group(self):
         """Create table UI group"""
-        group = QGroupBox("📊 Extracted Table (Double-click to edit)")
+        group = QGroupBox("Extracted Table Data")
         layout = QVBoxLayout()
         
         # Create table widget (16 columns, removed "No" column)
@@ -541,8 +550,15 @@ class MainWindow(QMainWindow):
         if file_path:
             self.current_file = file_path
             file_name = Path(file_path).name
-            self.file_label.setText(f"✅ {file_name}")
-            self.file_label.setStyleSheet("color: #10B981; font-weight: 600; font-size: 11pt;")
+            self.file_label.setText(f"Selected: {file_name}")
+            self.file_label.setStyleSheet(
+                "font-size: 11pt; "
+                "color: #10B981; "
+                "font-weight: 600; "
+                "padding: 8px; "
+                "background: rgba(16, 185, 129, 0.1); "
+                "border-radius: 6px;"
+            )
             
             # Enable Start and Reset buttons
             self.start_btn.setEnabled(True)
@@ -928,7 +944,12 @@ class MainWindow(QMainWindow):
         # Clear file selection
         self.current_file = None
         self.file_label.setText("No file selected")
-        self.file_label.setStyleSheet("font-size: 11pt; color: #6B7280;")
+        self.file_label.setStyleSheet(
+            "font-size: 11pt; "
+            "color: #64748B; "
+            "font-weight: 500; "
+            "padding: 8px;"
+        )
         
         # Clear OCR results
         self.ocr_results = None

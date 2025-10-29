@@ -1,196 +1,293 @@
 /* 
- * Lab-untuk-OCR Professional UI Stylesheet
- * Design: Clean, Minimal, Professional
- * Color: Single professional blue tone
+ * Lab-untuk-OCR Modern Glassmorphism UI
+ * Design: Glass, Blur, Depth, Modern
+ * Following Material Design & Apple HIG principles
  */
 
 /* ============================================================================
-   GLOBAL STYLES
+   GLOBAL - Modern Background
    ============================================================================ */
 
 QMainWindow {
-    background-color: #F9FAFB;
+    background: qlineargradient(
+        x1:0, y1:0, x2:1, y2:1,
+        stop:0 #E0E7FF,
+        stop:1 #F0F4FF
+    );
 }
 
 QWidget {
-    font-family: "Segoe UI", Arial, sans-serif;
+    font-family: -apple-system, "Segoe UI", "Roboto", sans-serif;
     font-size: 10pt;
-    color: #1F2937;
+    color: #1E293B;
 }
 
 /* ============================================================================
-   BUTTONS - Single Professional Color
+   BUTTONS - Glassmorphism with Depth
    ============================================================================ */
 
 QPushButton {
-    background-color: #2563EB;
+    background: qlineargradient(
+        x1:0, y1:0, x2:0, y2:1,
+        stop:0 rgba(59, 130, 246, 0.9),
+        stop:1 rgba(37, 99, 235, 0.95)
+    );
     color: white;
-    border: none;
-    border-radius: 6px;
-    padding: 10px 20px;
-    font-weight: 500;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    padding: 12px 24px;
+    font-weight: 600;
     font-size: 10pt;
-    min-height: 36px;
+    min-height: 40px;
+    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
 }
 
 QPushButton:hover {
-    background-color: #1D4ED8;
+    background: qlineargradient(
+        x1:0, y1:0, x2:0, y2:1,
+        stop:0 rgba(96, 165, 250, 0.95),
+        stop:1 rgba(59, 130, 246, 1.0)
+    );
+    border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 QPushButton:pressed {
-    background-color: #1E40AF;
+    background: qlineargradient(
+        x1:0, y1:0, x2:0, y2:1,
+        stop:0 rgba(29, 78, 216, 1.0),
+        stop:1 rgba(30, 64, 175, 1.0)
+    );
+    padding: 13px 24px 11px 24px;
 }
 
 QPushButton:disabled {
-    background-color: #D1D5DB;
-    color: #9CA3AF;
+    background: rgba(203, 213, 225, 0.5);
+    color: rgba(148, 163, 184, 0.8);
+    border: 1px solid rgba(203, 213, 225, 0.3);
 }
 
-/* Browse Button - Outline Style */
+/* Browse Button - Glass Outline */
 QPushButton#browse_btn {
-    background-color: #FFFFFF;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
     color: #2563EB;
-    border: 2px solid #2563EB;
+    border: 2px solid rgba(37, 99, 235, 0.3);
+    font-weight: 600;
 }
 
 QPushButton#browse_btn:hover {
-    background-color: #EFF6FF;
+    background: rgba(255, 255, 255, 0.9);
+    border: 2px solid rgba(37, 99, 235, 0.5);
+}
+
+/* Start Button - Accent */
+QPushButton#start_btn {
+    background: qlineargradient(
+        x1:0, y1:0, x2:0, y2:1,
+        stop:0 rgba(16, 185, 129, 0.9),
+        stop:1 rgba(5, 150, 105, 0.95)
+    );
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+QPushButton#start_btn:hover {
+    background: qlineargradient(
+        x1:0, y1:0, x2:0, y2:1,
+        stop:0 rgba(52, 211, 153, 0.95),
+        stop:1 rgba(16, 185, 129, 1.0)
+    );
+}
+
+QPushButton#start_btn:disabled {
+    background: rgba(203, 213, 225, 0.5);
+}
+
+/* Reset Button - Warning style */
+QPushButton#reset_btn {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    color: #DC2626;
+    border: 2px solid rgba(220, 38, 38, 0.3);
+    font-weight: 600;
+}
+
+QPushButton#reset_btn:hover {
+    background: rgba(254, 226, 226, 0.9);
+    border: 2px solid rgba(220, 38, 38, 0.5);
 }
 
 /* Export Button */
 QPushButton#exportButton {
-    background-color: #2563EB;
-    color: white;
+    background: qlineargradient(
+        x1:0, y1:0, x2:0, y2:1,
+        stop:0 rgba(139, 92, 246, 0.9),
+        stop:1 rgba(124, 58, 237, 0.95)
+    );
 }
 
 QPushButton#exportButton:hover {
-    background-color: #1D4ED8;
+    background: qlineargradient(
+        x1:0, y1:0, x2:0, y2:1,
+        stop:0 rgba(167, 139, 250, 0.95),
+        stop:1 rgba(139, 92, 246, 1.0)
+    );
 }
 
 /* ============================================================================
-   GROUP BOX (Cards) - Minimal Design
+   GROUP BOX - Glass Cards with Depth
    ============================================================================ */
 
 QGroupBox {
-    background-color: white;
-    border: 1px solid #E5E7EB;
-    border-radius: 8px;
-    padding: 16px;
-    margin-top: 12px;
-    font-weight: 600;
-    font-size: 11pt;
-    color: #1F2937;
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 16px;
+    padding: 24px;
+    margin-top: 16px;
+    font-weight: 700;
+    font-size: 12pt;
+    color: #1E293B;
 }
 
 QGroupBox::title {
     subcontrol-origin: margin;
     subcontrol-position: top left;
-    padding: 0 8px;
-    background-color: white;
+    padding: 4px 16px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 8px;
+    color: #1E293B;
 }
 
 /* ============================================================================
-   TABLE - Clean Professional
+   TABLE - Glass with Depth
    ============================================================================ */
 
 QTableWidget {
-    background-color: white;
-    border: 1px solid #E5E7EB;
-    border-radius: 6px;
-    gridline-color: #E5E7EB;
-    selection-background-color: #DBEAFE;
-    selection-color: #1F2937;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(226, 232, 240, 0.5);
+    border-radius: 12px;
+    gridline-color: rgba(226, 232, 240, 0.6);
+    selection-background-color: rgba(219, 234, 254, 0.7);
+    selection-color: #1E293B;
 }
 
 QTableWidget::item {
-    padding: 8px;
+    padding: 12px;
     border: none;
 }
 
 QTableWidget::item:selected {
-    background-color: #DBEAFE;
+    background: rgba(219, 234, 254, 0.8);
+    border-radius: 4px;
 }
 
-/* Table Header */
+QTableWidget::item:hover {
+    background: rgba(241, 245, 249, 0.6);
+}
+
+/* Table Header - Glass */
 QHeaderView::section {
-    background-color: #F3F4F6;
-    color: #374151;
-    padding: 10px;
+    background: rgba(248, 250, 252, 0.95);
+    backdrop-filter: blur(10px);
+    color: #475569;
+    padding: 14px 12px;
     border: none;
-    border-bottom: 2px solid #E5E7EB;
-    border-right: 1px solid #E5E7EB;
-    font-weight: 600;
+    border-bottom: 2px solid rgba(226, 232, 240, 0.7);
+    border-right: 1px solid rgba(226, 232, 240, 0.5);
+    font-weight: 700;
     font-size: 9pt;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 QHeaderView::section:hover {
-    background-color: #E5E7EB;
+    background: rgba(241, 245, 249, 1.0);
+}
+
+/* Vertical Header (Row Numbers) */
+QHeaderView::section:vertical {
+    background: rgba(239, 246, 255, 0.9);
+    color: #3B82F6;
+    font-weight: 700;
+    font-size: 10pt;
 }
 
 /* ============================================================================
-   PROGRESS BAR - Professional
+   PROGRESS BAR - Glass with Animation Feel
    ============================================================================ */
 
 QProgressBar {
-    border: 1px solid #E5E7EB;
-    border-radius: 6px;
-    background-color: #F3F4F6;
+    background: rgba(241, 245, 249, 0.7);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(203, 213, 225, 0.4);
+    border-radius: 12px;
     text-align: center;
-    height: 24px;
-    font-size: 9pt;
-    color: #1F2937;
+    height: 32px;
+    font-size: 10pt;
+    font-weight: 600;
+    color: #1E293B;
 }
 
 QProgressBar::chunk {
-    background-color: #2563EB;
-    border-radius: 5px;
+    background: qlineargradient(
+        x1:0, y1:0, x2:1, y2:0,
+        stop:0 rgba(59, 130, 246, 0.9),
+        stop:0.5 rgba(96, 165, 250, 0.95),
+        stop:1 rgba(59, 130, 246, 0.9)
+    );
+    border-radius: 11px;
 }
 
 /* ============================================================================
-   STATUS BAR - Minimal
+   STATUS BAR - Minimal Glass
    ============================================================================ */
 
 QStatusBar {
-    background-color: #F9FAFB;
-    color: #6B7280;
-    border-top: 1px solid #E5E7EB;
+    background: rgba(248, 250, 252, 0.8);
+    backdrop-filter: blur(15px);
+    color: #64748B;
+    border-top: 1px solid rgba(226, 232, 240, 0.6);
     font-size: 9pt;
+    padding: 6px 12px;
 }
 
 /* ============================================================================
-   SCROLL BAR - Clean
+   SCROLL BAR - Modern Minimal
    ============================================================================ */
 
 QScrollBar:vertical {
-    background-color: #F3F4F6;
-    width: 12px;
-    border-radius: 6px;
+    background: rgba(241, 245, 249, 0.5);
+    width: 14px;
+    border-radius: 7px;
+    margin: 4px;
 }
 
 QScrollBar::handle:vertical {
-    background-color: #D1D5DB;
-    border-radius: 6px;
-    min-height: 30px;
+    background: rgba(148, 163, 184, 0.5);
+    border-radius: 7px;
+    min-height: 40px;
 }
 
 QScrollBar::handle:vertical:hover {
-    background-color: #9CA3AF;
+    background: rgba(100, 116, 139, 0.7);
 }
 
 QScrollBar:horizontal {
-    background-color: #F3F4F6;
-    height: 12px;
-    border-radius: 6px;
+    background: rgba(241, 245, 249, 0.5);
+    height: 14px;
+    border-radius: 7px;
+    margin: 4px;
 }
 
 QScrollBar::handle:horizontal {
-    background-color: #D1D5DB;
-    border-radius: 6px;
-    min-width: 30px;
+    background: rgba(148, 163, 184, 0.5);
+    border-radius: 7px;
+    min-width: 40px;
 }
 
 QScrollBar::handle:horizontal:hover {
-    background-color: #9CA3AF;
+    background: rgba(100, 116, 139, 0.7);
 }
 
 QScrollBar::add-line, QScrollBar::sub-line {
@@ -199,54 +296,82 @@ QScrollBar::add-line, QScrollBar::sub-line {
 }
 
 /* ============================================================================
-   DIALOG - Professional
+   LABELS - Hierarchy
    ============================================================================ */
 
-QDialog {
-    background-color: white;
-}
-
 QLabel {
-    color: #374151;
-}
-
-QRadioButton {
-    color: #374151;
-    spacing: 8px;
-    padding: 6px;
-}
-
-QRadioButton::indicator {
-    width: 18px;
-    height: 18px;
-    border: 2px solid #D1D5DB;
-    border-radius: 9px;
-    background-color: white;
-}
-
-QRadioButton::indicator:checked {
-    background-color: #2563EB;
-    border-color: #2563EB;
-}
-
-QRadioButton::indicator:hover {
-    border-color: #2563EB;
-}
-
-QDialogButtonBox QPushButton {
-    min-width: 80px;
-    padding: 8px 16px;
+    color: #334155;
+    font-weight: 500;
 }
 
 /* ============================================================================
-   MESSAGE BOX - Clean
+   DIALOG - Glass
+   ============================================================================ */
+
+QDialog {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+}
+
+QRadioButton {
+    color: #334155;
+    spacing: 10px;
+    padding: 8px;
+    font-weight: 500;
+}
+
+QRadioButton::indicator {
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(148, 163, 184, 0.6);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.9);
+}
+
+QRadioButton::indicator:checked {
+    background: qradialgradient(
+        cx:0.5, cy:0.5, radius:0.5,
+        stop:0 #3B82F6,
+        stop:0.7 #3B82F6,
+        stop:1 rgba(59, 130, 246, 0.8)
+    );
+    border-color: #3B82F6;
+}
+
+QRadioButton::indicator:hover {
+    border-color: #3B82F6;
+    background: rgba(239, 246, 255, 0.9);
+}
+
+QDialogButtonBox QPushButton {
+    min-width: 100px;
+    padding: 10px 20px;
+}
+
+/* ============================================================================
+   MESSAGE BOX - Glass
    ============================================================================ */
 
 QMessageBox {
-    background-color: white;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
 }
 
 QMessageBox QPushButton {
-    min-width: 80px;
-    padding: 8px 16px;
+    min-width: 100px;
+    padding: 10px 20px;
+}
+
+/* ============================================================================
+   TOOLTIPS - Modern
+   ============================================================================ */
+
+QToolTip {
+    background: rgba(30, 41, 59, 0.95);
+    backdrop-filter: blur(10px);
+    color: white;
+    border: 1px solid rgba(100, 116, 139, 0.3);
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 9pt;
 }

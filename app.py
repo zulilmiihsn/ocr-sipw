@@ -9,11 +9,23 @@ Usage:
     python app.py
 
 Requirements:
-    pip install -r requirements-gui.txt
+    pip install -r requirements.txt
 """
 
 import sys
+import os
+import warnings
 from pathlib import Path
+
+# Suppress all warnings and debug logs for clean terminal output
+warnings.filterwarnings('ignore')
+os.environ['PYTHONWARNINGS'] = 'ignore'
+
+# Suppress PaddlePaddle/PaddleOCR logs
+os.environ['FLAGS_paddle_num_threads'] = '1'
+os.environ['FLAGS_allocator_strategy'] = 'auto_growth'
+os.environ['GLOG_minloglevel'] = '3'  # Suppress GLOG (Paddle uses glog)
+os.environ['PPOCR_LOG_LEVEL'] = 'ERROR'  # Only show errors
 
 # Add project root to path
 project_root = Path(__file__).parent

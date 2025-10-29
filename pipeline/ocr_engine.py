@@ -18,6 +18,8 @@ Date: October 2025
 """
 
 import sys
+import os
+import warnings
 import time
 from pathlib import Path
 import cv2
@@ -25,6 +27,10 @@ import numpy as np
 import json
 import re
 from collections import defaultdict
+
+# Suppress warnings for clean output
+warnings.filterwarnings('ignore')
+os.environ['PYTHONWARNINGS'] = 'ignore'
 
 
 # ============================================================================

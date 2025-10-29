@@ -4,8 +4,12 @@ BLOK III Table Detection (Parallel Dual-Direction Scan)
 
 import cv2
 import numpy as np
+import os
 from typing import Tuple, Optional
 from concurrent.futures import ThreadPoolExecutor
+
+# Control verbosity (set to False for production)
+VERBOSE = os.getenv('OCR_VERBOSE', 'false').lower() == 'true'
 
 
 def _scan_top_for_rekapitulasi(image, search_region_top, width, search_height_top, pytesseract):
@@ -176,8 +180,9 @@ def _fallback_ratio_detection(image: np.ndarray, height: int, width: int) -> Opt
     Returns:
         Tuple of (x, y, width, height) or None if invalid
     """
-    print(f"  📐 RATIO-BASED DETECTION:")
-    print(f"    Document size: {width}x{height}px")
+    if VERBOSE:
+        print(f"  📐 RATIO-BASED DETECTION:")
+        print(f"    Document size: {width}x{height}px")
     
     # BLOK III typically located at 19%-90% of document height
     # These ratios are measured from actual BPS form samples with ±3% safety margin
@@ -197,13 +202,15 @@ def _fallback_ratio_detection(image: np.ndarray, height: int, width: int) -> Opt
     # Validation: BLOK III should be at least 20% of document height
     min_height = int(height * 0.2)
     if blok3_height < min_height:
-        print(f"  ✗ FALLBACK FAILED: Height too small ({blok3_height}px < {min_height}px)")
+        if VERBOSE:
+            print(f"  ✗ FALLBACK FAILED: Height too small ({blok3_height}px < {min_height}px)")
         return None
     
-    print(f"    Top ratio: {TOP_RATIO*100:.0f}% → y={blok3_y_start}")
-    print(f"    Bottom ratio: {BOTTOM_RATIO*100:.0f}% → y={blok3_y_end}")
-    print(f"    BLOK III height: {blok3_height}px ({blok3_height/height*100:.1f}% of document)")
-    print(f"  ✓ FALLBACK SUCCESS: Using ratio-based boundaries")
+    if VERBOSE:
+        print(f"    Top ratio: {TOP_RATIO*100:.0f}% → y={blok3_y_start}")
+        print(f"    Bottom ratio: {BOTTOM_RATIO*100:.0f}% → y={blok3_y_end}")
+        print(f"    BLOK III height: {blok3_height}px ({blok3_height/height*100:.1f}% of document)")
+        print(f"  ✓ FALLBACK SUCCESS: Using ratio-based boundaries")
     
     return (0, blok3_y_start, width, blok3_height)
 
@@ -238,9 +245,10 @@ def detect_table_region(image: np.ndarray) -> Optional[Tuple[int, int, int, int]
     search_region_top = image[:search_height_top, :]
     search_region_bottom = image[height - search_height_bottom:, :]
     
-    print(f"🔍 PARALLEL Dual-direction OCR scan:")
-    print(f"  ⚡ Scanning TOP 30% ({search_height_top}px) for 'Rekapitulasi' [PARALLEL]")
-    print(f"  ⚡ Scanning BOTTOM 30% ({search_height_bottom}px) for 'Keterangan' [PARALLEL]")
+    if VERBOSE:
+        print(f"🔍 PARALLEL Dual-direction OCR scan:")
+        print(f"  ⚡ Scanning TOP 30% ({search_height_top}px) for 'Rekapitulasi' [PARALLEL]")
+        print(f"  ⚡ Scanning BOTTOM 30% ({search_height_bottom}px) for 'Keterangan' [PARALLEL]")
     
     start_total = time.time()
     
@@ -263,43 +271,48 @@ def detect_table_region(image: np.ndarray) -> Optional[Tuple[int, int, int, int]
         
         # Process results with FALLBACK
         if result_top is None:
-            print(f"  ✗ 'Rekapitulasi' not found in top 30%")
-            print(f"  🔄 FALLBACK: Using ratio-based detection...")
+            if VERBOSE:
+                print(f"  ✗ 'Rekapitulasi' not found in top 30%")
+                print(f"  🔄 FALLBACK: Using ratio-based detection...")
             return _fallback_ratio_detection(image, height, width)
         
         best_top = result_top['best']
         blok3_y_start = result_top['y_start']
         
-        print(f"  ✓ TOP: Found '{best_top['text']}' at y={best_top['y']} (score={best_top['score']}, conf={best_top['conf']}%) in {elapsed_top:.2f}s")
-        print(f"    → Upper boundary: y={blok3_y_start}")
+        if VERBOSE:
+            print(f"  ✓ TOP: Found '{best_top['text']}' at y={best_top['y']} (score={best_top['score']}, conf={best_top['conf']}%) in {elapsed_top:.2f}s")
+            print(f"    → Upper boundary: y={blok3_y_start}")
         
         best_bottom = result_bottom['best']
         blok3_y_end = result_bottom['y_end']
         
-        if best_bottom:
-            print(f"  ✓ BOTTOM: Found '{best_bottom['text']}' at y={best_bottom['y']} (score={best_bottom['score']}, conf={best_bottom['conf']}%) in {elapsed_bottom:.2f}s")
-            print(f"    → Lower boundary: y={blok3_y_end}")
-        else:
-            print(f"  ⚠ BOTTOM: 'Keterangan' not found, using image bottom in {elapsed_bottom:.2f}s")
-            print(f"    → Lower boundary: y={blok3_y_end} (image bottom)")
+        if VERBOSE:
+            if best_bottom:
+                print(f"  ✓ BOTTOM: Found '{best_bottom['text']}' at y={best_bottom['y']} (score={best_bottom['score']}, conf={best_bottom['conf']}%) in {elapsed_bottom:.2f}s")
+                print(f"    → Lower boundary: y={blok3_y_end}")
+            else:
+                print(f"  ⚠ BOTTOM: 'Keterangan' not found, using image bottom in {elapsed_bottom:.2f}s")
+                print(f"    → Lower boundary: y={blok3_y_end} (image bottom)")
         
         blok3_height = blok3_y_end - blok3_y_start
         
-        # Calculate speedup
-        sequential_time = elapsed_top + elapsed_bottom
-        speedup = sequential_time / elapsed_total if elapsed_total > 0 else 1.0
-        
-        print(f"\n  ⚡ PARALLEL PERFORMANCE:")
-        print(f"    Sequential time: {sequential_time:.2f}s")
-        print(f"    Parallel time:   {elapsed_total:.2f}s")
-        print(f"    Speedup:         {speedup:.2f}x faster!")
-        
-        print(f"\n  ✓ BLOK III region: y={blok3_y_start} to y={blok3_y_end} (height={blok3_height}px)")
+        if VERBOSE:
+            # Calculate speedup
+            sequential_time = elapsed_top + elapsed_bottom
+            speedup = sequential_time / elapsed_total if elapsed_total > 0 else 1.0
+            
+            print(f"\n  ⚡ PARALLEL PERFORMANCE:")
+            print(f"    Sequential time: {sequential_time:.2f}s")
+            print(f"    Parallel time:   {elapsed_total:.2f}s")
+            print(f"    Speedup:         {speedup:.2f}x faster!")
+            
+            print(f"\n  ✓ BLOK III region: y={blok3_y_start} to y={blok3_y_end} (height={blok3_height}px)")
         
         return (0, blok3_y_start, width, blok3_height)
         
     except Exception as e:
-        print(f"  ✗ OCR scan failed: {e}")
+        if VERBOSE:
+            print(f"  ✗ OCR scan failed: {e}")
         return None
 
 

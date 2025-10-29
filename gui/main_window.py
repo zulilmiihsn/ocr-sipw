@@ -432,7 +432,7 @@ class MainWindow(QMainWindow):
     
     def create_file_selection_group(self):
         """Create file selection UI group with Start button"""
-        group = QGroupBox("📁 File Selection & Processing")
+        group = QGroupBox("FILE SELECTION & PROCESSING")
         layout = QHBoxLayout()
         layout.setSpacing(12)
         
@@ -472,7 +472,7 @@ class MainWindow(QMainWindow):
     
     def create_table_group(self):
         """Create table UI group"""
-        group = QGroupBox("📊 Extracted Table (Double-click to edit)")
+        group = QGroupBox("EXTRACTED TABLE (Double-click to edit)")
         layout = QVBoxLayout()
         
         # Create table widget (16 columns, removed "No" column)
@@ -559,14 +559,16 @@ class MainWindow(QMainWindow):
         if file_path:
             self.current_file = file_path
             file_name = Path(file_path).name
-            self.file_label.setText(f"✅ {file_name}")
+            # Update file label with icon (if available) or checkmark
+            file_indicator = "✓" if ICONS_AVAILABLE else "✅"
+            self.file_label.setText(f"{file_indicator} {file_name}")
             self.file_label.setStyleSheet("color: #10B981; font-weight: 600; font-size: 11pt;")
             
             # Enable Start and Reset buttons
             self.start_btn.setEnabled(True)
             self.reset_btn.setEnabled(True)
             
-            self.update_status(f"✅ File loaded: {file_name} - Click 'Start OCR' to begin")
+            self.update_status(f"{file_indicator} File loaded: {file_name} - Click 'Start OCR' to begin")
     
     
     def start_ocr(self):
@@ -618,8 +620,9 @@ class MainWindow(QMainWindow):
         
         # Update status
         metadata = results['metadata']
+        success_icon = "✓" if ICONS_AVAILABLE else "✅"
         status_msg = (
-            f"✅ Complete! {metadata['num_rows']} rows extracted in "
+            f"{success_icon} Complete! {metadata['num_rows']} rows extracted in "
             f"{metadata['total_time']:.1f}s | Accuracy: ~95% | Ready to export"
         )
         self.update_status(status_msg)
@@ -641,7 +644,8 @@ class MainWindow(QMainWindow):
         # Re-enable Start button on error
         self.start_btn.setEnabled(True)
         
-        self.update_status(f"❌ Error: {error_msg}")
+        error_icon = "✗" if ICONS_AVAILABLE else "❌"
+        self.update_status(f"{error_icon} Error: {error_msg}")
         
         QMessageBox.critical(
             self,
@@ -722,11 +726,11 @@ class MainWindow(QMainWindow):
         layout.addSpacing(8)
         
         # Format options
-        excel_radio = QRadioButton("📊 Excel (.xlsx) - Recommended")
+        excel_radio = QRadioButton("Excel (.xlsx) - Recommended")
         excel_radio.setChecked(True)
-        csv_radio = QRadioButton("📄 CSV (.csv) - Plain text")
-        json_radio = QRadioButton("🔧 JSON (.json) - With metadata")
-        html_radio = QRadioButton("🌐 HTML (.html) - Interactive view")
+        csv_radio = QRadioButton("CSV (.csv) - Plain text")
+        json_radio = QRadioButton("JSON (.json) - With metadata")
+        html_radio = QRadioButton("HTML (.html) - Interactive view")
         
         layout.addWidget(excel_radio)
         layout.addWidget(csv_radio)
@@ -779,7 +783,8 @@ class MainWindow(QMainWindow):
             elif format_name == 'html':
                 self.export_to_html(file_path)
             
-            self.update_status(f"✅ Exported to {Path(file_path).name}")
+            success_icon = "✓" if ICONS_AVAILABLE else "✅"
+            self.update_status(f"{success_icon} Exported to {Path(file_path).name}")
             QMessageBox.information(self, "Export Successful", f"Results exported to:\n{file_path}")
             
         except Exception as e:
@@ -883,7 +888,7 @@ class MainWindow(QMainWindow):
     </style>
 </head>
 <body>
-    <h1>📊 BLOK III Table - Extraction Results</h1>
+    <h1>BLOK III Table - Extraction Results</h1>
     <div class="metadata">
 """
         

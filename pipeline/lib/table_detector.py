@@ -149,15 +149,10 @@ def _scan_bottom_for_keterangan(image, search_region_bottom, width, height, sear
                 row = search_strip_bottom[row_offset, :]
                 dark_pixels = np.sum(row < 128)
                 if dark_pixels > width * 0.3:
-                    # Add 30px margin below the detected border for safety
-                    blok3_y_end = min(y_search_bottom_start + row_offset + 30, height)
+                    blok3_y_end = y_search_bottom_start + row_offset + 15  # Add 15px margin
                     break
         else:
-            # No border detected, use keyword position + 30px margin
-            blok3_y_end = min(best_bottom['y'] + 30, height)
-    else:
-        # No keyword detected, add 30px margin to default bottom
-        blok3_y_end = height
+            blok3_y_end = best_bottom['y'] + 15  # Add 15px margin
     
     return {
         'best': best_bottom,
@@ -235,10 +230,10 @@ def detect_table_region(image: np.ndarray) -> Optional[Tuple[int, int, int, int]
         
         if best_bottom:
             print(f"  ✓ BOTTOM: Found '{best_bottom['text']}' at y={best_bottom['y']} (score={best_bottom['score']}, conf={best_bottom['conf']}%) in {elapsed_bottom:.2f}s")
-            print(f"    → Lower boundary: y={blok3_y_end} (+30px margin for safety)")
+            print(f"    → Lower boundary: y={blok3_y_end} (with +15px margin)")
         else:
             print(f"  ⚠ BOTTOM: 'Keterangan' not found, using image bottom in {elapsed_bottom:.2f}s")
-            print(f"    → Lower boundary: y={blok3_y_end} (image bottom)")
+            print(f"    → Lower boundary: y={blok3_y_end} (with +15px margin)")
         
         blok3_height = blok3_y_end - blok3_y_start
         

@@ -372,8 +372,8 @@ class MainWindow(QMainWindow):
     
     def init_ui(self):
         """Initialize the user interface"""
-        self.setWindowTitle("Lab-untuk-OCR - BLOK III Table Extractor v3.1")
-        self.setMinimumSize(1280, 860)
+        self.setWindowTitle("Lab-untuk-OCR - BLOK III Table Extractor")
+        self.setMinimumSize(1400, 900)
         
         # Load QSS stylesheet
         self.load_stylesheet()
@@ -382,10 +382,10 @@ class MainWindow(QMainWindow):
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
         
-        # Main layout with proper spacing
+        # Main layout with generous spacing (Gen Z aesthetic)
         main_layout = QVBoxLayout(central_widget)
-        main_layout.setContentsMargins(24, 24, 24, 24)
-        main_layout.setSpacing(16)
+        main_layout.setContentsMargins(32, 32, 32, 32)
+        main_layout.setSpacing(24)
         
         # File selection area (simplified)
         file_group = self.create_file_selection_group()
@@ -418,9 +418,9 @@ class MainWindow(QMainWindow):
     
     def create_file_selection_group(self):
         """Create file selection UI group with Start button"""
-        group = QGroupBox("File Selection & Processing")
+        group = QGroupBox("FILE SELECTION & PROCESSING")
         layout = QHBoxLayout()
-        layout.setSpacing(16)
+        layout.setSpacing(20)
         
         # File label with better styling
         self.file_label = QLabel("No file selected")
@@ -463,7 +463,7 @@ class MainWindow(QMainWindow):
     
     def create_table_group(self):
         """Create table UI group"""
-        group = QGroupBox("Extracted Table Data")
+        group = QGroupBox("EXTRACTED TABLE DATA")
         layout = QVBoxLayout()
         
         # Create table widget (16 columns, removed "No" column)

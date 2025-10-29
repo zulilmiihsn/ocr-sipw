@@ -495,9 +495,17 @@ class MainWindow(QMainWindow):
         for i, width in enumerate(column_widths):
             header.resizeSection(i, width)
         
-        # Enable editing
-        self.table.setEditTriggers(QTableWidget.DoubleClicked | QTableWidget.EditKeyPressed)
+        # Enable single-click editing
+        self.table.setEditTriggers(
+            QTableWidget.CurrentChanged |  # Single-click to edit
+            QTableWidget.SelectedClicked |  # Click on selected cell
+            QTableWidget.EditKeyPressed |   # Any key press
+            QTableWidget.AnyKeyPressed      # Start typing immediately
+        )
         self.table.itemChanged.connect(self.on_cell_edited)
+        
+        # Install event filter for Enter key navigation
+        self.table.installEventFilter(self)
         
         layout.addWidget(self.table)
         
@@ -875,6 +883,32 @@ class MainWindow(QMainWindow):
         """Update status bar"""
         self.status_bar.showMessage(message)
     
+    def eventFilter(self, source, event):
+        """Handle Enter key navigation in table"""
+        from PyQt5.QtCore import QEvent
+        from PyQt5.QtGui import QKeyEvent
+        
+        if source == self.table and event.type() == QEvent.KeyPress:
+            key_event = event
+            
+            # Check for Enter or NumPad Enter
+            if key_event.key() in (Qt.Key_Return, Qt.Key_Enter):
+                current_row = self.table.currentRow()
+                current_col = self.table.currentColumn()
+                
+                # Move to next cell (right, then down to next row)
+                if current_col < 15:  # Not last column (16 columns, 0-15)
+                    self.table.setCurrentCell(current_row, current_col + 1)
+                elif current_row < 9:  # Not last row (10 rows, 0-9)
+                    self.table.setCurrentCell(current_row + 1, 0)  # Go to first column of next row
+                else:
+                    # Last cell, wrap to first cell
+                    self.table.setCurrentCell(0, 0)
+                
+                return True  # Event handled
+        
+        # Pass event to parent
+        return super().eventFilter(source, event)
     
     def closeEvent(self, event):
         """Handle window close"""

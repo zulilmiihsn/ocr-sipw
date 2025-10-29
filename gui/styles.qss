@@ -138,12 +138,13 @@ QTableWidget::item:focus {
 QHeaderView::section {
     background-color: #475569;
     color: #FFFFFF;
-    padding: 8px 4px;
+    padding: 4px 4px;
     border: none;
     border-right: 1px solid #64748B;
     border-bottom: 2px solid #2563EB;
     font-weight: 600;
     font-size: 8pt;
+    max-height: 40px;
 }
 
 QHeaderView::section:hover {
@@ -159,15 +160,16 @@ QHeaderView::section:last {
     border-right: none;
 }
 
-/* Vertical Header - Clean Blue Compact */
+/* Vertical Header - Clean Blue Compact (Row Numbers) */
 QHeaderView::section:vertical {
     background-color: #2563EB;
     color: #FFFFFF;
     font-weight: 600;
     font-size: 9pt;
-    padding: 4px 8px;
+    padding: 2px 4px;
     border-right: 2px solid #1D4ED8;
     border-bottom: 1px solid #3B82F6;
+    max-width: 30px;
 }
 
 /* ============================================================================

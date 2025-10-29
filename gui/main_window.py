@@ -566,6 +566,9 @@ class MainWindow(QMainWindow):
         for i in range(10):
             self.table.setVerticalHeaderItem(i, QTableWidgetItem(str(i + 1)))
         
+        # Set vertical header (row numbers) width - VERY COMPACT
+        self.table.verticalHeader().setFixedWidth(35)
+        
         # Adjust column widths - COMPACT for 1 page fit
         header = self.table.horizontalHeader()
         column_widths = [

@@ -44,11 +44,11 @@ pip install -r requirements.txt
 ### 2️⃣ Run the System
 
 ```bash
-# Navigate to final system
-cd experiments/final_system
+# Navigate to pipeline folder
+cd pipeline
 
 # Run the main pipeline
-python RUN_ADAPTIVE_V2_SMART_ROWS.py
+python run_ocr.py
 
 # View results in browser
 # Open: visualize_results.html
@@ -57,9 +57,9 @@ python RUN_ADAPTIVE_V2_SMART_ROWS.py
 ### 3️⃣ View Results
 
 The system generates:
-- ✅ `ADAPTIVE_V2_SMART_RESULTS.json` - Structured data
+- ✅ `ocr_results.json` - Structured OCR data
 - ✅ `visualize_results.html` - Beautiful visualization
-- ✅ `results_data.js` - JavaScript data for web display
+- ✅ `blok3_cropped.jpg` - Cropped BLOK III image
 
 ---
 
@@ -111,28 +111,25 @@ The system generates:
 
 ```
 lab-untuk-ocr/
-├── 📂 src/                          # Core library
+├── 📂 pipeline/                     🎯 PRODUCTION CODE (Main!)
+│   ├── run_ocr.py                   # Main pipeline (95% accuracy)
+│   ├── adaptive_ocr.py              # Core OCR library
+│   ├── visualize_results.html       # HTML visualization
+│   ├── sample_results.json          # Sample output
+│   ├── sample_blok3.jpg             # Sample cropped image
+│   ├── README.md                    # Full documentation
+│   ├── SUMMARY.md                   # Executive summary
+│   └── QUICK_START.md               # Quick start guide
+│
+├── 📂 src/                          ✅ Core library
 │   ├── ocr/                         # OCR modules
 │   ├── utils/                       # Utility functions
 │   └── models/                      # Data models
 │
-├── 📂 experiments/
-│   ├── stage1_image_loading/        # ✅ Approved: PDF/Image loading
-│   ├── stage2_preprocessing/        # ✅ Approved: No preprocessing
-│   ├── stage3_table_detection/      # ✅ Approved: OCR + Border detection
-│   ├── stage4_cell_segmentation/    # ✅ Approved: Morphological lines
-│   ├── stage5_ocr/                  # ✅ Final OCR methods
-│   ├── results/                     # Final results only
-│   └── final_system/                # 🎯 PRODUCTION-READY v2.1
-│       ├── RUN_ADAPTIVE_V2_SMART_ROWS.py   # Main pipeline
-│       ├── visualize_results.html          # Visualization
-│       ├── adaptive_ocr_pipeline.py        # Core library
-│       └── README.md                       # Detailed docs
-│
-├── 📂 contoh gambar/                # Sample images
-├── 📂 data/                         # Data directory
-├── 📄 requirements.txt              # Python dependencies
-└── 📄 README.md                     # This file
+├── 📂 contoh gambar/                ✅ Sample images
+├── 📂 data/                         ✅ Data directory
+├── 📄 README.md                    ✅ Main documentation
+└── 📄 requirements.txt             ✅ Python dependencies
 ```
 
 ---
@@ -183,17 +180,11 @@ lab-untuk-ocr/
 
 Detailed documentation available in:
 
-- 📘 **[experiments/final_system/README.md](experiments/final_system/README.md)** - Full system documentation
-- 📗 **[experiments/final_system/SUMMARY.md](experiments/final_system/SUMMARY.md)** - Executive summary
-- 📙 **[experiments/final_system/QUICK_START.md](experiments/final_system/QUICK_START.md)** - Quick start guide
-- 📕 **[experiments/PIPELINE_STAGES.md](experiments/PIPELINE_STAGES.md)** - Pipeline overview
+- 📘 **[pipeline/README.md](pipeline/README.md)** - Full system documentation
+- 📗 **[pipeline/SUMMARY.md](pipeline/SUMMARY.md)** - Executive summary
+- 📙 **[pipeline/QUICK_START.md](pipeline/QUICK_START.md)** - Quick start guide
 
-Each stage has its own documentation:
-- `experiments/stage1_image_loading/README.md`
-- `experiments/stage2_preprocessing/README.md`
-- `experiments/stage3_table_detection/STAGE3_APPROVED.md`
-- `experiments/stage4_cell_segmentation/STAGE4_APPROVED.md`
-- `experiments/stage5_ocr/OCR_MODELS_INFO.md`
+All approved methods are integrated into the production pipeline!
 
 ---
 
@@ -218,20 +209,21 @@ The system includes a beautiful HTML visualization:
 To test with your own images:
 
 1. Place image in `contoh gambar/` folder
-2. Edit `RUN_ADAPTIVE_V2_SMART_ROWS.py`:
+2. Edit `pipeline/run_ocr.py`:
    ```python
-   image = load_image('contoh gambar/YOUR_IMAGE.png')
+   image = load_image('../contoh gambar/YOUR_IMAGE.png')
    ```
 3. Run the pipeline:
    ```bash
-   python RUN_ADAPTIVE_V2_SMART_ROWS.py
+   cd pipeline
+   python run_ocr.py
    ```
 
 ---
 
 ## 🔧 Configuration
 
-Key configuration in `experiments/final_system/requirements.txt`:
+Key configuration in `pipeline/requirements.txt`:
 
 ```txt
 paddleocr>=3.0.0       # OCR engine
@@ -243,12 +235,18 @@ numpy>=1.24.0          # Numerical ops
 
 ## 📝 Version History
 
-### v2.0 - Smart Row Detection (Current) 🎯
+### v3.0 - Production Structure (Current) 🎯
+- ✅ Ultra-clean production structure
+- ✅ All code in `pipeline/` folder
+- ✅ 95.0% accuracy maintained
+- ✅ Easy to use and deploy
+- ✅ All experiments completed
+
+### v2.0 - Smart Row Detection
 - ✅ 95.0% accuracy achieved
 - ✅ Smart row detection (exactly 10 rows)
 - ✅ Adaptive column learning
 - ✅ HTML visualization
-- ✅ Production-ready
 
 ### v1.1 - Adaptive Mapping
 - 📈 94.1% accuracy

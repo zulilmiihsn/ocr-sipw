@@ -83,6 +83,9 @@ class OCRWorker(QThread):
             # Improved smart row detection using Y-clustering from OCR
             image_height = cropped.shape[0]
             
+            # ADAPTIVE TOLERANCE: Scale with image size for robustness
+            adaptive_tolerance = max(10, int(image_height * 0.015))  # 1.5% of image height, min 10px
+            
             # Find header end by detecting header keywords
             header_y_max = 0
             for det in ocr_results:
@@ -110,7 +113,7 @@ class OCRWorker(QThread):
                 # Group detections that are close together (same row)
                 row_groups = []
                 current_group = [data_y_centers[0]]
-                tolerance = 15  # pixels tolerance for same row
+                tolerance = adaptive_tolerance  # ADAPTIVE tolerance based on image size
                 
                 for y in data_y_centers[1:]:
                     if y - current_group[-1] <= tolerance:
@@ -250,6 +253,13 @@ class OCRWorker(QThread):
                 
                 return total_score
             
+            # Calculate adaptive row tolerance for cell mapping
+            if len(h_lines) > 1:
+                avg_row_height = (h_lines[-1] - h_lines[0]) / max(len(h_lines) - 1, 1)
+                adaptive_row_tolerance = max(8, int(avg_row_height * 0.25))  # 25% of row height, min 8px
+            else:
+                adaptive_row_tolerance = 10
+            
             # Map detections to cells using advanced scoring
             for det in ocr_results:
                 y_center = (det['y_min'] + det['y_max']) / 2
@@ -267,8 +277,8 @@ class OCRWorker(QThread):
                     row_y_min = h_lines[i]
                     row_y_max = h_lines[i + 1]
                     
-                    # Skip if detection is far from this row (STRICTER: 10px tolerance)
-                    if y_center < row_y_min - 10 or y_center > row_y_max + 10:
+                    # Skip if detection is far from this row (ADAPTIVE tolerance)
+                    if y_center < row_y_min - adaptive_row_tolerance or y_center > row_y_max + adaptive_row_tolerance:
                         continue
                     
                     for j in range(len(column_structure)):

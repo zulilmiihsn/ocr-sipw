@@ -1,25 +1,54 @@
-# Core Dependencies
-opencv-python>=4.8.0
-numpy>=1.24.0
-Pillow>=10.0.0
+# Lab-untuk-OCR - Complete Dependencies
+# Install: pip install -r requirements.txt
+
+# ============================================================================
+# CORE DEPENDENCIES
+# ============================================================================
+
+# Image Processing
+opencv-python==4.8.1.78
+numpy==1.24.3
+Pillow==10.1.0
 
 # PDF Handling
 pdf2image>=1.16.3
 
-# OCR Engines
-pytesseract>=0.3.10
+# ============================================================================
+# OCR ENGINES
+# ============================================================================
 
-# PaddleOCR (Optional - for AI-based table detection)
-paddlepaddle>=2.5.0
-paddleocr>=2.7.0
+# Tesseract OCR
+pytesseract==0.3.10
 
-# Table Transformer (Optional - for state-of-the-art table detection)
-# transformers>=4.30.0
-# torch>=2.0.0
+# PaddleOCR (AI-based OCR)
+paddlepaddle==2.5.2
+paddleocr==2.7.3
 
-# GUI
-customtkinter>=5.2.0
+# ============================================================================
+# GUI APPLICATION
+# ============================================================================
 
-# Data Export
+# PyQt5 Framework
+PyQt5==5.15.10
+PyQt5-Qt5==5.15.2
+PyQt5-sip==12.13.0
+
+# ============================================================================
+# DATA EXPORT
+# ============================================================================
+
+# Excel Export
+openpyxl==3.1.2
+XlsxWriter==3.1.9
+
+# CSV/JSON (built-in Python modules)
+
+# ============================================================================
+# UTILITIES
+# ============================================================================
+
+# Progress bars
+tqdm==4.66.1
+
+# Data manipulation (for potential future use)
 pandas>=2.0.0
-

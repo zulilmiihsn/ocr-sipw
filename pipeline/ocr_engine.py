@@ -100,8 +100,7 @@ class PaddleOCREngine:
                 'det_db_box_thresh': 0.5,         # Detection threshold
                 'det_db_unclip_ratio': 1.8,       # Text box expansion
                 'total_process_num': 1,           # Single process
-                'use_mp': False,                  # No multiprocessing overhead
-                'show_log': False                 # Suppress logs
+                'use_mp': False                   # No multiprocessing overhead
             }
             
             # CPU-specific optimizations

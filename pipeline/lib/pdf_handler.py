@@ -14,7 +14,7 @@ def is_pdf(file_path: str) -> bool:
 
 def pdf_to_images(pdf_path: str, dpi: int = 300) -> List[np.ndarray]:
     """
-    Convert PDF to list of images (one per page)
+    Convert PDF to list of images (one per page) using PyMuPDF
     
     Args:
         pdf_path: Path to PDF file
@@ -24,47 +24,50 @@ def pdf_to_images(pdf_path: str, dpi: int = 300) -> List[np.ndarray]:
         List of images as numpy arrays (BGR format for OpenCV)
     """
     try:
-        from pdf2image import convert_from_path
+        import fitz  # PyMuPDF
         import cv2
         
         print(f"📄 Converting PDF to images (DPI: {dpi})...")
         
-        # Convert PDF to PIL images
-        pil_images = convert_from_path(pdf_path, dpi=dpi)
+        # Open PDF
+        pdf_document = fitz.open(pdf_path)
+        num_pages = len(pdf_document)
         
-        print(f"  ✓ Extracted {len(pil_images)} page(s)")
+        print(f"  ✓ Detected {num_pages} page(s)")
         
-        # Convert PIL images to OpenCV format (numpy BGR)
+        # Convert each page to image
         cv_images = []
-        for i, pil_img in enumerate(pil_images):
-            # Convert PIL RGB to OpenCV BGR
-            img_rgb = np.array(pil_img)
+        zoom = dpi / 72  # PDF default DPI is 72
+        mat = fitz.Matrix(zoom, zoom)  # Zoom matrix
+        
+        for page_num in range(num_pages):
+            # Get page
+            page = pdf_document[page_num]
+            
+            # Render page to pixmap (image)
+            pix = page.get_pixmap(matrix=mat)
+            
+            # Convert pixmap to numpy array (RGB)
+            img_rgb = np.frombuffer(pix.samples, dtype=np.uint8).reshape(pix.height, pix.width, 3)
+            
+            # Convert RGB to BGR for OpenCV
             img_bgr = cv2.cvtColor(img_rgb, cv2.COLOR_RGB2BGR)
+            
             cv_images.append(img_bgr)
-            print(f"  ✓ Page {i+1}: {img_bgr.shape}")
+            print(f"  ✓ Page {page_num + 1}: {img_bgr.shape}")
+        
+        pdf_document.close()
         
         return cv_images
         
     except ImportError as e:
         raise ImportError(
-            "pdf2image library not found. Install with: pip install pdf2image\n"
-            "Also requires poppler-utils. See installation guide in README."
+            "PyMuPDF library not found.\n\n"
+            "Install with: pip install PyMuPDF\n\n"
+            "This is a pure Python library with no system dependencies!"
         ) from e
     except Exception as e:
-        # Check if it's poppler-related error
-        error_msg = str(e).lower()
-        if 'poppler' in error_msg or 'unable to get page count' in error_msg:
-            raise RuntimeError(
-                "Poppler tidak terinstall!\n\n"
-                "Untuk Windows:\n"
-                "1. Download poppler: https://github.com/oschwartz10612/poppler-windows/releases\n"
-                "2. Extract ke folder (contoh: C:\\poppler)\n"
-                "3. Tambahkan ke PATH: C:\\poppler\\Library\\bin\n"
-                "4. Restart aplikasi\n\n"
-                "Atau install via conda: conda install -c conda-forge poppler"
-            ) from e
-        else:
-            raise RuntimeError(f"Failed to convert PDF: {str(e)}") from e
+        raise RuntimeError(f"Failed to convert PDF: {str(e)}") from e
 
 
 def load_document(file_path: str, dpi: int = 300) -> Tuple[List[np.ndarray], str]:

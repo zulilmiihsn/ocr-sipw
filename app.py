@@ -27,6 +27,9 @@ os.environ['FLAGS_allocator_strategy'] = 'auto_growth'
 os.environ['GLOG_minloglevel'] = '3'  # Suppress GLOG (Paddle uses glog)
 os.environ['PPOCR_LOG_LEVEL'] = 'ERROR'  # Only show errors
 
+# Suppress PaddleX model loading messages
+os.environ['PADDLEX_VERBOSITY'] = 'ERROR'
+
 # Add project root to path
 project_root = Path(__file__).parent
 sys.path.insert(0, str(project_root))

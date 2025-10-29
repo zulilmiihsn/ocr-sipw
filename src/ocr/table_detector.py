@@ -12,8 +12,9 @@ def detect_blok3_with_ocr(
     image: np.ndarray
 ) -> Optional[Tuple[int, int, int, int]]:
     """
-    FAST: Detect BLOK III region using Tesseract OCR only.
-    Scans TOP 30% of image for "BLOK III" text.
+    FAST: Detect BLOK III region using Tesseract OCR with dual-direction scan.
+    - Scans TOP 30% for "Rekapitulasi" (upper boundary)
+    - Scans BOTTOM 30% for "Keterangan" (lower boundary)
     
     Args:
         image: Preprocessed full image
@@ -34,52 +35,55 @@ def detect_blok3_with_ocr(
     except ImportError:
         return None
     
-    # Search in TOP 30% only (BLOK III title always near top)
-    search_height = int(height * 0.3)
-    search_region = image[:search_height, :]
-    
-    print(f"🔍 Fast OCR scan for BLOK III in top 30% ({search_height}px)...")
-    
     import time
+    
+    # ========================================
+    # STEP 1: Scan TOP 30% for "Rekapitulasi" (upper boundary)
+    # ========================================
+    search_height_top = int(height * 0.3)
+    search_region_top = image[:search_height_top, :]
+    
+    print(f"🔍 Dual-direction OCR scan:")
+    print(f"  → Scanning TOP 30% ({search_height_top}px) for 'Rekapitulasi'...")
+    
     start = time.time()
     
     try:
-        data = pytesseract.image_to_data(
-            search_region,
+        # Scan TOP for "Rekapitulasi"
+        data_top = pytesseract.image_to_data(
+            search_region_top,
             output_type=pytesseract.Output.DICT,
             lang='eng+ind',
             config='--psm 6'
         )
         
-        elapsed = time.time() - start
+        elapsed_top = time.time() - start
         
-        # Find BLOK III marker - look for best match (highest confidence + most complete)
-        candidates = []
+        # Find "Rekapitulasi" marker
+        candidates_top = []
         
-        for i in range(len(data['text'])):
-            text = data['text'][i].strip()
-            conf = int(data['conf'][i])
+        for i in range(len(data_top['text'])):
+            text = data_top['text'][i].strip()
+            conf = int(data_top['conf'][i])
             
             if conf < 30 or not text:
                 continue
             
             text_upper = text.upper()
             
-            # Score keywords (higher = better match)
+            # Score keywords for upper boundary
             score = 0
-            if 'BLOK' in text_upper and 'III' in text_upper:
+            if 'REKAPITULASI' in text_upper:
                 score = 100  # Perfect match
-            elif 'REKAPITULASI' in text_upper:
+            elif 'BLOK' in text_upper and 'III' in text_upper:
                 score = 90  # Very good
             elif 'MUATAN' in text_upper:
                 score = 80  # Good
-            elif 'BLOK' in text_upper or 'III' in text_upper:
-                score = 50  # Partial
             
             if score > 0:
-                y_title = data['top'][i]
-                h_title = data['height'][i]
-                candidates.append({
+                y_title = data_top['top'][i]
+                h_title = data_top['height'][i]
+                candidates_top.append({
                     'text': text,
                     'score': score,
                     'conf': conf,
@@ -87,18 +91,17 @@ def detect_blok3_with_ocr(
                     'h': h_title
                 })
         
-        if not candidates:
-            print(f"  ✗ BLOK III not found in top 30%")
+        if not candidates_top:
+            print(f"  ✗ 'Rekapitulasi' not found in top 30%")
             return None
         
-        # Pick best candidate (highest score, then highest confidence)
-        best = sorted(candidates, key=lambda x: (x['score'], x['conf']), reverse=True)[0]
+        # Pick best candidate for upper boundary
+        best_top = sorted(candidates_top, key=lambda x: (x['score'], x['conf']), reverse=True)[0]
         
-        # Find table border below title
-        # Strategy: Look for horizontal line (many dark pixels in a row)
-        y_search_start = best['y'] + best['h']
-        y_search_end = min(y_search_start + 100, search_height)
-        search_strip = search_region[y_search_start:y_search_end, :]
+        # Find table border below "Rekapitulasi"
+        y_search_start = best_top['y'] + best_top['h']
+        y_search_end = min(y_search_start + 100, search_height_top)
+        search_strip = search_region_top[y_search_start:y_search_end, :]
         
         # Find first row with significant horizontal content (table border)
         blok3_y_start = y_search_start
@@ -109,15 +112,100 @@ def detect_blok3_with_ocr(
                 blok3_y_start = y_search_start + row_offset
                 break
         
-        blok3_height = height - blok3_y_start
+        print(f"  ✓ Found '{best_top['text']}' at y={best_top['y']} (score={best_top['score']}, conf={best_top['conf']}%) in {elapsed_top:.2f}s")
+        print(f"  → Upper boundary detected at y={blok3_y_start}")
         
-        print(f"  ✓ Found '{best['text']}' at y={best['y']} (score={best['score']}, conf={best['conf']}%) in {elapsed:.2f}s")
-        print(f"  → Table border detected at y={blok3_y_start}")
-        print(f"  → BLOK III region: y={blok3_y_start} to {height}")
+        # ========================================
+        # STEP 2: Scan BOTTOM 30% for "Keterangan" (lower boundary)
+        # ========================================
+        search_height_bottom = int(height * 0.3)
+        search_region_bottom = image[height - search_height_bottom:, :]
+        
+        print(f"  → Scanning BOTTOM 30% ({search_height_bottom}px) for 'Keterangan'...")
+        
+        start_bottom = time.time()
+        
+        # Scan BOTTOM for "Keterangan"
+        data_bottom = pytesseract.image_to_data(
+            search_region_bottom,
+            output_type=pytesseract.Output.DICT,
+            lang='eng+ind',
+            config='--psm 6'
+        )
+        
+        elapsed_bottom = time.time() - start_bottom
+        
+        # Find "Keterangan" marker
+        candidates_bottom = []
+        
+        for i in range(len(data_bottom['text'])):
+            text = data_bottom['text'][i].strip()
+            conf = int(data_bottom['conf'][i])
+            
+            if conf < 30 or not text:
+                continue
+            
+            text_upper = text.upper()
+            
+            # Score keywords for lower boundary
+            score = 0
+            if 'KETERANGAN' in text_upper:
+                score = 100  # Perfect match
+            elif 'KET' in text_upper:
+                score = 80  # Good
+            
+            if score > 0:
+                # Adjust Y coordinate (relative to full image)
+                y_relative = data_bottom['top'][i]
+                y_absolute = (height - search_height_bottom) + y_relative
+                h_title = data_bottom['height'][i]
+                
+                candidates_bottom.append({
+                    'text': text,
+                    'score': score,
+                    'conf': conf,
+                    'y': y_absolute,
+                    'h': h_title
+                })
+        
+        # Determine lower boundary
+        blok3_y_end = height  # Default: sampai bawah
+        
+        if candidates_bottom:
+            # Pick best candidate for lower boundary
+            best_bottom = sorted(candidates_bottom, key=lambda x: (x['score'], x['conf']), reverse=True)[0]
+            
+            # Find table border above "Keterangan"
+            # Look for horizontal line before the keyword
+            y_search_bottom_start = max(best_bottom['y'] - 100, height - search_height_bottom)
+            y_search_bottom_end = best_bottom['y']
+            
+            if y_search_bottom_end > y_search_bottom_start:
+                search_strip_bottom = image[y_search_bottom_start:y_search_bottom_end, :]
+                
+                # Find last row with significant horizontal content (table border)
+                # Scan from bottom to top
+                for row_offset in range(search_strip_bottom.shape[0] - 1, -1, -1):
+                    row = search_strip_bottom[row_offset, :]
+                    dark_pixels = np.sum(row < 128)
+                    if dark_pixels > width * 0.3:
+                        blok3_y_end = y_search_bottom_start + row_offset
+                        break
+            else:
+                blok3_y_end = best_bottom['y']
+            
+            print(f"  ✓ Found '{best_bottom['text']}' at y={best_bottom['y']} (score={best_bottom['score']}, conf={best_bottom['conf']}%) in {elapsed_bottom:.2f}s")
+            print(f"  → Lower boundary detected at y={blok3_y_end}")
+        else:
+            print(f"  ⚠ 'Keterangan' not found, using image bottom as lower boundary")
+            print(f"  → Lower boundary: y={blok3_y_end} (image bottom)")
+        
+        blok3_height = blok3_y_end - blok3_y_start
+        
+        print(f"  ✓ BLOK III region: y={blok3_y_start} to y={blok3_y_end} (height={blok3_height}px)")
         
         # Return bounding box for BLOK III region
         return (0, blok3_y_start, width, blok3_height)
-        return None
         
     except Exception as e:
         print(f"  ✗ OCR scan failed: {e}")

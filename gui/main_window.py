@@ -390,45 +390,13 @@ class MainWindow(QMainWindow):
         main_layout.setContentsMargins(24, 24, 24, 24)
         main_layout.setSpacing(16)
         
-        # File selection area
+        # File selection area (simplified)
         file_group = self.create_file_selection_group()
         main_layout.addWidget(file_group)
         
-        # Splitter for image preview and table
-        splitter = QSplitter(Qt.Horizontal)
-        
-        # Image preview card
-        preview_card = QGroupBox("📷 Image Preview")
-        preview_layout = QVBoxLayout()
-        preview_layout.setContentsMargins(8, 8, 8, 8)
-        
-        self.image_label = QLabel()
-        self.image_label.setMinimumSize(420, 340)
-        self.image_label.setMaximumSize(520, 440)
-        self.image_label.setStyleSheet(
-            "QLabel { "
-            "border: 2px dashed #E5E7EB; "
-            "border-radius: 8px; "
-            "background: #F9FAFB; "
-            "color: #9CA3AF; "
-            "font-size: 11pt; "
-            "}"
-        )
-        self.image_label.setAlignment(Qt.AlignCenter)
-        self.image_label.setText("📷\n\nDrag & drop or browse\nto select an image")
-        preview_layout.addWidget(self.image_label)
-        
-        preview_card.setLayout(preview_layout)
-        splitter.addWidget(preview_card)
-        
-        # Table area
+        # Table area (full width, no image preview)
         table_group = self.create_table_group()
-        splitter.addWidget(table_group)
-        
-        splitter.setStretchFactor(0, 1)
-        splitter.setStretchFactor(1, 3)
-        
-        main_layout.addWidget(splitter)
+        main_layout.addWidget(table_group)
         
         # Progress bar
         self.progress_bar = QProgressBar()
@@ -436,9 +404,13 @@ class MainWindow(QMainWindow):
         self.progress_bar.setTextVisible(True)
         main_layout.addWidget(self.progress_bar)
         
-        # Export buttons
-        export_layout = self.create_export_buttons()
-        main_layout.addLayout(export_layout)
+        # Single Export button
+        export_btn = QPushButton("💾 Export Results")
+        export_btn.setObjectName("exportButton")
+        export_btn.clicked.connect(self.export_results)
+        export_btn.setEnabled(False)
+        self.export_button = export_btn
+        main_layout.addWidget(export_btn)
         
         # Status bar
         self.status_bar = QStatusBar()
@@ -472,39 +444,22 @@ class MainWindow(QMainWindow):
         help_menu.addAction(about_action)
     
     def create_file_selection_group(self):
-        """Create file selection UI group"""
+        """Create simplified file selection UI group"""
         group = QGroupBox("📁 File Selection")
         layout = QHBoxLayout()
         layout.setSpacing(12)
         
-        # File info container
-        file_container = QWidget()
-        file_layout = QVBoxLayout(file_container)
-        file_layout.setContentsMargins(0, 0, 0, 0)
-        file_layout.setSpacing(4)
-        
+        # File label (compact)
         self.file_label = QLabel("No file selected")
-        self.file_label.setObjectName("subtitle_label")
-        file_layout.addWidget(self.file_label)
+        self.file_label.setStyleSheet("font-size: 11pt; color: #6B7280;")
+        layout.addWidget(self.file_label, 1)
         
-        self.file_path_label = QLabel("")
-        self.file_path_label.setStyleSheet("color: #9CA3AF; font-size: 9pt;")
-        self.file_path_label.setVisible(False)
-        file_layout.addWidget(self.file_path_label)
-        
-        layout.addWidget(file_container, 1)
-        
-        browse_btn = QPushButton("📂 Browse...")
+        # Browse button
+        browse_btn = QPushButton("📂 Browse File...")
         browse_btn.setObjectName("browse_btn")
         browse_btn.clicked.connect(self.browse_file)
-        browse_btn.setMinimumWidth(120)
+        browse_btn.setMinimumWidth(150)
         layout.addWidget(browse_btn)
-        
-        self.start_btn = QPushButton("🚀 Start OCR")
-        self.start_btn.clicked.connect(self.start_ocr)
-        self.start_btn.setEnabled(False)
-        self.start_btn.setMinimumWidth(140)
-        layout.addWidget(self.start_btn)
         
         group.setLayout(layout)
         return group
@@ -575,53 +530,9 @@ class MainWindow(QMainWindow):
         group.setLayout(layout)
         return group
     
-    def create_export_buttons(self):
-        """Create export buttons"""
-        # Card for export buttons
-        export_card = QGroupBox("💾 Export Results")
-        layout = QHBoxLayout()
-        layout.setSpacing(12)
-        
-        self.export_excel_btn = QPushButton("📊 Excel")
-        self.export_excel_btn.clicked.connect(lambda: self.export_results("excel"))
-        self.export_excel_btn.setEnabled(False)
-        self.export_excel_btn.setMinimumWidth(140)
-        self.export_excel_btn.setToolTip("Export to Excel with formatting")
-        layout.addWidget(self.export_excel_btn)
-        
-        self.export_csv_btn = QPushButton("📄 CSV")
-        self.export_csv_btn.clicked.connect(lambda: self.export_results("csv"))
-        self.export_csv_btn.setEnabled(False)
-        self.export_csv_btn.setMinimumWidth(140)
-        self.export_csv_btn.setToolTip("Export to CSV (comma-separated)")
-        layout.addWidget(self.export_csv_btn)
-        
-        self.export_json_btn = QPushButton("🔧 JSON")
-        self.export_json_btn.clicked.connect(lambda: self.export_results("json"))
-        self.export_json_btn.setEnabled(False)
-        self.export_json_btn.setMinimumWidth(140)
-        self.export_json_btn.setToolTip("Export to JSON with metadata")
-        layout.addWidget(self.export_json_btn)
-        
-        self.export_html_btn = QPushButton("🌐 HTML")
-        self.export_html_btn.clicked.connect(lambda: self.export_results("html"))
-        self.export_html_btn.setEnabled(False)
-        self.export_html_btn.setMinimumWidth(140)
-        self.export_html_btn.setToolTip("Export to HTML (interactive view)")
-        layout.addWidget(self.export_html_btn)
-        
-        layout.addStretch()
-        
-        export_card.setLayout(layout)
-        
-        # Wrap in container
-        container_layout = QVBoxLayout()
-        container_layout.addWidget(export_card)
-        
-        return container_layout
     
     def browse_file(self):
-        """Open file browser dialog"""
+        """Open file browser dialog and auto-start OCR"""
         file_path, _ = QFileDialog.getOpenFileName(
             self,
             "Select PDF or Image File",
@@ -635,42 +546,11 @@ class MainWindow(QMainWindow):
             self.file_label.setText(f"✅ {file_name}")
             self.file_label.setStyleSheet("color: #10B981; font-weight: 600; font-size: 11pt;")
             
-            # Show file path
-            self.file_path_label.setText(str(Path(file_path).parent))
-            self.file_path_label.setVisible(True)
-            
-            self.start_btn.setEnabled(True)
-            
-            # Load and display image preview
-            self.load_image_preview(file_path)
-            
             self.update_status(f"✅ File loaded: {file_name}")
+            
+            # AUTO-START OCR immediately
+            self.start_ocr()
     
-    def load_image_preview(self, file_path: str):
-        """Load and display image preview"""
-        try:
-            pixmap = QPixmap(file_path)
-            if not pixmap.isNull():
-                # Update style for loaded image
-                self.image_label.setStyleSheet(
-                    "QLabel { "
-                    "border: 2px solid #E5E7EB; "
-                    "border-radius: 8px; "
-                    "background: white; "
-                    "}"
-                )
-                # Scale to fit label while maintaining aspect ratio
-                scaled_pixmap = pixmap.scaled(
-                    self.image_label.width() - 20,
-                    self.image_label.height() - 20,
-                    Qt.KeepAspectRatio,
-                    Qt.SmoothTransformation
-                )
-                self.image_label.setPixmap(scaled_pixmap)
-            else:
-                self.image_label.setText("📷\n\nPreview not available")
-        except Exception as e:
-            self.image_label.setText(f"📷\n\nError loading preview\n{str(e)[:30]}")
     
     def start_ocr(self):
         """Start OCR processing"""
@@ -798,43 +678,82 @@ class MainWindow(QMainWindow):
         self.update_status(f"Edited cell ({row+1}, {col+1}) | Total edits: {len(self.edited_cells)}")
     
     def enable_export_buttons(self, enabled: bool):
-        """Enable or disable export buttons"""
-        self.export_excel_btn.setEnabled(enabled)
-        self.export_csv_btn.setEnabled(enabled)
-        self.export_json_btn.setEnabled(enabled)
-        self.export_html_btn.setEnabled(enabled)
+        """Enable or disable export button"""
+        self.export_button.setEnabled(enabled)
     
-    def export_results(self, format: str):
-        """Export results to file"""
+    def export_results(self):
+        """Export OCR results with format selection dialog"""
         if not self.ocr_results:
+            QMessageBox.warning(self, "No Data", "Please run OCR first before exporting.")
             return
         
-        # Get save file path
-        filters = {
-            'excel': "Excel Files (*.xlsx)",
-            'csv': "CSV Files (*.csv)",
-            'json': "JSON Files (*.json)",
-            'html': "HTML Files (*.html)"
-        }
+        # Format selection dialog
+        from PyQt5.QtWidgets import QDialog, QVBoxLayout, QRadioButton, QDialogButtonBox, QLabel
         
+        dialog = QDialog(self)
+        dialog.setWindowTitle("Select Export Format")
+        dialog.setMinimumWidth(350)
+        
+        layout = QVBoxLayout()
+        layout.addWidget(QLabel("Choose export format:"))
+        layout.addSpacing(8)
+        
+        # Format options
+        excel_radio = QRadioButton("📊 Excel (.xlsx) - Recommended")
+        excel_radio.setChecked(True)
+        csv_radio = QRadioButton("📄 CSV (.csv) - Plain text")
+        json_radio = QRadioButton("🔧 JSON (.json) - With metadata")
+        html_radio = QRadioButton("🌐 HTML (.html) - Interactive view")
+        
+        layout.addWidget(excel_radio)
+        layout.addWidget(csv_radio)
+        layout.addWidget(json_radio)
+        layout.addWidget(html_radio)
+        
+        # Buttons
+        buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        buttons.accepted.connect(dialog.accept)
+        buttons.rejected.connect(dialog.reject)
+        layout.addWidget(buttons)
+        
+        dialog.setLayout(layout)
+        
+        if dialog.exec_() != QDialog.Accepted:
+            return
+        
+        # Determine selected format
+        if excel_radio.isChecked():
+            format_name = "excel"
+            ext = "xlsx"
+        elif csv_radio.isChecked():
+            format_name = "csv"
+            ext = "csv"
+        elif json_radio.isChecked():
+            format_name = "json"
+            ext = "json"
+        else:
+            format_name = "html"
+            ext = "html"
+        
+        # File dialog for saving
         file_path, _ = QFileDialog.getSaveFileName(
             self,
-            f"Export to {format.upper()}",
-            str(Path.home() / f"blok3_results.{format if format != 'excel' else 'xlsx'}"),
-            filters[format]
+            f"Export {format_name.upper()} Results",
+            str(Path.home() / f"blok3_results.{ext}"),
+            f"{format_name.upper()} Files (*.{ext});;All Files (*.*)"
         )
         
         if not file_path:
             return
         
         try:
-            if format == 'excel':
+            if format_name == 'excel':
                 self.export_to_excel(file_path)
-            elif format == 'csv':
+            elif format_name == 'csv':
                 self.export_to_csv(file_path)
-            elif format == 'json':
+            elif format_name == 'json':
                 self.export_to_json(file_path)
-            elif format == 'html':
+            elif format_name == 'html':
                 self.export_to_html(file_path)
             
             self.update_status(f"✅ Exported to {Path(file_path).name}")

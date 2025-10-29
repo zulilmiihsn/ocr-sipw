@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adaptive v2.1 - Smart Row Detection Results</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .header .accuracy {
+            font-size: 3em;
+            font-weight: bold;
+            margin: 20px 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            padding: 20px;
+            background: #f8f9fa;
+            border-bottom: 3px solid #667eea;
+        }
+        
+        .stat-box {
+            text-align: center;
+            padding: 15px;
+        }
+        
+        .stat-box .number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-box .label {
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            padding: 20px;
+            background: #fff;
+            border-bottom: 2px solid #eee;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .legend-box {
+            width: 30px;
+            height: 30px;
+            border-radius: 5px;
+            border: 2px solid #ddd;
+        }
+        
+        .correct { background: #d4edda; }
+        .incorrect { background: #f8d7da; }
+        .empty { background: #f8f9fa; }
+        
+        .table-container {
+            padding: 20px;
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9em;
+        }
+        
+        th {
+            background: #667eea;
+            color: white;
+            padding: 12px 8px;
+            text-align: left;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        td {
+            padding: 10px 8px;
+            border: 1px solid #ddd;
+        }
+        
+        .row-header {
+            background: #f8f9fa;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        .cell-container {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .detected {
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .expected {
+            font-size: 0.85em;
+            color: #666;
+            font-style: italic;
+        }
+        
+        .confidence {
+            font-size: 0.75em;
+            color: #999;
+        }
+        
+        .match-icon {
+            font-size: 1.2em;
+            margin-right: 5px;
+        }
+        
+        .footer {
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            border-top: 2px solid #eee;
+        }
+        
+        .row-accuracy {
+            font-weight: bold;
+            padding: 8px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        
+        .acc-100 { background: #d4edda; color: #155724; }
+        .acc-90 { background: #d1ecf1; color: #0c5460; }
+        .acc-80 { background: #fff3cd; color: #856404; }
+        .acc-low { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 Adaptive v2.1 - Smart Row Detection</h1>
+            <div class="accuracy">95.0% ACCURACY</div>
+            <p>Strategy: Force exactly 10 data rows with equal spacing</p>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-box">
+                <div class="number">160</div>
+                <div class="label">Total Cells</div>
+            </div>
+            <div class="stat-box">
+                <div class="number">152</div>
+                <div class="label">Correct</div>
+            </div>
+            <div class="stat-box">
+                <div class="number">8</div>
+                <div class="label">Errors</div>
+            </div>
+            <div class="stat-box">
+                <div class="number">10</div>
+                <div class="label">Rows (Exact!)</div>
+            </div>
+            <div class="stat-box">
+                <div class="number">17</div>
+                <div class="label">Columns</div>
+            </div>
+            <div class="stat-box">
+                <div class="number">81s</div>
+                <div class="label">Processing Time</div>
+            </div>
+        </div>
+        
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-box correct"></div>
+                <span>✅ Correct (152 cells)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box incorrect"></div>
+                <span>❌ Incorrect (8 cells)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box empty"></div>
+                <span>⚪ Empty (both)</span>
+            </div>
+        </div>
+        
+        <div class="table-container">
+            <table id="resultsTable">
+                <thead>
+                    <tr>
+                        <th style="width: 60px;">Row</th>
+                        <th style="width: 100px;">Accuracy</th>
+                        <th style="width: 80px;">Kode SLS</th>
+                        <th style="width: 70px;">Sub</th>
+                        <th style="width: 120px;">RT/RW</th>
+                        <th style="width: 70px;">JML KK</th>
+                        <th style="width: 70px;">BTT</th>
+                        <th style="width: 80px;">Kosong</th>
+                        <th style="width: 70px;">BKU</th>
+                        <th style="width: 70px;">BBTT</th>
+                        <th style="width: 80px;">Usaha</th>
+                        <th style="width: 70px;">Total</th>
+                        <th style="width: 100px;">Wilayah</th>
+                        <th style="width: 70px;">Shift</th>
+                        <th style="width: 100px;">Jam</th>
+                        <th style="width: 120px;">Contact</th>
+                        <th style="width: 70px;">Dom</th>
+                        <th style="width: 70px;">Ubah</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- Will be populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="footer">
+            <p><strong>Method:</strong> Adaptive v2.1 with Smart Row Detection</p>
+            <p><strong>Features:</strong> Vertical lines for columns + Equal spacing for 10 rows</p>
+            <p><strong>Perfect Rows:</strong> Row 2, 3, 4, 6 (100% accuracy each!) 🎉</p>
+        </div>
+    </div>
+    
+    <script src="results_data.js"></script>
+    <script>
+        // Ground Truth Data
+        const groundTruth = {
+            1: ["0001", "00", "RT 001 RW 001", "90", "14", "15", "21", "11", "10", "75", "Madong", "5", "8.00-12.00", "0823456789/zul", "3", "1"],
+            2: ["0002", "00", "RT 002 RW 002", "23", "23", "56", "23", "8", "9", "101", "Eropa", "12", "10.00-16.00", "12344512", "1", "1"],
+            3: ["0003", "00", "RT 003 RW 001", "121", "32", "55", "56", "78", "99", "100", "Barat", "1", "", "", "", ""],
+            4: ["0004", "03", "RT 004 RW 001", "86", "12", "11", "2", "14", "5", "76", "Limapuluh", "1", "17.00", "jauhari", "1", "1"],
+            5: ["0004", "02", "RT 004 RW 001", "8", "14", "4", "4", "4", "10", "15", "Limyu", "1", "12.00-10.00", "jauhariya", "1", "1"],
+            6: ["0004", "01", "RT 004 RW 001", "64", "77", "551", "12", "14", "9", "10", "timtim", "2", "", "", "1", "1"],
+            7: ["0005", "00", "RT 005 RW 001", "14", "15", "16", "17", "18", "19", "10", "jerman", "2", "8.00-21.00", "surya", "1", "1"],
+            8: ["0006", "00", "RT 012 RW 001", "56", "14", "7", "21", "23", "10", "75", "Madong", "5", "8.00-12.00", "0823456789/zul", "3", "1"],
+            9: ["0007", "00", "RT 015 RW 001", "8", "21", "4", "5", "11", "10", "75", "Madong", "5", "8.00-12.00", "0823456789/zul", "3", "1"],
+            10: ["0008", "00", "RT 016 RW 001", "90", "14", "15", "21", "11", "10", "75", "Madong", "5", "8.00-12.00", "0823456789/zul", "3", "1"]
+        };
+        
+        // Load and display results
+        window.addEventListener('DOMContentLoaded', () => {
+            const data = resultsData;
+            const tbody = document.getElementById('tableBody');
+            
+            if (!data || !data.rows) {
+                tbody.innerHTML = '<tr><td colspan="18" style="text-align:center; color:red;">Error: No data available</td></tr>';
+                return;
+            }
+            
+            data.rows.forEach((row, idx) => {
+                    const rowNum = idx + 1;
+                    const gt = groundTruth[rowNum];
+                    const tr = document.createElement('tr');
+                    
+                    // Calculate row accuracy
+                    let correct = 0;
+                    let total = 16;
+                    
+                    const detected = [
+                        row.cells['1']?.text_final || '',
+                        row.cells['2']?.text_final || '',
+                        row.cells['3']?.text_final || '',
+                        row.cells['4']?.text_final || '',
+                        row.cells['5']?.text_final || '',
+                        row.cells['6']?.text_final || '',
+                        row.cells['7']?.text_final || '',
+                        row.cells['8']?.text_final || '',
+                        row.cells['9']?.text_final || '',
+                        row.cells['10']?.text_final || '',
+                        row.cells['11']?.text_final || '',
+                        row.cells['12']?.text_final || '',
+                        row.cells['13']?.text_final || '',
+                        row.cells['14']?.text_final || '',
+                        row.cells['15']?.text_final || '',
+                        row.cells['16']?.text_final || ''
+                    ];
+                    
+                    detected.forEach((det, i) => {
+                        const exp = gt[i];
+                        if (normalize(det) === normalize(exp)) correct++;
+                    });
+                    
+                    const accPct = (correct / total * 100).toFixed(1);
+                    const accClass = accPct >= 100 ? 'acc-100' : accPct >= 90 ? 'acc-90' : accPct >= 80 ? 'acc-80' : 'acc-low';
+                    
+                    // Row header
+                    tr.innerHTML = `
+                        <td class="row-header">${rowNum}</td>
+                        <td class="row-accuracy ${accClass}">${correct}/${total}<br>${accPct}%</td>
+                    `;
+                    
+                    // Data cells
+                    detected.forEach((det, i) => {
+                        const exp = gt[i];
+                        const isCorrect = normalize(det) === normalize(exp);
+                        const isEmpty = !det && !exp;
+                        const cellClass = isEmpty ? 'empty' : isCorrect ? 'correct' : 'incorrect';
+                        const icon = isEmpty ? '⚪' : isCorrect ? '✅' : '❌';
+                        
+                        const conf = row.cells[`${i+1}`]?.confidence || 0;
+                        
+                        const td = document.createElement('td');
+                        td.className = cellClass;
+                        td.innerHTML = `
+                            <div class="cell-container">
+                                <div class="detected"><span class="match-icon">${icon}</span>${det || '(empty)'}</div>
+                                <div class="expected">GT: ${exp || '(empty)'}</div>
+                                ${det ? `<div class="confidence">${(conf * 100).toFixed(1)}%</div>` : ''}
+                            </div>
+                        `;
+                        tr.appendChild(td);
+                    });
+                    
+                    tbody.appendChild(tr);
+                });
+        });
+        
+        function normalize(text) {
+            return (text || '').trim().toLowerCase();
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,2286 @@
+{
+  "metadata": {
+    "method": "Full Document OCR + Smart Mapping",
+    "total_time": "81.45s",
+    "grid_size": "16 rows × 17 columns",
+    "total_detections": 245,
+    "mapped_cells": 149,
+    "column_headers": [
+      "No",
+      "Kode Kab/Kota SLS",
+      "Kode Kec",
+      "Nama SLS/Non-SLS",
+      "Perkiraan Jumlah Muatan KK",
+      "BTT",
+      "BTT Kosong",
+      "BKU",
+      "BBTT non Usaha",
+      "Perkiraan Jumlah Muatan Usaha",
+      "Total Muatan Ekonomi",
+      "Nama Wilayah Konsentrasi Ekonomi",
+      "Jumlah Shift Pada Wilayah Konsentrasi Ekonomi",
+      "Jam Operasional",
+      "Contact Person",
+      "Muatan Dominan",
+      "Apakah terdapat perubahan batas (hasil rekon ?)"
+    ]
+  },
+  "table": [
+    {
+      "row": 0,
+      "cells": [
+        {
+          "column": 0,
+          "column_name": "No",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 1,
+          "column_name": "Kode Kab/Kota SLS",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 2,
+          "column_name": "Kode Kec",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 3,
+          "column_name": "Nama SLS/Non-SLS",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 4,
+          "column_name": "Perkiraan Jumlah Muatan KK",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 5,
+          "column_name": "BTT",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 6,
+          "column_name": "BTT Kosong",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 7,
+          "column_name": "BKU",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 8,
+          "column_name": "BBTT non Usaha",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 9,
+          "column_name": "Perkiraan Jumlah Muatan Usaha",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 10,
+          "column_name": "Total Muatan Ekonomi",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 11,
+          "column_name": "Nama Wilayah Konsentrasi Ekonomi",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 12,
+          "column_name": "Jumlah Shift Pada Wilayah Konsentrasi Ekonomi",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 13,
+          "column_name": "Jam Operasional",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 14,
+          "column_name": "Contact Person",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 15,
+          "column_name": "Muatan Dominan",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 16,
+          "column_name": "Apakah terdapat perubahan batas (hasil rekon ?)",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        }
+      ]
+    },
+    {
+      "row": 1,
+      "cells": [
+        {
+          "column": 0,
+          "column_name": "No",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 1,
+          "column_name": "Kode Kab/Kota SLS",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 2,
+          "column_name": "Kode Kec",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 3,
+          "column_name": "Nama SLS/Non-SLS",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 4,
+          "column_name": "Perkiraan Jumlah Muatan KK",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 5,
+          "column_name": "BTT",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 6,
+          "column_name": "BTT Kosong",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 7,
+          "column_name": "BKU",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 8,
+          "column_name": "BBTT non Usaha",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 9,
+          "column_name": "Perkiraan Jumlah Muatan Usaha",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 10,
+          "column_name": "Total Muatan Ekonomi",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 11,
+          "column_name": "Nama Wilayah Konsentrasi Ekonomi",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 12,
+          "column_name": "Jumlah Shift Pada Wilayah Konsentrasi Ekonomi",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 13,
+          "column_name": "Jam Operasional",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 14,
+          "column_name": "Contact Person",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 15,
+          "column_name": "Muatan Dominan",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 16,
+          "column_name": "Apakah terdapat perubahan batas (hasil rekon ?)",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        }
+      ]
+    },
+    {
+      "row": 2,
+      "cells": [
+        {
+          "column": 0,
+          "column_name": "No",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 1,
+          "column_name": "Kode Kab/Kota SLS",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 2,
+          "column_name": "Kode Kec",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 3,
+          "column_name": "Nama SLS/Non-SLS",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 4,
+          "column_name": "Perkiraan Jumlah Muatan KK",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 5,
+          "column_name": "BTT",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 6,
+          "column_name": "BTT Kosong",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 7,
+          "column_name": "BKU",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 8,
+          "column_name": "BBTT non Usaha",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 9,
+          "column_name": "Perkiraan Jumlah Muatan Usaha",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 10,
+          "column_name": "Total Muatan Ekonomi",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 11,
+          "column_name": "Nama Wilayah Konsentrasi Ekonomi",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 12,
+          "column_name": "Jumlah Shift Pada Wilayah Konsentrasi Ekonomi",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 13,
+          "column_name": "Jam Operasional",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 14,
+          "column_name": "Contact Person",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 15,
+          "column_name": "Muatan Dominan",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 16,
+          "column_name": "Apakah terdapat perubahan batas (hasil rekon ?)",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        }
+      ]
+    },
+    {
+      "row": 3,
+      "cells": [
+        {
+          "column": 0,
+          "column_name": "No",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 1,
+          "column_name": "Kode Kab/Kota SLS",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 2,
+          "column_name": "Kode Kec",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 3,
+          "column_name": "Nama SLS/Non-SLS",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 4,
+          "column_name": "Perkiraan Jumlah Muatan KK",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 5,
+          "column_name": "BTT",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 6,
+          "column_name": "BTT Kosong",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 7,
+          "column_name": "BKU",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 8,
+          "column_name": "BBTT non Usaha",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 9,
+          "column_name": "Perkiraan Jumlah Muatan Usaha",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 10,
+          "column_name": "Total Muatan Ekonomi",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 11,
+          "column_name": "Nama Wilayah Konsentrasi Ekonomi",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 12,
+          "column_name": "Jumlah Shift Pada Wilayah Konsentrasi Ekonomi",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 13,
+          "column_name": "Jam Operasional",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 14,
+          "column_name": "Contact Person",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 15,
+          "column_name": "Muatan Dominan",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 16,
+          "column_name": "Apakah terdapat perubahan batas (hasil rekon ?)",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        }
+      ]
+    },
+    {
+      "row": 4,
+      "cells": [
+        {
+          "column": 0,
+          "column_name": "No",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 1,
+          "column_name": "Kode Kab/Kota SLS",
+          "text_raw": "0001",
+          "text_final": "0001",
+          "confidence": 0.9999808073043823,
+          "num_detections": 1
+        },
+        {
+          "column": 2,
+          "column_name": "Kode Kec",
+          "text_raw": "00",
+          "text_final": "00",
+          "confidence": 0.999876081943512,
+          "num_detections": 1
+        },
+        {
+          "column": 3,
+          "column_name": "Nama SLS/Non-SLS",
+          "text_raw": "RT 001 RW 001",
+          "text_final": "001001",
+          "confidence": 0.9937436580657959,
+          "num_detections": 1
+        },
+        {
+          "column": 4,
+          "column_name": "Perkiraan Jumlah Muatan KK",
+          "text_raw": "90",
+          "text_final": "90",
+          "confidence": 0.999955952167511,
+          "num_detections": 1
+        },
+        {
+          "column": 5,
+          "column_name": "BTT",
+          "text_raw": "14",
+          "text_final": "14",
+          "confidence": 0.9998198747634888,
+          "num_detections": 1
+        },
+        {
+          "column": 6,
+          "column_name": "BTT Kosong",
+          "text_raw": "[15",
+          "text_final": "15",
+          "confidence": 0.7807777523994446,
+          "num_detections": 1
+        },
+        {
+          "column": 7,
+          "column_name": "BKU",
+          "text_raw": "21",
+          "text_final": "21",
+          "confidence": 0.9526343941688538,
+          "num_detections": 1
+        },
+        {
+          "column": 8,
+          "column_name": "BBTT non Usaha",
+          "text_raw": "11",
+          "text_final": "11",
+          "confidence": 0.9972575306892395,
+          "num_detections": 1
+        },
+        {
+          "column": 9,
+          "column_name": "Perkiraan Jumlah Muatan Usaha",
+          "text_raw": "20",
+          "text_final": "20",
+          "confidence": 0.9968736171722412,
+          "num_detections": 1
+        },
+        {
+          "column": 10,
+          "column_name": "Total Muatan Ekonomi",
+          "text_raw": "75",
+          "text_final": "75",
+          "confidence": 0.9994459748268127,
+          "num_detections": 1
+        },
+        {
+          "column": 11,
+          "column_name": "Nama Wilayah Konsentrasi Ekonomi",
+          "text_raw": "Madong",
+          "text_final": "",
+          "confidence": 0.9991304874420166,
+          "num_detections": 1
+        },
+        {
+          "column": 12,
+          "column_name": "Jumlah Shift Pada Wilayah Konsentrasi Ekonomi",
+          "text_raw": "5",
+          "text_final": "5",
+          "confidence": 0.9995065927505493,
+          "num_detections": 1
+        },
+        {
+          "column": 13,
+          "column_name": "Jam Operasional",
+          "text_raw": "8.00-22.00",
+          "text_final": "8.00-22.00",
+          "confidence": 0.9966446757316589,
+          "num_detections": 1
+        },
+        {
+          "column": 14,
+          "column_name": "Contact Person",
+          "text_raw": "0823456789/zul",
+          "text_final": "0823456789/zul",
+          "confidence": 0.999796450138092,
+          "num_detections": 1
+        },
+        {
+          "column": 15,
+          "column_name": "Muatan Dominan",
+          "text_raw": "3",
+          "text_final": "3",
+          "confidence": 0.9995591044425964,
+          "num_detections": 1
+        },
+        {
+          "column": 16,
+          "column_name": "Apakah terdapat perubahan batas (hasil rekon ?)",
+          "text_raw": "1",
+          "text_final": "1",
+          "confidence": 0.9997873902320862,
+          "num_detections": 1
+        }
+      ]
+    },
+    {
+      "row": 5,
+      "cells": [
+        {
+          "column": 0,
+          "column_name": "No",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 1,
+          "column_name": "Kode Kab/Kota SLS",
+          "text_raw": "0002",
+          "text_final": "0002",
+          "confidence": 0.9988040328025818,
+          "num_detections": 1
+        },
+        {
+          "column": 2,
+          "column_name": "Kode Kec",
+          "text_raw": "00",
+          "text_final": "00",
+          "confidence": 0.9996675252914429,
+          "num_detections": 1
+        },
+        {
+          "column": 3,
+          "column_name": "Nama SLS/Non-SLS",
+          "text_raw": "RT 002 RW 002",
+          "text_final": "002002",
+          "confidence": 0.9665817022323608,
+          "num_detections": 1
+        },
+        {
+          "column": 4,
+          "column_name": "Perkiraan Jumlah Muatan KK",
+          "text_raw": "23",
+          "text_final": "23",
+          "confidence": 0.984896183013916,
+          "num_detections": 1
+        },
+        {
+          "column": 5,
+          "column_name": "BTT",
+          "text_raw": "23",
+          "text_final": "23",
+          "confidence": 0.9751708507537842,
+          "num_detections": 1
+        },
+        {
+          "column": 6,
+          "column_name": "BTT Kosong",
+          "text_raw": "[56",
+          "text_final": "56",
+          "confidence": 0.8385087847709656,
+          "num_detections": 1
+        },
+        {
+          "column": 7,
+          "column_name": "BKU",
+          "text_raw": "23",
+          "text_final": "23",
+          "confidence": 0.9857825040817261,
+          "num_detections": 1
+        },
+        {
+          "column": 8,
+          "column_name": "BBTT non Usaha",
+          "text_raw": "8",
+          "text_final": "8",
+          "confidence": 0.999921441078186,
+          "num_detections": 1
+        },
+        {
+          "column": 9,
+          "column_name": "Perkiraan Jumlah Muatan Usaha",
+          "text_raw": "9",
+          "text_final": "9",
+          "confidence": 0.9960843324661255,
+          "num_detections": 1
+        },
+        {
+          "column": 10,
+          "column_name": "Total Muatan Ekonomi",
+          "text_raw": "101",
+          "text_final": "101",
+          "confidence": 0.9999508857727051,
+          "num_detections": 1
+        },
+        {
+          "column": 11,
+          "column_name": "Nama Wilayah Konsentrasi Ekonomi",
+          "text_raw": "Eropa",
+          "text_final": "",
+          "confidence": 0.9995971918106079,
+          "num_detections": 1
+        },
+        {
+          "column": 12,
+          "column_name": "Jumlah Shift Pada Wilayah Konsentrasi Ekonomi",
+          "text_raw": "12",
+          "text_final": "12",
+          "confidence": 0.999595046043396,
+          "num_detections": 1
+        },
+        {
+          "column": 13,
+          "column_name": "Jam Operasional",
+          "text_raw": "10.00-16.00",
+          "text_final": "10.00-16.00",
+          "confidence": 0.9972761273384094,
+          "num_detections": 1
+        },
+        {
+          "column": 14,
+          "column_name": "Contact Person",
+          "text_raw": "12344512",
+          "text_final": "12344512",
+          "confidence": 0.9970821142196655,
+          "num_detections": 1
+        },
+        {
+          "column": 15,
+          "column_name": "Muatan Dominan",
+          "text_raw": "1",
+          "text_final": "1",
+          "confidence": 0.9999057054519653,
+          "num_detections": 1
+        },
+        {
+          "column": 16,
+          "column_name": "Apakah terdapat perubahan batas (hasil rekon ?)",
+          "text_raw": "1",
+          "text_final": "1",
+          "confidence": 0.9998650550842285,
+          "num_detections": 1
+        }
+      ]
+    },
+    {
+      "row": 6,
+      "cells": [
+        {
+          "column": 0,
+          "column_name": "No",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 1,
+          "column_name": "Kode Kab/Kota SLS",
+          "text_raw": "0003",
+          "text_final": "0003",
+          "confidence": 0.9998752474784851,
+          "num_detections": 1
+        },
+        {
+          "column": 2,
+          "column_name": "Kode Kec",
+          "text_raw": "00",
+          "text_final": "00",
+          "confidence": 0.9996284246444702,
+          "num_detections": 1
+        },
+        {
+          "column": 3,
+          "column_name": "Nama SLS/Non-SLS",
+          "text_raw": "RT 003 RW 001",
+          "text_final": "003001",
+          "confidence": 0.9984129667282104,
+          "num_detections": 1
+        },
+        {
+          "column": 4,
+          "column_name": "Perkiraan Jumlah Muatan KK",
+          "text_raw": "121",
+          "text_final": "121",
+          "confidence": 0.9997137188911438,
+          "num_detections": 1
+        },
+        {
+          "column": 5,
+          "column_name": "BTT",
+          "text_raw": "32",
+          "text_final": "32",
+          "confidence": 0.995241105556488,
+          "num_detections": 1
+        },
+        {
+          "column": 6,
+          "column_name": "BTT Kosong",
+          "text_raw": "55",
+          "text_final": "55",
+          "confidence": 0.9998637437820435,
+          "num_detections": 1
+        },
+        {
+          "column": 7,
+          "column_name": "BKU",
+          "text_raw": "56",
+          "text_final": "56",
+          "confidence": 0.9999203681945801,
+          "num_detections": 1
+        },
+        {
+          "column": 8,
+          "column_name": "BBTT non Usaha",
+          "text_raw": "78",
+          "text_final": "78",
+          "confidence": 0.9999749064445496,
+          "num_detections": 1
+        },
+        {
+          "column": 9,
+          "column_name": "Perkiraan Jumlah Muatan Usaha",
+          "text_raw": "99",
+          "text_final": "99",
+          "confidence": 0.9996321797370911,
+          "num_detections": 1
+        },
+        {
+          "column": 10,
+          "column_name": "Total Muatan Ekonomi",
+          "text_raw": "100",
+          "text_final": "100",
+          "confidence": 0.9999615550041199,
+          "num_detections": 1
+        },
+        {
+          "column": 11,
+          "column_name": "Nama Wilayah Konsentrasi Ekonomi",
+          "text_raw": "Barat",
+          "text_final": "",
+          "confidence": 0.9985406994819641,
+          "num_detections": 1
+        },
+        {
+          "column": 12,
+          "column_name": "Jumlah Shift Pada Wilayah Konsentrasi Ekonomi",
+          "text_raw": "1",
+          "text_final": "1",
+          "confidence": 0.9997925162315369,
+          "num_detections": 1
+        },
+        {
+          "column": 13,
+          "column_name": "Jam Operasional",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 14,
+          "column_name": "Contact Person",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 15,
+          "column_name": "Muatan Dominan",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 16,
+          "column_name": "Apakah terdapat perubahan batas (hasil rekon ?)",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        }
+      ]
+    },
+    {
+      "row": 7,
+      "cells": [
+        {
+          "column": 0,
+          "column_name": "No",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 1,
+          "column_name": "Kode Kab/Kota SLS",
+          "text_raw": "0004",
+          "text_final": "0004",
+          "confidence": 0.9999548196792603,
+          "num_detections": 1
+        },
+        {
+          "column": 2,
+          "column_name": "Kode Kec",
+          "text_raw": "03",
+          "text_final": "03",
+          "confidence": 0.9998886585235596,
+          "num_detections": 1
+        },
+        {
+          "column": 3,
+          "column_name": "Nama SLS/Non-SLS",
+          "text_raw": "RT 004 RW 001",
+          "text_final": "004001",
+          "confidence": 0.998503565788269,
+          "num_detections": 1
+        },
+        {
+          "column": 4,
+          "column_name": "Perkiraan Jumlah Muatan KK",
+          "text_raw": "86",
+          "text_final": "86",
+          "confidence": 0.9999498128890991,
+          "num_detections": 1
+        },
+        {
+          "column": 5,
+          "column_name": "BTT",
+          "text_raw": "12",
+          "text_final": "12",
+          "confidence": 0.9993453621864319,
+          "num_detections": 1
+        },
+        {
+          "column": 6,
+          "column_name": "BTT Kosong",
+          "text_raw": "11",
+          "text_final": "11",
+          "confidence": 0.9996157884597778,
+          "num_detections": 1
+        },
+        {
+          "column": 7,
+          "column_name": "BKU",
+          "text_raw": "2",
+          "text_final": "2",
+          "confidence": 0.9535044431686401,
+          "num_detections": 1
+        },
+        {
+          "column": 8,
+          "column_name": "BBTT non Usaha",
+          "text_raw": "14",
+          "text_final": "14",
+          "confidence": 0.9999362826347351,
+          "num_detections": 1
+        },
+        {
+          "column": 9,
+          "column_name": "Perkiraan Jumlah Muatan Usaha",
+          "text_raw": "5",
+          "text_final": "5",
+          "confidence": 0.9992522597312927,
+          "num_detections": 1
+        },
+        {
+          "column": 10,
+          "column_name": "Total Muatan Ekonomi",
+          "text_raw": "76",
+          "text_final": "76",
+          "confidence": 0.9998782277107239,
+          "num_detections": 1
+        },
+        {
+          "column": 11,
+          "column_name": "Nama Wilayah Konsentrasi Ekonomi",
+          "text_raw": "Limapuluh",
+          "text_final": "",
+          "confidence": 0.9731606245040894,
+          "num_detections": 1
+        },
+        {
+          "column": 12,
+          "column_name": "Jumlah Shift Pada Wilayah Konsentrasi Ekonomi",
+          "text_raw": "1",
+          "text_final": "1",
+          "confidence": 0.9998071789741516,
+          "num_detections": 1
+        },
+        {
+          "column": 13,
+          "column_name": "Jam Operasional",
+          "text_raw": "17.00",
+          "text_final": "17.00",
+          "confidence": 0.9999231100082397,
+          "num_detections": 1
+        },
+        {
+          "column": 14,
+          "column_name": "Contact Person",
+          "text_raw": "jauhari",
+          "text_final": "jauhari",
+          "confidence": 0.9886048436164856,
+          "num_detections": 1
+        },
+        {
+          "column": 15,
+          "column_name": "Muatan Dominan",
+          "text_raw": "1",
+          "text_final": "1",
+          "confidence": 0.9998902082443237,
+          "num_detections": 1
+        },
+        {
+          "column": 16,
+          "column_name": "Apakah terdapat perubahan batas (hasil rekon ?)",
+          "text_raw": "1",
+          "text_final": "1",
+          "confidence": 0.9998041987419128,
+          "num_detections": 1
+        }
+      ]
+    },
+    {
+      "row": 8,
+      "cells": [
+        {
+          "column": 0,
+          "column_name": "No",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 1,
+          "column_name": "Kode Kab/Kota SLS",
+          "text_raw": "0004",
+          "text_final": "0004",
+          "confidence": 0.9999775290489197,
+          "num_detections": 1
+        },
+        {
+          "column": 2,
+          "column_name": "Kode Kec",
+          "text_raw": "02",
+          "text_final": "02",
+          "confidence": 0.9993432760238647,
+          "num_detections": 1
+        },
+        {
+          "column": 3,
+          "column_name": "Nama SLS/Non-SLS",
+          "text_raw": "RT 004 RW 001",
+          "text_final": "004001",
+          "confidence": 0.9849995970726013,
+          "num_detections": 1
+        },
+        {
+          "column": 4,
+          "column_name": "Perkiraan Jumlah Muatan KK",
+          "text_raw": "8",
+          "text_final": "8",
+          "confidence": 0.9999016523361206,
+          "num_detections": 1
+        },
+        {
+          "column": 5,
+          "column_name": "BTT",
+          "text_raw": "14",
+          "text_final": "14",
+          "confidence": 0.9999673962593079,
+          "num_detections": 1
+        },
+        {
+          "column": 6,
+          "column_name": "BTT Kosong",
+          "text_raw": "4",
+          "text_final": "4",
+          "confidence": 0.9998775720596313,
+          "num_detections": 1
+        },
+        {
+          "column": 7,
+          "column_name": "BKU",
+          "text_raw": "4",
+          "text_final": "4",
+          "confidence": 0.999776303768158,
+          "num_detections": 1
+        },
+        {
+          "column": 8,
+          "column_name": "BBTT non Usaha",
+          "text_raw": "4",
+          "text_final": "4",
+          "confidence": 0.999808132648468,
+          "num_detections": 1
+        },
+        {
+          "column": 9,
+          "column_name": "Perkiraan Jumlah Muatan Usaha",
+          "text_raw": "10",
+          "text_final": "10",
+          "confidence": 0.9999208450317383,
+          "num_detections": 1
+        },
+        {
+          "column": 10,
+          "column_name": "Total Muatan Ekonomi",
+          "text_raw": "15",
+          "text_final": "15",
+          "confidence": 0.9994580149650574,
+          "num_detections": 1
+        },
+        {
+          "column": 11,
+          "column_name": "Nama Wilayah Konsentrasi Ekonomi",
+          "text_raw": "Emyu",
+          "text_final": "",
+          "confidence": 0.999502956867218,
+          "num_detections": 1
+        },
+        {
+          "column": 12,
+          "column_name": "Jumlah Shift Pada Wilayah Konsentrasi Ekonomi",
+          "text_raw": "1",
+          "text_final": "1",
+          "confidence": 0.9998024106025696,
+          "num_detections": 1
+        },
+        {
+          "column": 13,
+          "column_name": "Jam Operasional",
+          "text_raw": "12.00-10.00",
+          "text_final": "12.00-10.00",
+          "confidence": 0.9985374808311462,
+          "num_detections": 1
+        },
+        {
+          "column": 14,
+          "column_name": "Contact Person",
+          "text_raw": "jauhariya",
+          "text_final": "jauhariya",
+          "confidence": 0.9394630789756775,
+          "num_detections": 1
+        },
+        {
+          "column": 15,
+          "column_name": "Muatan Dominan",
+          "text_raw": "1",
+          "text_final": "1",
+          "confidence": 0.9996275901794434,
+          "num_detections": 1
+        },
+        {
+          "column": 16,
+          "column_name": "Apakah terdapat perubahan batas (hasil rekon ?)",
+          "text_raw": "1",
+          "text_final": "1",
+          "confidence": 0.999600350856781,
+          "num_detections": 1
+        }
+      ]
+    },
+    {
+      "row": 9,
+      "cells": [
+        {
+          "column": 0,
+          "column_name": "No",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 1,
+          "column_name": "Kode Kab/Kota SLS",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 2,
+          "column_name": "Kode Kec",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 3,
+          "column_name": "Nama SLS/Non-SLS",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 4,
+          "column_name": "Perkiraan Jumlah Muatan KK",
+          "text_raw": "64",
+          "text_final": "64",
+          "confidence": 0.9999317526817322,
+          "num_detections": 1
+        },
+        {
+          "column": 5,
+          "column_name": "BTT",
+          "text_raw": "77",
+          "text_final": "77",
+          "confidence": 0.9281597137451172,
+          "num_detections": 1
+        },
+        {
+          "column": 6,
+          "column_name": "BTT Kosong",
+          "text_raw": "551",
+          "text_final": "551",
+          "confidence": 0.9998717308044434,
+          "num_detections": 1
+        },
+        {
+          "column": 7,
+          "column_name": "BKU",
+          "text_raw": "12",
+          "text_final": "12",
+          "confidence": 0.9994162321090698,
+          "num_detections": 1
+        },
+        {
+          "column": 8,
+          "column_name": "BBTT non Usaha",
+          "text_raw": "14",
+          "text_final": "14",
+          "confidence": 0.9997237920761108,
+          "num_detections": 1
+        },
+        {
+          "column": 9,
+          "column_name": "Perkiraan Jumlah Muatan Usaha",
+          "text_raw": "9",
+          "text_final": "9",
+          "confidence": 0.9989655017852783,
+          "num_detections": 1
+        },
+        {
+          "column": 10,
+          "column_name": "Total Muatan Ekonomi",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 11,
+          "column_name": "Nama Wilayah Konsentrasi Ekonomi",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 12,
+          "column_name": "Jumlah Shift Pada Wilayah Konsentrasi Ekonomi",
+          "text_raw": "2",
+          "text_final": "2",
+          "confidence": 0.9611656665802002,
+          "num_detections": 1
+        },
+        {
+          "column": 13,
+          "column_name": "Jam Operasional",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 14,
+          "column_name": "Contact Person",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 15,
+          "column_name": "Muatan Dominan",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 16,
+          "column_name": "Apakah terdapat perubahan batas (hasil rekon ?)",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        }
+      ]
+    },
+    {
+      "row": 10,
+      "cells": [
+        {
+          "column": 0,
+          "column_name": "No",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 1,
+          "column_name": "Kode Kab/Kota SLS",
+          "text_raw": "0005 0004",
+          "text_final": "0005 0004",
+          "confidence": 0.9999430477619171,
+          "num_detections": 2
+        },
+        {
+          "column": 2,
+          "column_name": "Kode Kec",
+          "text_raw": "00 01",
+          "text_final": "00 01",
+          "confidence": 0.9993927180767059,
+          "num_detections": 2
+        },
+        {
+          "column": 3,
+          "column_name": "Nama SLS/Non-SLS",
+          "text_raw": "RT 004 RW 001",
+          "text_final": "004001",
+          "confidence": 0.9816234111785889,
+          "num_detections": 1
+        },
+        {
+          "column": 4,
+          "column_name": "Perkiraan Jumlah Muatan KK",
+          "text_raw": "14",
+          "text_final": "14",
+          "confidence": 0.9999257326126099,
+          "num_detections": 1
+        },
+        {
+          "column": 5,
+          "column_name": "BTT",
+          "text_raw": "15",
+          "text_final": "15",
+          "confidence": 0.9997583627700806,
+          "num_detections": 1
+        },
+        {
+          "column": 6,
+          "column_name": "BTT Kosong",
+          "text_raw": "16",
+          "text_final": "16",
+          "confidence": 0.9994044303894043,
+          "num_detections": 1
+        },
+        {
+          "column": 7,
+          "column_name": "BKU",
+          "text_raw": "17",
+          "text_final": "17",
+          "confidence": 0.9997813105583191,
+          "num_detections": 1
+        },
+        {
+          "column": 8,
+          "column_name": "BBTT non Usaha",
+          "text_raw": "18",
+          "text_final": "18",
+          "confidence": 0.9999566674232483,
+          "num_detections": 1
+        },
+        {
+          "column": 9,
+          "column_name": "Perkiraan Jumlah Muatan Usaha",
+          "text_raw": "19",
+          "text_final": "19",
+          "confidence": 0.9998873472213745,
+          "num_detections": 1
+        },
+        {
+          "column": 10,
+          "column_name": "Total Muatan Ekonomi",
+          "text_raw": "10",
+          "text_final": "10",
+          "confidence": 0.9998178482055664,
+          "num_detections": 1
+        },
+        {
+          "column": 11,
+          "column_name": "Nama Wilayah Konsentrasi Ekonomi",
+          "text_raw": "timtim",
+          "text_final": "",
+          "confidence": 0.9996889233589172,
+          "num_detections": 1
+        },
+        {
+          "column": 12,
+          "column_name": "Jumlah Shift Pada Wilayah Konsentrasi Ekonomi",
+          "text_raw": "2",
+          "text_final": "2",
+          "confidence": 0.9640664458274841,
+          "num_detections": 1
+        },
+        {
+          "column": 13,
+          "column_name": "Jam Operasional",
+          "text_raw": "8.00-22.00",
+          "text_final": "8.00-22.00",
+          "confidence": 0.9835074543952942,
+          "num_detections": 1
+        },
+        {
+          "column": 14,
+          "column_name": "Contact Person",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 15,
+          "column_name": "Muatan Dominan",
+          "text_raw": "1 1",
+          "text_final": "1",
+          "confidence": 0.999467670917511,
+          "num_detections": 2
+        },
+        {
+          "column": 16,
+          "column_name": "Apakah terdapat perubahan batas (hasil rekon ?)",
+          "text_raw": "1 1",
+          "text_final": "1",
+          "confidence": 0.9994941055774689,
+          "num_detections": 2
+        }
+      ]
+    },
+    {
+      "row": 11,
+      "cells": [
+        {
+          "column": 0,
+          "column_name": "No",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 1,
+          "column_name": "Kode Kab/Kota SLS",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 2,
+          "column_name": "Kode Kec",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 3,
+          "column_name": "Nama SLS/Non-SLS",
+          "text_raw": "RT 005 RW 001",
+          "text_final": "005001",
+          "confidence": 0.9749962091445923,
+          "num_detections": 1
+        },
+        {
+          "column": 4,
+          "column_name": "Perkiraan Jumlah Muatan KK",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 5,
+          "column_name": "BTT",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 6,
+          "column_name": "BTT Kosong",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 7,
+          "column_name": "BKU",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 8,
+          "column_name": "BBTT non Usaha",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 9,
+          "column_name": "Perkiraan Jumlah Muatan Usaha",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 10,
+          "column_name": "Total Muatan Ekonomi",
+          "text_raw": "20",
+          "text_final": "20",
+          "confidence": 0.9948318600654602,
+          "num_detections": 1
+        },
+        {
+          "column": 11,
+          "column_name": "Nama Wilayah Konsentrasi Ekonomi",
+          "text_raw": "jerman",
+          "text_final": "",
+          "confidence": 0.9988513588905334,
+          "num_detections": 1
+        },
+        {
+          "column": 12,
+          "column_name": "Jumlah Shift Pada Wilayah Konsentrasi Ekonomi",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 13,
+          "column_name": "Jam Operasional",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 14,
+          "column_name": "Contact Person",
+          "text_raw": "surya",
+          "text_final": "surya",
+          "confidence": 0.9689731597900391,
+          "num_detections": 1
+        },
+        {
+          "column": 15,
+          "column_name": "Muatan Dominan",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 16,
+          "column_name": "Apakah terdapat perubahan batas (hasil rekon ?)",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        }
+      ]
+    },
+    {
+      "row": 12,
+      "cells": [
+        {
+          "column": 0,
+          "column_name": "No",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 1,
+          "column_name": "Kode Kab/Kota SLS",
+          "text_raw": "0006",
+          "text_final": "0006",
+          "confidence": 0.999871015548706,
+          "num_detections": 1
+        },
+        {
+          "column": 2,
+          "column_name": "Kode Kec",
+          "text_raw": "00",
+          "text_final": "00",
+          "confidence": 0.9998081922531128,
+          "num_detections": 1
+        },
+        {
+          "column": 3,
+          "column_name": "Nama SLS/Non-SLS",
+          "text_raw": "RT 012 RW 001",
+          "text_final": "012001",
+          "confidence": 0.9713850021362305,
+          "num_detections": 1
+        },
+        {
+          "column": 4,
+          "column_name": "Perkiraan Jumlah Muatan KK",
+          "text_raw": "56",
+          "text_final": "56",
+          "confidence": 0.9999128580093384,
+          "num_detections": 1
+        },
+        {
+          "column": 5,
+          "column_name": "BTT",
+          "text_raw": "14",
+          "text_final": "14",
+          "confidence": 0.9999496936798096,
+          "num_detections": 1
+        },
+        {
+          "column": 6,
+          "column_name": "BTT Kosong",
+          "text_raw": "7",
+          "text_final": "7",
+          "confidence": 0.9991908669471741,
+          "num_detections": 1
+        },
+        {
+          "column": 7,
+          "column_name": "BKU",
+          "text_raw": "21",
+          "text_final": "21",
+          "confidence": 0.9793350696563721,
+          "num_detections": 1
+        },
+        {
+          "column": 8,
+          "column_name": "BBTT non Usaha",
+          "text_raw": "23",
+          "text_final": "23",
+          "confidence": 0.9841659069061279,
+          "num_detections": 1
+        },
+        {
+          "column": 9,
+          "column_name": "Perkiraan Jumlah Muatan Usaha",
+          "text_raw": "20",
+          "text_final": "20",
+          "confidence": 0.9982200860977173,
+          "num_detections": 1
+        },
+        {
+          "column": 10,
+          "column_name": "Total Muatan Ekonomi",
+          "text_raw": "75",
+          "text_final": "75",
+          "confidence": 0.9996895790100098,
+          "num_detections": 1
+        },
+        {
+          "column": 11,
+          "column_name": "Nama Wilayah Konsentrasi Ekonomi",
+          "text_raw": "Madong",
+          "text_final": "",
+          "confidence": 0.9980209469795227,
+          "num_detections": 1
+        },
+        {
+          "column": 12,
+          "column_name": "Jumlah Shift Pada Wilayah Konsentrasi Ekonomi",
+          "text_raw": "5",
+          "text_final": "5",
+          "confidence": 0.9997114539146423,
+          "num_detections": 1
+        },
+        {
+          "column": 13,
+          "column_name": "Jam Operasional",
+          "text_raw": "8.00-22.00",
+          "text_final": "8.00-22.00",
+          "confidence": 0.9993658065795898,
+          "num_detections": 1
+        },
+        {
+          "column": 14,
+          "column_name": "Contact Person",
+          "text_raw": "0823456789/zul",
+          "text_final": "0823456789/zul",
+          "confidence": 0.9998629689216614,
+          "num_detections": 1
+        },
+        {
+          "column": 15,
+          "column_name": "Muatan Dominan",
+          "text_raw": "3",
+          "text_final": "3",
+          "confidence": 0.999685525894165,
+          "num_detections": 1
+        },
+        {
+          "column": 16,
+          "column_name": "Apakah terdapat perubahan batas (hasil rekon ?)",
+          "text_raw": "1",
+          "text_final": "1",
+          "confidence": 0.9997547268867493,
+          "num_detections": 1
+        }
+      ]
+    },
+    {
+      "row": 13,
+      "cells": [
+        {
+          "column": 0,
+          "column_name": "No",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 1,
+          "column_name": "Kode Kab/Kota SLS",
+          "text_raw": "0007",
+          "text_final": "0007",
+          "confidence": 0.999929666519165,
+          "num_detections": 1
+        },
+        {
+          "column": 2,
+          "column_name": "Kode Kec",
+          "text_raw": "00",
+          "text_final": "00",
+          "confidence": 0.9996700286865234,
+          "num_detections": 1
+        },
+        {
+          "column": 3,
+          "column_name": "Nama SLS/Non-SLS",
+          "text_raw": "RT 015 RW 001",
+          "text_final": "015001",
+          "confidence": 0.9531798958778381,
+          "num_detections": 1
+        },
+        {
+          "column": 4,
+          "column_name": "Perkiraan Jumlah Muatan KK",
+          "text_raw": "8",
+          "text_final": "8",
+          "confidence": 0.9999326467514038,
+          "num_detections": 1
+        },
+        {
+          "column": 5,
+          "column_name": "BTT",
+          "text_raw": "21",
+          "text_final": "21",
+          "confidence": 0.976547122001648,
+          "num_detections": 1
+        },
+        {
+          "column": 6,
+          "column_name": "BTT Kosong",
+          "text_raw": "4",
+          "text_final": "4",
+          "confidence": 0.9999005794525146,
+          "num_detections": 1
+        },
+        {
+          "column": 7,
+          "column_name": "BKU",
+          "text_raw": "5",
+          "text_final": "5",
+          "confidence": 0.9991554021835327,
+          "num_detections": 1
+        },
+        {
+          "column": 8,
+          "column_name": "BBTT non Usaha",
+          "text_raw": "11",
+          "text_final": "11",
+          "confidence": 0.9998397827148438,
+          "num_detections": 1
+        },
+        {
+          "column": 9,
+          "column_name": "Perkiraan Jumlah Muatan Usaha",
+          "text_raw": "20",
+          "text_final": "20",
+          "confidence": 0.9950087070465088,
+          "num_detections": 1
+        },
+        {
+          "column": 10,
+          "column_name": "Total Muatan Ekonomi",
+          "text_raw": "75",
+          "text_final": "75",
+          "confidence": 0.9996801614761353,
+          "num_detections": 1
+        },
+        {
+          "column": 11,
+          "column_name": "Nama Wilayah Konsentrasi Ekonomi",
+          "text_raw": "Madong",
+          "text_final": "",
+          "confidence": 0.9988906979560852,
+          "num_detections": 1
+        },
+        {
+          "column": 12,
+          "column_name": "Jumlah Shift Pada Wilayah Konsentrasi Ekonomi",
+          "text_raw": "5",
+          "text_final": "5",
+          "confidence": 0.9997506737709045,
+          "num_detections": 1
+        },
+        {
+          "column": 13,
+          "column_name": "Jam Operasional",
+          "text_raw": "8.00-22.00",
+          "text_final": "8.00-22.00",
+          "confidence": 0.9995192289352417,
+          "num_detections": 1
+        },
+        {
+          "column": 14,
+          "column_name": "Contact Person",
+          "text_raw": "0823456789/zul",
+          "text_final": "0823456789/zul",
+          "confidence": 0.9998866319656372,
+          "num_detections": 1
+        },
+        {
+          "column": 15,
+          "column_name": "Muatan Dominan",
+          "text_raw": "3",
+          "text_final": "3",
+          "confidence": 0.9997231364250183,
+          "num_detections": 1
+        },
+        {
+          "column": 16,
+          "column_name": "Apakah terdapat perubahan batas (hasil rekon ?)",
+          "text_raw": "1",
+          "text_final": "1",
+          "confidence": 0.9993898868560791,
+          "num_detections": 1
+        }
+      ]
+    },
+    {
+      "row": 14,
+      "cells": [
+        {
+          "column": 0,
+          "column_name": "No",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 1,
+          "column_name": "Kode Kab/Kota SLS",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 2,
+          "column_name": "Kode Kec",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 3,
+          "column_name": "Nama SLS/Non-SLS",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 4,
+          "column_name": "Perkiraan Jumlah Muatan KK",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 5,
+          "column_name": "BTT",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 6,
+          "column_name": "BTT Kosong",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 7,
+          "column_name": "BKU",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 8,
+          "column_name": "BBTT non Usaha",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 9,
+          "column_name": "Perkiraan Jumlah Muatan Usaha",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 10,
+          "column_name": "Total Muatan Ekonomi",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 11,
+          "column_name": "Nama Wilayah Konsentrasi Ekonomi",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 12,
+          "column_name": "Jumlah Shift Pada Wilayah Konsentrasi Ekonomi",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 13,
+          "column_name": "Jam Operasional",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 14,
+          "column_name": "Contact Person",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 15,
+          "column_name": "Muatan Dominan",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 16,
+          "column_name": "Apakah terdapat perubahan batas (hasil rekon ?)",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        }
+      ]
+    },
+    {
+      "row": 15,
+      "cells": [
+        {
+          "column": 0,
+          "column_name": "No",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 1,
+          "column_name": "Kode Kab/Kota SLS",
+          "text_raw": "0008",
+          "text_final": "0008",
+          "confidence": 0.9999023675918579,
+          "num_detections": 1
+        },
+        {
+          "column": 2,
+          "column_name": "Kode Kec",
+          "text_raw": "00",
+          "text_final": "00",
+          "confidence": 0.9998489618301392,
+          "num_detections": 1
+        },
+        {
+          "column": 3,
+          "column_name": "Nama SLS/Non-SLS",
+          "text_raw": "RT 016 RW 001",
+          "text_final": "016001",
+          "confidence": 0.9827528595924377,
+          "num_detections": 1
+        },
+        {
+          "column": 4,
+          "column_name": "Perkiraan Jumlah Muatan KK",
+          "text_raw": "90",
+          "text_final": "90",
+          "confidence": 0.9999541640281677,
+          "num_detections": 1
+        },
+        {
+          "column": 5,
+          "column_name": "BTT",
+          "text_raw": "14 15",
+          "text_final": "1415",
+          "confidence": 0.9994283616542816,
+          "num_detections": 2
+        },
+        {
+          "column": 6,
+          "column_name": "BTT Kosong",
+          "text_raw": "",
+          "text_final": "",
+          "confidence": 0.0,
+          "num_detections": 0
+        },
+        {
+          "column": 7,
+          "column_name": "BKU",
+          "text_raw": "21",
+          "text_final": "21",
+          "confidence": 0.9436757564544678,
+          "num_detections": 1
+        },
+        {
+          "column": 8,
+          "column_name": "BBTT non Usaha",
+          "text_raw": "11",
+          "text_final": "11",
+          "confidence": 0.99986332654953,
+          "num_detections": 1
+        },
+        {
+          "column": 9,
+          "column_name": "Perkiraan Jumlah Muatan Usaha",
+          "text_raw": "20",
+          "text_final": "20",
+          "confidence": 0.9972341656684875,
+          "num_detections": 1
+        },
+        {
+          "column": 10,
+          "column_name": "Total Muatan Ekonomi",
+          "text_raw": "75",
+          "text_final": "75",
+          "confidence": 0.9998550415039062,
+          "num_detections": 1
+        },
+        {
+          "column": 11,
+          "column_name": "Nama Wilayah Konsentrasi Ekonomi",
+          "text_raw": "Madong",
+          "text_final": "",
+          "confidence": 0.9985876083374023,
+          "num_detections": 1
+        },
+        {
+          "column": 12,
+          "column_name": "Jumlah Shift Pada Wilayah Konsentrasi Ekonomi",
+          "text_raw": "5",
+          "text_final": "5",
+          "confidence": 0.9996626377105713,
+          "num_detections": 1
+        },
+        {
+          "column": 13,
+          "column_name": "Jam Operasional",
+          "text_raw": "8.00-22.00",
+          "text_final": "8.00-22.00",
+          "confidence": 0.9940687417984009,
+          "num_detections": 1
+        },
+        {
+          "column": 14,
+          "column_name": "Contact Person",
+          "text_raw": "0823456789/zul",
+          "text_final": "0823456789/zul",
+          "confidence": 0.9998732805252075,
+          "num_detections": 1
+        },
+        {
+          "column": 15,
+          "column_name": "Muatan Dominan",
+          "text_raw": "3",
+          "text_final": "3",
+          "confidence": 0.9995269775390625,
+          "num_detections": 1
+        },
+        {
+          "column": 16,
+          "column_name": "Apakah terdapat perubahan batas (hasil rekon ?)",
+          "text_raw": "1",
+          "text_final": "1",
+          "confidence": 0.999681830406189,
+          "num_detections": 1
+        }
+      ]
+    }
+  ]
+}

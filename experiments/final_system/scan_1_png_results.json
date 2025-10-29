@@ -1,0 +1,1544 @@
+{
+  "metadata": {
+    "method": "Adaptive OCR v2.0",
+    "version": "2.0",
+    "processing_time_seconds": 95.76,
+    "grid_size": "22 rows × 17 columns",
+    "learned_columns": 17,
+    "data_rows": 20,
+    "total_detections": 267,
+    "accuracy_estimate": "94.1%"
+  },
+  "columns": [
+    {
+      "index": 0,
+      "name": "Column 0"
+    },
+    {
+      "index": 1,
+      "name": "Column 1"
+    },
+    {
+      "index": 2,
+      "name": "Column 2"
+    },
+    {
+      "index": 3,
+      "name": "Column 3"
+    },
+    {
+      "index": 4,
+      "name": "Column 4"
+    },
+    {
+      "index": 5,
+      "name": "Column 5"
+    },
+    {
+      "index": 6,
+      "name": "Column 6"
+    },
+    {
+      "index": 7,
+      "name": "Column 7"
+    },
+    {
+      "index": 8,
+      "name": "Column 8"
+    },
+    {
+      "index": 9,
+      "name": "2.Kode Petugas"
+    },
+    {
+      "index": 10,
+      "name": "Column 10"
+    },
+    {
+      "index": 11,
+      "name": "Column 11"
+    },
+    {
+      "index": 12,
+      "name": "Column 12"
+    },
+    {
+      "index": 13,
+      "name": "Column 13"
+    },
+    {
+      "index": 14,
+      "name": "Column 14"
+    },
+    {
+      "index": 15,
+      "name": "Column 15"
+    },
+    {
+      "index": 16,
+      "name": "Column 16"
+    }
+  ],
+  "data": [
+    {
+      "row": 0,
+      "cells": {
+        "Column 0": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 1": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 2": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 3": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 4": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 5": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 6": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 7": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 8": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "2.Kode Petugas": {
+          "text": "4. Tanggal Pelaksanaan",
+          "confidence": 0.9885797500610352
+        },
+        "Column 10": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 11": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 12": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 13": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 14": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 15": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 16": {
+          "text": "",
+          "confidence": 0.0
+        }
+      }
+    },
+    {
+      "row": 1,
+      "cells": {
+        "Column 0": {
+          "text": "Desa/Kelurahan",
+          "confidence": 0.9997822642326355
+        },
+        "Column 1": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 2": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 3": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 4": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 5": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 6": {
+          "text": "2 Tidak",
+          "confidence": 0.9940205812454224
+        },
+        "Column 7": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 8": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "2.Kode Petugas": {
+          "text": "5. Tanda Tangan",
+          "confidence": 0.9668036699295044
+        },
+        "Column 10": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 11": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 12": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 13": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 14": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 15": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 16": {
+          "text": "",
+          "confidence": 0.0
+        }
+      }
+    },
+    {
+      "row": 2,
+      "cells": {
+        "Column 0": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 1": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 2": {
+          "text": ". Apakah terdapat penggunaan LK Peta di wilayah ini?",
+          "confidence": 0.9663337469100952
+        },
+        "Column 3": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 4": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 5": {
+          "text": "1 Ya",
+          "confidence": 0.9822614192962646
+        },
+        "Column 6": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 7": {
+          "text": "b) Jumlah SLS/Non-SLS/Sub-SLS:",
+          "confidence": 0.998124897480011
+        },
+        "Column 8": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "2.Kode Petugas": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 10": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 11": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 12": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 13": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 14": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 15": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 16": {
+          "text": "Halaman ke .......Halama",
+          "confidence": 0.824956476688385
+        }
+      }
+    },
+    {
+      "row": 3,
+      "cells": {
+        "Column 0": {
+          "text": "Rekapitulasi",
+          "confidence": 0.9994006752967834
+        },
+        "Column 1": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 2": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 3": {
+          "text": "a) Jumlah SLS/Non-SLS :",
+          "confidence": 0.9787817597389221
+        },
+        "Column 4": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 5": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 6": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 7": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 8": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "2.Kode Petugas": {
+          "text": "BLOK III. REKAPITULASI MUATAN",
+          "confidence": 0.9700906872749329
+        },
+        "Column 10": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 11": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 12": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 13": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 14": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 15": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 16": {
+          "text": "",
+          "confidence": 0.0
+        }
+      }
+    },
+    {
+      "row": 4,
+      "cells": {
+        "Column 0": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 1": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 2": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 3": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 4": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 5": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 6": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 7": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 8": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "2.Kode Petugas": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 10": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 11": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 12": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 13": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 14": {
+          "text": "Contact Person",
+          "confidence": 0.9997616410255432
+        },
+        "Column 15": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 16": {
+          "text": "Apakah",
+          "confidence": 0.9993966221809387
+        }
+      }
+    },
+    {
+      "row": 5,
+      "cells": {
+        "Column 0": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 1": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 2": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 3": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 4": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 5": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 6": {
+          "text": "Perkiraan Jumlah Muatan Bangunan",
+          "confidence": 0.9963604211807251
+        },
+        "Column 7": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 8": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "2.Kode Petugas": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 10": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 11": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 12": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 13": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 14": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 15": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 16": {
+          "text": "terdapat",
+          "confidence": 0.9550554752349854
+        }
+      }
+    },
+    {
+      "row": 6,
+      "cells": {
+        "Column 0": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 1": {
+          "text": "Kode SLS/Non- SLS",
+          "confidence": 0.9991487860679626
+        },
+        "Column 2": {
+          "text": "Kode Sub- SLS",
+          "confidence": 0.998504638671875
+        },
+        "Column 3": {
+          "text": "Nama SLS/Non-SLS",
+          "confidence": 0.9998230934143066
+        },
+        "Column 4": {
+          "text": "Perkiraan Jumlah Muatan KK (Keluarga) (5)",
+          "confidence": 0.9967204034328461
+        },
+        "Column 5": {
+          "text": "Bangunan Tempat Tinggal (BTT) (6)",
+          "confidence": 0.9315238296985626
+        },
+        "Column 6": {
+          "text": "Tinggal Bangunan Tempat Kosong (BTT Kosong) ()",
+          "confidence": 0.9274632732073466
+        },
+        "Column 7": {
+          "text": "Bangunan Khusus Usaha (BKU) (8)",
+          "confidence": 0.9806777834892273
+        },
+        "Column 8": {
+          "text": "Bangunan Bukan Tempat Tinggal (BBTT non Usaha (9)",
+          "confidence": 0.989728844165802
+        },
+        "2.Kode Petugas": {
+          "text": "Perkiraan Jumlah Muatan Usaha (10)",
+          "confidence": 0.9669352173805237
+        },
+        "Column 10": {
+          "text": "Total Muatan (11)",
+          "confidence": 0.999783843755722
+        },
+        "Column 11": {
+          "text": "Nama Wilayah Konsentrasi Ekonomi (12)",
+          "confidence": 0.9446971416473389
+        },
+        "Column 12": {
+          "text": "Jumlah Shift Pada Wilayah Konsentrasi Ekonomi (13)",
+          "confidence": 0.9835949063301086
+        },
+        "Column 13": {
+          "text": "Jam Operasional (14)",
+          "confidence": 0.9624815384546915
+        },
+        "Column 14": {
+          "text": "Telepon/ Email (15)",
+          "confidence": 0.9336107075214386
+        },
+        "Column 15": {
+          "text": "Muatan Dominan \") (16)",
+          "confidence": 0.9761216441790262
+        },
+        "Column 16": {
+          "text": "perubahan batas (hasil rekon)? 2 - Tidak 1-Ya (17)",
+          "confidence": 0.9640981554985046
+        }
+      }
+    },
+    {
+      "row": 7,
+      "cells": {
+        "Column 0": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 1": {
+          "text": "(2)",
+          "confidence": 0.9970675110816956
+        },
+        "Column 2": {
+          "text": "(3)",
+          "confidence": 0.9979372024536133
+        },
+        "Column 3": {
+          "text": "(4)",
+          "confidence": 0.9971182346343994
+        },
+        "Column 4": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 5": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 6": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 7": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 8": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "2.Kode Petugas": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 10": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 11": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 12": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 13": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 14": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 15": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 16": {
+          "text": "",
+          "confidence": 0.0
+        }
+      }
+    },
+    {
+      "row": 8,
+      "cells": {
+        "Column 0": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 1": {
+          "text": "0001",
+          "confidence": 0.9999717473983765
+        },
+        "Column 2": {
+          "text": "00",
+          "confidence": 0.9995259642601013
+        },
+        "Column 3": {
+          "text": "RT 001 RW 001",
+          "confidence": 0.9873263835906982
+        },
+        "Column 4": {
+          "text": "90",
+          "confidence": 0.9999629259109497
+        },
+        "Column 5": {
+          "text": "14",
+          "confidence": 0.9998895525932312
+        },
+        "Column 6": {
+          "text": "15",
+          "confidence": 0.99773108959198
+        },
+        "Column 7": {
+          "text": "21",
+          "confidence": 0.9910538196563721
+        },
+        "Column 8": {
+          "text": "11",
+          "confidence": 0.9989535808563232
+        },
+        "2.Kode Petugas": {
+          "text": "20",
+          "confidence": 0.9966002702713013
+        },
+        "Column 10": {
+          "text": "75",
+          "confidence": 0.9997105598449707
+        },
+        "Column 11": {
+          "text": "Madong",
+          "confidence": 0.9994465708732605
+        },
+        "Column 12": {
+          "text": "5",
+          "confidence": 0.9997885823249817
+        },
+        "Column 13": {
+          "text": "8.00-22.00",
+          "confidence": 0.9998383522033691
+        },
+        "Column 14": {
+          "text": "0823456789/zul",
+          "confidence": 0.999886691570282
+        },
+        "Column 15": {
+          "text": "3",
+          "confidence": 0.9995817542076111
+        },
+        "Column 16": {
+          "text": "1",
+          "confidence": 0.9988481998443604
+        }
+      }
+    },
+    {
+      "row": 9,
+      "cells": {
+        "Column 0": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 1": {
+          "text": "0002",
+          "confidence": 0.9886834621429443
+        },
+        "Column 2": {
+          "text": "00",
+          "confidence": 0.9991755485534668
+        },
+        "Column 3": {
+          "text": "RT 002 RW 002",
+          "confidence": 0.9776566028594971
+        },
+        "Column 4": {
+          "text": "23",
+          "confidence": 0.9979311227798462
+        },
+        "Column 5": {
+          "text": "23",
+          "confidence": 0.9976377487182617
+        },
+        "Column 6": {
+          "text": "56",
+          "confidence": 0.9985320568084717
+        },
+        "Column 7": {
+          "text": "23",
+          "confidence": 0.9934699535369873
+        },
+        "Column 8": {
+          "text": "8",
+          "confidence": 0.9998780488967896
+        },
+        "2.Kode Petugas": {
+          "text": "9",
+          "confidence": 0.9989319443702698
+        },
+        "Column 10": {
+          "text": "101",
+          "confidence": 0.9999444484710693
+        },
+        "Column 11": {
+          "text": "Eropa",
+          "confidence": 0.9997110366821289
+        },
+        "Column 12": {
+          "text": "12",
+          "confidence": 0.9993621110916138
+        },
+        "Column 13": {
+          "text": "10.00-16.00",
+          "confidence": 0.9999206066131592
+        },
+        "Column 14": {
+          "text": "12344512",
+          "confidence": 0.99952232837677
+        },
+        "Column 15": {
+          "text": "1",
+          "confidence": 0.9995693564414978
+        },
+        "Column 16": {
+          "text": "1",
+          "confidence": 0.9998015761375427
+        }
+      }
+    },
+    {
+      "row": 10,
+      "cells": {
+        "Column 0": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 1": {
+          "text": "0003",
+          "confidence": 0.9998394250869751
+        },
+        "Column 2": {
+          "text": "00",
+          "confidence": 0.9990923404693604
+        },
+        "Column 3": {
+          "text": "RT 003 RW 001",
+          "confidence": 0.9522050023078918
+        },
+        "Column 4": {
+          "text": "121",
+          "confidence": 0.999016523361206
+        },
+        "Column 5": {
+          "text": "32",
+          "confidence": 0.9970377683639526
+        },
+        "Column 6": {
+          "text": "55",
+          "confidence": 0.8927412033081055
+        },
+        "Column 7": {
+          "text": "56",
+          "confidence": 0.9999051690101624
+        },
+        "Column 8": {
+          "text": "78",
+          "confidence": 0.9999691247940063
+        },
+        "2.Kode Petugas": {
+          "text": "99",
+          "confidence": 0.9998180270195007
+        },
+        "Column 10": {
+          "text": "100",
+          "confidence": 0.9999796748161316
+        },
+        "Column 11": {
+          "text": "Barat",
+          "confidence": 0.9992446899414062
+        },
+        "Column 12": {
+          "text": "1",
+          "confidence": 0.9995813965797424
+        },
+        "Column 13": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 14": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 15": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 16": {
+          "text": "",
+          "confidence": 0.0
+        }
+      }
+    },
+    {
+      "row": 11,
+      "cells": {
+        "Column 0": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 1": {
+          "text": "0004",
+          "confidence": 0.9999560117721558
+        },
+        "Column 2": {
+          "text": "03",
+          "confidence": 0.999887228012085
+        },
+        "Column 3": {
+          "text": "RT 004 RW 001",
+          "confidence": 0.9977980256080627
+        },
+        "Column 4": {
+          "text": "86",
+          "confidence": 0.9999439120292664
+        },
+        "Column 5": {
+          "text": "12",
+          "confidence": 0.999543309211731
+        },
+        "Column 6": {
+          "text": "11",
+          "confidence": 0.9994230270385742
+        },
+        "Column 7": {
+          "text": "2",
+          "confidence": 0.9934843182563782
+        },
+        "Column 8": {
+          "text": "14",
+          "confidence": 0.9999110102653503
+        },
+        "2.Kode Petugas": {
+          "text": "5",
+          "confidence": 0.9997414946556091
+        },
+        "Column 10": {
+          "text": "76",
+          "confidence": 0.9999234080314636
+        },
+        "Column 11": {
+          "text": "Limapuluh",
+          "confidence": 0.9994255900382996
+        },
+        "Column 12": {
+          "text": "1",
+          "confidence": 0.9997889399528503
+        },
+        "Column 13": {
+          "text": "17.00",
+          "confidence": 0.9999435544013977
+        },
+        "Column 14": {
+          "text": "jauhari",
+          "confidence": 0.9956740140914917
+        },
+        "Column 15": {
+          "text": "1",
+          "confidence": 0.9995008707046509
+        },
+        "Column 16": {
+          "text": "1",
+          "confidence": 0.9996911287307739
+        }
+      }
+    },
+    {
+      "row": 12,
+      "cells": {
+        "Column 0": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 1": {
+          "text": "0004",
+          "confidence": 0.9999712705612183
+        },
+        "Column 2": {
+          "text": "02",
+          "confidence": 0.9977114200592041
+        },
+        "Column 3": {
+          "text": "RT 004 RW 001",
+          "confidence": 0.9928770661354065
+        },
+        "Column 4": {
+          "text": "8",
+          "confidence": 0.9998897314071655
+        },
+        "Column 5": {
+          "text": "14",
+          "confidence": 0.9999470710754395
+        },
+        "Column 6": {
+          "text": "4",
+          "confidence": 0.9994184970855713
+        },
+        "Column 7": {
+          "text": "4",
+          "confidence": 0.9998119473457336
+        },
+        "Column 8": {
+          "text": "4",
+          "confidence": 0.9998648166656494
+        },
+        "2.Kode Petugas": {
+          "text": "10",
+          "confidence": 0.9999071359634399
+        },
+        "Column 10": {
+          "text": "15",
+          "confidence": 0.9993441104888916
+        },
+        "Column 11": {
+          "text": "Emyu",
+          "confidence": 0.9994967579841614
+        },
+        "Column 12": {
+          "text": "1",
+          "confidence": 0.9998124241828918
+        },
+        "Column 13": {
+          "text": "12.00-10.00",
+          "confidence": 0.9845340251922607
+        },
+        "Column 14": {
+          "text": "jauhariya",
+          "confidence": 0.9553036093711853
+        },
+        "Column 15": {
+          "text": "1",
+          "confidence": 0.9997596144676208
+        },
+        "Column 16": {
+          "text": "1",
+          "confidence": 0.9996570348739624
+        }
+      }
+    },
+    {
+      "row": 13,
+      "cells": {
+        "Column 0": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 1": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 2": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 3": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 4": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 5": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 6": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 7": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 8": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "2.Kode Petugas": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 10": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 11": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 12": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 13": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 14": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 15": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 16": {
+          "text": "1",
+          "confidence": 0.9995958209037781
+        }
+      }
+    },
+    {
+      "row": 14,
+      "cells": {
+        "Column 0": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 1": {
+          "text": "0004",
+          "confidence": 0.9999268054962158
+        },
+        "Column 2": {
+          "text": "01",
+          "confidence": 0.9998476505279541
+        },
+        "Column 3": {
+          "text": "RT 004 RW 001",
+          "confidence": 0.9836148023605347
+        },
+        "Column 4": {
+          "text": "64 14",
+          "confidence": 0.9998515248298645
+        },
+        "Column 5": {
+          "text": "77 15",
+          "confidence": 0.9775474369525909
+        },
+        "Column 6": {
+          "text": "16 551",
+          "confidence": 0.9525564908981323
+        },
+        "Column 7": {
+          "text": "12 17",
+          "confidence": 0.9994434714317322
+        },
+        "Column 8": {
+          "text": "14 18",
+          "confidence": 0.9999376535415649
+        },
+        "2.Kode Petugas": {
+          "text": "19 9",
+          "confidence": 0.9994692206382751
+        },
+        "Column 10": {
+          "text": "10",
+          "confidence": 0.9998897314071655
+        },
+        "Column 11": {
+          "text": "timtim",
+          "confidence": 0.999779999256134
+        },
+        "Column 12": {
+          "text": "2 2",
+          "confidence": 0.9932869672775269
+        },
+        "Column 13": {
+          "text": "8.00-22.00",
+          "confidence": 0.9991427659988403
+        },
+        "Column 14": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 15": {
+          "text": "1 1",
+          "confidence": 0.9995266199111938
+        },
+        "Column 16": {
+          "text": "1",
+          "confidence": 0.9997074007987976
+        }
+      }
+    },
+    {
+      "row": 15,
+      "cells": {
+        "Column 0": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 1": {
+          "text": "0005",
+          "confidence": 0.9999489784240723
+        },
+        "Column 2": {
+          "text": "00",
+          "confidence": 0.9993162155151367
+        },
+        "Column 3": {
+          "text": "RT 005 RW 001",
+          "confidence": 0.9697020649909973
+        },
+        "Column 4": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 5": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 6": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 7": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 8": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "2.Kode Petugas": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 10": {
+          "text": "20",
+          "confidence": 0.9994876384735107
+        },
+        "Column 11": {
+          "text": "jerman",
+          "confidence": 0.9991442561149597
+        },
+        "Column 12": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 13": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 14": {
+          "text": "surya",
+          "confidence": 0.9909159541130066
+        },
+        "Column 15": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 16": {
+          "text": "",
+          "confidence": 0.0
+        }
+      }
+    },
+    {
+      "row": 16,
+      "cells": {
+        "Column 0": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 1": {
+          "text": "0006",
+          "confidence": 0.9999055862426758
+        },
+        "Column 2": {
+          "text": "00",
+          "confidence": 0.9986040592193604
+        },
+        "Column 3": {
+          "text": "RT 012 RW 001",
+          "confidence": 0.9975827932357788
+        },
+        "Column 4": {
+          "text": "56",
+          "confidence": 0.9999510049819946
+        },
+        "Column 5": {
+          "text": "14",
+          "confidence": 0.9999353885650635
+        },
+        "Column 6": {
+          "text": "7",
+          "confidence": 0.9996240139007568
+        },
+        "Column 7": {
+          "text": "21",
+          "confidence": 0.9940801858901978
+        },
+        "Column 8": {
+          "text": "23",
+          "confidence": 0.9832940101623535
+        },
+        "2.Kode Petugas": {
+          "text": "20",
+          "confidence": 0.998083233833313
+        },
+        "Column 10": {
+          "text": "75",
+          "confidence": 0.9997928142547607
+        },
+        "Column 11": {
+          "text": "Madong",
+          "confidence": 0.9995298981666565
+        },
+        "Column 12": {
+          "text": "5",
+          "confidence": 0.9996780157089233
+        },
+        "Column 13": {
+          "text": "8.00-22.00",
+          "confidence": 0.9990390539169312
+        },
+        "Column 14": {
+          "text": "0823456789/zul",
+          "confidence": 0.9542503952980042
+        },
+        "Column 15": {
+          "text": "3",
+          "confidence": 0.9996218681335449
+        },
+        "Column 16": {
+          "text": "1",
+          "confidence": 0.9994939565658569
+        }
+      }
+    },
+    {
+      "row": 17,
+      "cells": {
+        "Column 0": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 1": {
+          "text": "0007",
+          "confidence": 0.9999496936798096
+        },
+        "Column 2": {
+          "text": "00",
+          "confidence": 0.9997127056121826
+        },
+        "Column 3": {
+          "text": "RT 015 RW 001",
+          "confidence": 0.9988162517547607
+        },
+        "Column 4": {
+          "text": "8",
+          "confidence": 0.9999067783355713
+        },
+        "Column 5": {
+          "text": "21 4",
+          "confidence": 0.9975085854530334
+        },
+        "Column 6": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 7": {
+          "text": "5",
+          "confidence": 0.999739944934845
+        },
+        "Column 8": {
+          "text": "11",
+          "confidence": 0.9992122650146484
+        },
+        "2.Kode Petugas": {
+          "text": "20",
+          "confidence": 0.9986081123352051
+        },
+        "Column 10": {
+          "text": "75",
+          "confidence": 0.9998851418495178
+        },
+        "Column 11": {
+          "text": "Madong",
+          "confidence": 0.998930037021637
+        },
+        "Column 12": {
+          "text": "5",
+          "confidence": 0.9997249245643616
+        },
+        "Column 13": {
+          "text": "8.00-22.00",
+          "confidence": 0.9993159174919128
+        },
+        "Column 14": {
+          "text": "0823456789/zul",
+          "confidence": 0.999897301197052
+        },
+        "Column 15": {
+          "text": "3",
+          "confidence": 0.9996126294136047
+        },
+        "Column 16": {
+          "text": "1",
+          "confidence": 0.9938479065895081
+        }
+      }
+    },
+    {
+      "row": 18,
+      "cells": {
+        "Column 0": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 1": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 2": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 3": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 4": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 5": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 6": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 7": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 8": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "2.Kode Petugas": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 10": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 11": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 12": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 13": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 14": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 15": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 16": {
+          "text": "",
+          "confidence": 0.0
+        }
+      }
+    },
+    {
+      "row": 19,
+      "cells": {
+        "Column 0": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 1": {
+          "text": "0008",
+          "confidence": 0.999906063079834
+        },
+        "Column 2": {
+          "text": "00",
+          "confidence": 0.9991053938865662
+        },
+        "Column 3": {
+          "text": "RT 016 RW 001",
+          "confidence": 0.9939835667610168
+        },
+        "Column 4": {
+          "text": "90",
+          "confidence": 0.9999396800994873
+        },
+        "Column 5": {
+          "text": "14 15",
+          "confidence": 0.9996904134750366
+        },
+        "Column 6": {
+          "text": "",
+          "confidence": 0.0
+        },
+        "Column 7": {
+          "text": "21",
+          "confidence": 0.9874053001403809
+        },
+        "Column 8": {
+          "text": "11",
+          "confidence": 0.9998508095741272
+        },
+        "2.Kode Petugas": {
+          "text": "20",
+          "confidence": 0.9911617040634155
+        },
+        "Column 10": {
+          "text": "75",
+          "confidence": 0.9999397397041321
+        },
+        "Column 11": {
+          "text": "Madong",
+          "confidence": 0.9995536208152771
+        },
+        "Column 12": {
+          "text": "5",
+          "confidence": 0.9997037053108215
+        },
+        "Column 13": {
+          "text": "8.00-22.00",
+          "confidence": 0.9965476989746094
+        },
+        "Column 14": {
+          "text": "0823456789/zul",
+          "confidence": 0.9997661709785461
+        },
+        "Column 15": {
+          "text": "3",
+          "confidence": 0.9996765851974487
+        },
+        "Column 16": {
+          "text": "1",
+          "confidence": 0.9997164607048035
+        }
+      }
+    }
+  ]
+}

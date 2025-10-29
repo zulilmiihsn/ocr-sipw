@@ -1,0 +1,15 @@
+{
+  "total_rows": 14,
+  "header_rows": 1,
+  "data_rows": 13,
+  "empty_cells": 63,
+  "data_cells": 158,
+  "average_confidence": "95.5%",
+  "time": {
+    "model_loading": "31.00s",
+    "classification": "26.58s",
+    "paddleocr": "483.19s",
+    "total": "540.96s"
+  },
+  "method": "Intelligent + PaddleOCR PP-OCRv5"
+}

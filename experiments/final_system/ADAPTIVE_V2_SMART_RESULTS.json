@@ -1,0 +1,1054 @@
+{
+  "metadata": {
+    "method": "Adaptive v2.1 - Smart Row Detection",
+    "input": "contoh gambar/1.png",
+    "total_time": "80.79s",
+    "detections": 245,
+    "columns": 17,
+    "data_rows": 10,
+    "strategy": "Force exactly 10 data rows with equal spacing"
+  },
+  "columns": [
+    {
+      "index": 0,
+      "name": "Column 0",
+      "x_left": 27,
+      "x_right": 59,
+      "x_center": 43
+    },
+    {
+      "index": 1,
+      "name": "Kode",
+      "x_left": 59,
+      "x_right": 134,
+      "x_center": 96
+    },
+    {
+      "index": 2,
+      "name": "Kode Sub-",
+      "x_left": 134,
+      "x_right": 209,
+      "x_center": 171
+    },
+    {
+      "index": 3,
+      "name": "Nama SLS/Non-SLS",
+      "x_left": 209,
+      "x_right": 339,
+      "x_center": 274
+    },
+    {
+      "index": 4,
+      "name": "Perkiraan Jumlah Muatan",
+      "x_left": 339,
+      "x_right": 439,
+      "x_center": 389
+    },
+    {
+      "index": 5,
+      "name": "Tinggal (BTT)",
+      "x_left": 439,
+      "x_right": 523,
+      "x_center": 481
+    },
+    {
+      "index": 6,
+      "name": "Kosong (BTT",
+      "x_left": 523,
+      "x_right": 607,
+      "x_center": 565
+    },
+    {
+      "index": 7,
+      "name": "Perkiraan Jumlah Muatan Bangunan Usaha (BKU)",
+      "x_left": 607,
+      "x_right": 691,
+      "x_center": 649
+    },
+    {
+      "index": 8,
+      "name": "Tinggal (BBTT",
+      "x_left": 691,
+      "x_right": 789,
+      "x_center": 740
+    },
+    {
+      "index": 9,
+      "name": "Perkiraan Jumlah Muatan",
+      "x_left": 789,
+      "x_right": 879,
+      "x_center": 834
+    },
+    {
+      "index": 10,
+      "name": "Total Muatan",
+      "x_left": 879,
+      "x_right": 966,
+      "x_center": 922
+    },
+    {
+      "index": 11,
+      "name": "Nama Wilayah Konsentrasi",
+      "x_left": 966,
+      "x_right": 1120,
+      "x_center": 1043
+    },
+    {
+      "index": 12,
+      "name": "Jumlah Shift Pada Wilayah",
+      "x_left": 1120,
+      "x_right": 1208,
+      "x_center": 1164
+    },
+    {
+      "index": 13,
+      "name": "Operasional",
+      "x_left": 1208,
+      "x_right": 1302,
+      "x_center": 1255
+    },
+    {
+      "index": 14,
+      "name": "Contact Person",
+      "x_left": 1302,
+      "x_right": 1458,
+      "x_center": 1380
+    },
+    {
+      "index": 15,
+      "name": "Muatan",
+      "x_left": 1458,
+      "x_right": 1533,
+      "x_center": 1495
+    },
+    {
+      "index": 16,
+      "name": "Apakah",
+      "x_left": 1533,
+      "x_right": 1624,
+      "x_center": 1578
+    }
+  ],
+  "rows": [
+    {
+      "row_index": 0,
+      "y_top": 194,
+      "y_bottom": 265,
+      "cells": {
+        "0": {
+          "text": "",
+          "confidence": 0.0,
+          "text_final": ""
+        },
+        "1": {
+          "text": "0001",
+          "confidence": 0.9999860525131226,
+          "text_final": "0001"
+        },
+        "2": {
+          "text": "00",
+          "confidence": 0.9997377991676331,
+          "text_final": "00"
+        },
+        "3": {
+          "text": "RT 001 RW 001",
+          "confidence": 0.9873835444450378,
+          "text_final": "RT 001 RW 001"
+        },
+        "4": {
+          "text": "90",
+          "confidence": 0.9999485611915588,
+          "text_final": "90"
+        },
+        "5": {
+          "text": "14",
+          "confidence": 0.9998629689216614,
+          "text_final": "14"
+        },
+        "6": {
+          "text": "15",
+          "confidence": 0.9990607500076294,
+          "text_final": "15"
+        },
+        "7": {
+          "text": "21",
+          "confidence": 0.9773169755935669,
+          "text_final": "21"
+        },
+        "8": {
+          "text": "11",
+          "confidence": 0.9995105266571045,
+          "text_final": "11"
+        },
+        "9": {
+          "text": "20",
+          "confidence": 0.9983271956443787,
+          "text_final": "20"
+        },
+        "10": {
+          "text": "75",
+          "confidence": 0.999781608581543,
+          "text_final": "75"
+        },
+        "11": {
+          "text": "Madong",
+          "confidence": 0.9994298815727234,
+          "text_final": "Madong"
+        },
+        "12": {
+          "text": "5",
+          "confidence": 0.9995556473731995,
+          "text_final": "5"
+        },
+        "13": {
+          "text": "8.00-22.00",
+          "confidence": 0.997515082359314,
+          "text_final": "8.00-22.00"
+        },
+        "14": {
+          "text": "0823456789/zul",
+          "confidence": 0.9998103380203247,
+          "text_final": "0823456789/zul"
+        },
+        "15": {
+          "text": "3",
+          "confidence": 0.9995811581611633,
+          "text_final": "3"
+        },
+        "16": {
+          "text": "1",
+          "confidence": 0.9996458292007446,
+          "text_final": "1"
+        }
+      }
+    },
+    {
+      "row_index": 1,
+      "y_top": 265,
+      "y_bottom": 336,
+      "cells": {
+        "0": {
+          "text": "",
+          "confidence": 0.0,
+          "text_final": ""
+        },
+        "1": {
+          "text": "0002",
+          "confidence": 0.9990633130073547,
+          "text_final": "0002"
+        },
+        "2": {
+          "text": "00",
+          "confidence": 0.9993599653244019,
+          "text_final": "00"
+        },
+        "3": {
+          "text": "RT 002 RW 002",
+          "confidence": 0.9640354514122009,
+          "text_final": "RT 002 RW 002"
+        },
+        "4": {
+          "text": "23",
+          "confidence": 0.9887866973876953,
+          "text_final": "23"
+        },
+        "5": {
+          "text": "23",
+          "confidence": 0.9884541034698486,
+          "text_final": "23"
+        },
+        "6": {
+          "text": "[56",
+          "confidence": 0.8644788265228271,
+          "text_final": "56"
+        },
+        "7": {
+          "text": "23",
+          "confidence": 0.9930747151374817,
+          "text_final": "23"
+        },
+        "8": {
+          "text": "8",
+          "confidence": 0.9999175071716309,
+          "text_final": "8"
+        },
+        "9": {
+          "text": "9",
+          "confidence": 0.9952174425125122,
+          "text_final": "9"
+        },
+        "10": {
+          "text": "101",
+          "confidence": 0.9999299049377441,
+          "text_final": "101"
+        },
+        "11": {
+          "text": "Eropa",
+          "confidence": 0.9995964169502258,
+          "text_final": "Eropa"
+        },
+        "12": {
+          "text": "12",
+          "confidence": 0.9995885491371155,
+          "text_final": "12"
+        },
+        "13": {
+          "text": "10.00-16.00",
+          "confidence": 0.998304009437561,
+          "text_final": "10.00-16.00"
+        },
+        "14": {
+          "text": "12344512",
+          "confidence": 0.9717496633529663,
+          "text_final": "12344512"
+        },
+        "15": {
+          "text": "1",
+          "confidence": 0.9997830986976624,
+          "text_final": "1"
+        },
+        "16": {
+          "text": "1",
+          "confidence": 0.9997959733009338,
+          "text_final": "1"
+        }
+      }
+    },
+    {
+      "row_index": 2,
+      "y_top": 336,
+      "y_bottom": 407,
+      "cells": {
+        "0": {
+          "text": "",
+          "confidence": 0.0,
+          "text_final": ""
+        },
+        "1": {
+          "text": "0003",
+          "confidence": 0.9998739361763,
+          "text_final": "0003"
+        },
+        "2": {
+          "text": "00",
+          "confidence": 0.9995487928390503,
+          "text_final": "00"
+        },
+        "3": {
+          "text": "RT 003 RW 001",
+          "confidence": 0.9917924404144287,
+          "text_final": "RT 003 RW 001"
+        },
+        "4": {
+          "text": "121",
+          "confidence": 0.999748945236206,
+          "text_final": "121"
+        },
+        "5": {
+          "text": "32",
+          "confidence": 0.996213436126709,
+          "text_final": "32"
+        },
+        "6": {
+          "text": "55",
+          "confidence": 0.999862790107727,
+          "text_final": "55"
+        },
+        "7": {
+          "text": "56",
+          "confidence": 0.9999216198921204,
+          "text_final": "56"
+        },
+        "8": {
+          "text": "78",
+          "confidence": 0.9999252557754517,
+          "text_final": "78"
+        },
+        "9": {
+          "text": "99",
+          "confidence": 0.9997591972351074,
+          "text_final": "99"
+        },
+        "10": {
+          "text": "100",
+          "confidence": 0.9999728202819824,
+          "text_final": "100"
+        },
+        "11": {
+          "text": "Barat",
+          "confidence": 0.9988695383071899,
+          "text_final": "Barat"
+        },
+        "12": {
+          "text": "1",
+          "confidence": 0.9997468590736389,
+          "text_final": "1"
+        },
+        "13": {
+          "text": "",
+          "confidence": 0.0,
+          "text_final": ""
+        },
+        "14": {
+          "text": "",
+          "confidence": 0.0,
+          "text_final": ""
+        },
+        "15": {
+          "text": "",
+          "confidence": 0.0,
+          "text_final": ""
+        },
+        "16": {
+          "text": "",
+          "confidence": 0.0,
+          "text_final": ""
+        }
+      }
+    },
+    {
+      "row_index": 3,
+      "y_top": 407,
+      "y_bottom": 478,
+      "cells": {
+        "0": {
+          "text": "",
+          "confidence": 0.0,
+          "text_final": ""
+        },
+        "1": {
+          "text": "0004",
+          "confidence": 0.9999766945838928,
+          "text_final": "0004"
+        },
+        "2": {
+          "text": "03",
+          "confidence": 0.9998536109924316,
+          "text_final": "03"
+        },
+        "3": {
+          "text": "RT 004 RW 001",
+          "confidence": 0.9983562231063843,
+          "text_final": "RT 004 RW 001"
+        },
+        "4": {
+          "text": "86",
+          "confidence": 0.9999532699584961,
+          "text_final": "86"
+        },
+        "5": {
+          "text": "12",
+          "confidence": 0.9994200468063354,
+          "text_final": "12"
+        },
+        "6": {
+          "text": "11",
+          "confidence": 0.9994706511497498,
+          "text_final": "11"
+        },
+        "7": {
+          "text": "2",
+          "confidence": 0.9467807412147522,
+          "text_final": "2"
+        },
+        "8": {
+          "text": "14",
+          "confidence": 0.9999107122421265,
+          "text_final": "14"
+        },
+        "9": {
+          "text": "5",
+          "confidence": 0.9996115565299988,
+          "text_final": "5"
+        },
+        "10": {
+          "text": "76",
+          "confidence": 0.9999149441719055,
+          "text_final": "76"
+        },
+        "11": {
+          "text": "Limapuluh",
+          "confidence": 0.9996392130851746,
+          "text_final": "Limapuluh"
+        },
+        "12": {
+          "text": "1",
+          "confidence": 0.9996645450592041,
+          "text_final": "1"
+        },
+        "13": {
+          "text": "17.00",
+          "confidence": 0.9998728036880493,
+          "text_final": "17.00"
+        },
+        "14": {
+          "text": "jauhari",
+          "confidence": 0.923804759979248,
+          "text_final": "jauhari"
+        },
+        "15": {
+          "text": "1",
+          "confidence": 0.9997552037239075,
+          "text_final": "1"
+        },
+        "16": {
+          "text": "1",
+          "confidence": 0.9996904134750366,
+          "text_final": "1"
+        }
+      }
+    },
+    {
+      "row_index": 4,
+      "y_top": 478,
+      "y_bottom": 549,
+      "cells": {
+        "0": {
+          "text": "",
+          "confidence": 0.0,
+          "text_final": ""
+        },
+        "1": {
+          "text": "0004",
+          "confidence": 0.9999814629554749,
+          "text_final": "0004"
+        },
+        "2": {
+          "text": "02",
+          "confidence": 0.9993801116943359,
+          "text_final": "02"
+        },
+        "3": {
+          "text": "RT 004 RW 001",
+          "confidence": 0.9556427597999573,
+          "text_final": "RT 004 RW 001"
+        },
+        "4": {
+          "text": "8",
+          "confidence": 0.9998807907104492,
+          "text_final": "8"
+        },
+        "5": {
+          "text": "14",
+          "confidence": 0.9999682307243347,
+          "text_final": "14"
+        },
+        "6": {
+          "text": "4",
+          "confidence": 0.9998440742492676,
+          "text_final": "4"
+        },
+        "7": {
+          "text": "4",
+          "confidence": 0.9996806383132935,
+          "text_final": "4"
+        },
+        "8": {
+          "text": "4",
+          "confidence": 0.9997569918632507,
+          "text_final": "4"
+        },
+        "9": {
+          "text": "10",
+          "confidence": 0.9999127388000488,
+          "text_final": "10"
+        },
+        "10": {
+          "text": "15",
+          "confidence": 0.9996023178100586,
+          "text_final": "15"
+        },
+        "11": {
+          "text": "Emyu",
+          "confidence": 0.9994782209396362,
+          "text_final": "Emyu"
+        },
+        "12": {
+          "text": "1",
+          "confidence": 0.9998051524162292,
+          "text_final": "1"
+        },
+        "13": {
+          "text": "12.00-10.00",
+          "confidence": 0.9820358157157898,
+          "text_final": "12.00-10.00"
+        },
+        "14": {
+          "text": "jauhariya",
+          "confidence": 0.9052143096923828,
+          "text_final": "jauhariya"
+        },
+        "15": {
+          "text": "1",
+          "confidence": 0.9996299743652344,
+          "text_final": "1"
+        },
+        "16": {
+          "text": "1",
+          "confidence": 0.999336302280426,
+          "text_final": "1"
+        }
+      }
+    },
+    {
+      "row_index": 5,
+      "y_top": 549,
+      "y_bottom": 620,
+      "cells": {
+        "0": {
+          "text": "",
+          "confidence": 0.0,
+          "text_final": ""
+        },
+        "1": {
+          "text": "0004",
+          "confidence": 0.9999750852584839,
+          "text_final": "0004"
+        },
+        "2": {
+          "text": "01",
+          "confidence": 0.9998875856399536,
+          "text_final": "01"
+        },
+        "3": {
+          "text": "RT 004 RW 001",
+          "confidence": 0.9473313093185425,
+          "text_final": "RT 004 RW 001"
+        },
+        "4": {
+          "text": "64",
+          "confidence": 0.9999307990074158,
+          "text_final": "64"
+        },
+        "5": {
+          "text": "77",
+          "confidence": 0.9990920424461365,
+          "text_final": "77"
+        },
+        "6": {
+          "text": "551",
+          "confidence": 0.9999025464057922,
+          "text_final": "551"
+        },
+        "7": {
+          "text": "12",
+          "confidence": 0.9992736577987671,
+          "text_final": "12"
+        },
+        "8": {
+          "text": "14",
+          "confidence": 0.9999323487281799,
+          "text_final": "14"
+        },
+        "9": {
+          "text": "9",
+          "confidence": 0.9992524981498718,
+          "text_final": "9"
+        },
+        "10": {
+          "text": "10",
+          "confidence": 0.9998809695243835,
+          "text_final": "10"
+        },
+        "11": {
+          "text": "timtim",
+          "confidence": 0.9990549087524414,
+          "text_final": "timtim"
+        },
+        "12": {
+          "text": "2",
+          "confidence": 0.9761990308761597,
+          "text_final": "2"
+        },
+        "13": {
+          "text": "",
+          "confidence": 0.0,
+          "text_final": ""
+        },
+        "14": {
+          "text": "",
+          "confidence": 0.0,
+          "text_final": ""
+        },
+        "15": {
+          "text": "1",
+          "confidence": 0.9992995262145996,
+          "text_final": "1"
+        },
+        "16": {
+          "text": "1",
+          "confidence": 0.9994775652885437,
+          "text_final": "1"
+        }
+      }
+    },
+    {
+      "row_index": 6,
+      "y_top": 620,
+      "y_bottom": 691,
+      "cells": {
+        "0": {
+          "text": "",
+          "confidence": 0.0,
+          "text_final": ""
+        },
+        "1": {
+          "text": "0005",
+          "confidence": 0.9999534487724304,
+          "text_final": "0005"
+        },
+        "2": {
+          "text": "00",
+          "confidence": 0.9994423389434814,
+          "text_final": "00"
+        },
+        "3": {
+          "text": "RT 005 RW 001",
+          "confidence": 0.9734178185462952,
+          "text_final": "RT 005 RW 001"
+        },
+        "4": {
+          "text": "14",
+          "confidence": 0.9999238848686218,
+          "text_final": "14"
+        },
+        "5": {
+          "text": "15",
+          "confidence": 0.9998526573181152,
+          "text_final": "15"
+        },
+        "6": {
+          "text": "16",
+          "confidence": 0.9993964433670044,
+          "text_final": "16"
+        },
+        "7": {
+          "text": "17",
+          "confidence": 0.999767005443573,
+          "text_final": "17"
+        },
+        "8": {
+          "text": "18",
+          "confidence": 0.9999624490737915,
+          "text_final": "18"
+        },
+        "9": {
+          "text": "19",
+          "confidence": 0.9999215006828308,
+          "text_final": "19"
+        },
+        "10": {
+          "text": "20",
+          "confidence": 0.9992406368255615,
+          "text_final": "20"
+        },
+        "11": {
+          "text": "jerman",
+          "confidence": 0.9991421699523926,
+          "text_final": "jerman"
+        },
+        "12": {
+          "text": "2",
+          "confidence": 0.990985631942749,
+          "text_final": "2"
+        },
+        "13": {
+          "text": "8.00-22.00",
+          "confidence": 0.9950227737426758,
+          "text_final": "8.00-22.00"
+        },
+        "14": {
+          "text": "surya",
+          "confidence": 0.9529571533203125,
+          "text_final": "surya"
+        },
+        "15": {
+          "text": "1",
+          "confidence": 0.9993972778320312,
+          "text_final": "1"
+        },
+        "16": {
+          "text": "1",
+          "confidence": 0.9995926022529602,
+          "text_final": "1"
+        }
+      }
+    },
+    {
+      "row_index": 7,
+      "y_top": 691,
+      "y_bottom": 762,
+      "cells": {
+        "0": {
+          "text": "",
+          "confidence": 0.0,
+          "text_final": ""
+        },
+        "1": {
+          "text": "0006",
+          "confidence": 0.9998598098754883,
+          "text_final": "0006"
+        },
+        "2": {
+          "text": "00",
+          "confidence": 0.9994089603424072,
+          "text_final": "00"
+        },
+        "3": {
+          "text": "RT 012 RW 001",
+          "confidence": 0.9657354950904846,
+          "text_final": "RT 012 RW 001"
+        },
+        "4": {
+          "text": "56",
+          "confidence": 0.9999133944511414,
+          "text_final": "56"
+        },
+        "5": {
+          "text": "14",
+          "confidence": 0.9999560713768005,
+          "text_final": "14"
+        },
+        "6": {
+          "text": "7",
+          "confidence": 0.999390721321106,
+          "text_final": "7"
+        },
+        "7": {
+          "text": "21",
+          "confidence": 0.9761648178100586,
+          "text_final": "21"
+        },
+        "8": {
+          "text": "23",
+          "confidence": 0.990774393081665,
+          "text_final": "23"
+        },
+        "9": {
+          "text": "20",
+          "confidence": 0.9984941482543945,
+          "text_final": "20"
+        },
+        "10": {
+          "text": "75",
+          "confidence": 0.9997710585594177,
+          "text_final": "75"
+        },
+        "11": {
+          "text": "Madong",
+          "confidence": 0.9986727833747864,
+          "text_final": "Madong"
+        },
+        "12": {
+          "text": "5",
+          "confidence": 0.9994745850563049,
+          "text_final": "5"
+        },
+        "13": {
+          "text": "8.00-22.00",
+          "confidence": 0.9997340440750122,
+          "text_final": "8.00-22.00"
+        },
+        "14": {
+          "text": "0823456789/zul",
+          "confidence": 0.9998784065246582,
+          "text_final": "0823456789/zul"
+        },
+        "15": {
+          "text": "3",
+          "confidence": 0.9996337890625,
+          "text_final": "3"
+        },
+        "16": {
+          "text": "1",
+          "confidence": 0.999538779258728,
+          "text_final": "1"
+        }
+      }
+    },
+    {
+      "row_index": 8,
+      "y_top": 762,
+      "y_bottom": 833,
+      "cells": {
+        "0": {
+          "text": "",
+          "confidence": 0.0,
+          "text_final": ""
+        },
+        "1": {
+          "text": "0007",
+          "confidence": 0.9999555349349976,
+          "text_final": "0007"
+        },
+        "2": {
+          "text": "00",
+          "confidence": 0.9997687339782715,
+          "text_final": "00"
+        },
+        "3": {
+          "text": "RT 015 RW 001",
+          "confidence": 0.9704803824424744,
+          "text_final": "RT 015 RW 001"
+        },
+        "4": {
+          "text": "8",
+          "confidence": 0.9999172687530518,
+          "text_final": "8"
+        },
+        "5": {
+          "text": "21",
+          "confidence": 0.9904099702835083,
+          "text_final": "21"
+        },
+        "6": {
+          "text": "4",
+          "confidence": 0.9998243451118469,
+          "text_final": "4"
+        },
+        "7": {
+          "text": "5",
+          "confidence": 0.9997764229774475,
+          "text_final": "5"
+        },
+        "8": {
+          "text": "11",
+          "confidence": 0.9998267889022827,
+          "text_final": "11"
+        },
+        "9": {
+          "text": "20",
+          "confidence": 0.9973037242889404,
+          "text_final": "20"
+        },
+        "10": {
+          "text": "75",
+          "confidence": 0.9997801780700684,
+          "text_final": "75"
+        },
+        "11": {
+          "text": "Madong",
+          "confidence": 0.9992339015007019,
+          "text_final": "Madong"
+        },
+        "12": {
+          "text": "5",
+          "confidence": 0.9997813105583191,
+          "text_final": "5"
+        },
+        "13": {
+          "text": "8.00-22.00",
+          "confidence": 0.9996919631958008,
+          "text_final": "8.00-22.00"
+        },
+        "14": {
+          "text": "0823456789/zul",
+          "confidence": 0.9998321533203125,
+          "text_final": "0823456789/zul"
+        },
+        "15": {
+          "text": "3",
+          "confidence": 0.9996041655540466,
+          "text_final": "3"
+        },
+        "16": {
+          "text": "1",
+          "confidence": 0.9994569420814514,
+          "text_final": "1"
+        }
+      }
+    },
+    {
+      "row_index": 9,
+      "y_top": 833,
+      "y_bottom": 905,
+      "cells": {
+        "0": {
+          "text": "",
+          "confidence": 0.0,
+          "text_final": ""
+        },
+        "1": {
+          "text": "0008",
+          "confidence": 0.9998853802680969,
+          "text_final": "0008"
+        },
+        "2": {
+          "text": "00",
+          "confidence": 0.9997276067733765,
+          "text_final": "00"
+        },
+        "3": {
+          "text": "RT 016 RW 001",
+          "confidence": 0.9919726848602295,
+          "text_final": "RT 016 RW 001"
+        },
+        "4": {
+          "text": "90",
+          "confidence": 0.9999442100524902,
+          "text_final": "90"
+        },
+        "5": {
+          "text": "14 15",
+          "confidence": 0.9992868602275848,
+          "text_final": "14 15"
+        },
+        "6": {
+          "text": "",
+          "confidence": 0.0,
+          "text_final": ""
+        },
+        "7": {
+          "text": "21",
+          "confidence": 0.9517953395843506,
+          "text_final": "21"
+        },
+        "8": {
+          "text": "11",
+          "confidence": 0.9998561143875122,
+          "text_final": "11"
+        },
+        "9": {
+          "text": "20",
+          "confidence": 0.9972736835479736,
+          "text_final": "20"
+        },
+        "10": {
+          "text": "75",
+          "confidence": 0.9998542070388794,
+          "text_final": "75"
+        },
+        "11": {
+          "text": "Madong",
+          "confidence": 0.9992976188659668,
+          "text_final": "Madong"
+        },
+        "12": {
+          "text": "5",
+          "confidence": 0.9996949434280396,
+          "text_final": "5"
+        },
+        "13": {
+          "text": "8.00-22.00",
+          "confidence": 0.9980717897415161,
+          "text_final": "8.00-22.00"
+        },
+        "14": {
+          "text": "0823456789/zul",
+          "confidence": 0.9999140501022339,
+          "text_final": "0823456789/zul"
+        },
+        "15": {
+          "text": "3",
+          "confidence": 0.9995501637458801,
+          "text_final": "3"
+        },
+        "16": {
+          "text": "1",
+          "confidence": 0.9993211030960083,
+          "text_final": "1"
+        }
+      }
+    }
+  ]
+}

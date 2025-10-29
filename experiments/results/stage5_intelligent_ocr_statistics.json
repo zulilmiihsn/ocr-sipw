@@ -1,0 +1,13 @@
+{
+  "total_rows": 14,
+  "header_rows": 1,
+  "data_rows": 13,
+  "empty_cells": 63,
+  "data_cells": 158,
+  "average_confidence": "75.6%",
+  "time": {
+    "classification": "28.92s",
+    "ocr": "68.41s",
+    "total": "97.54s"
+  }
+}

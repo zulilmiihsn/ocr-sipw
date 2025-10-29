@@ -780,12 +780,17 @@ class MainWindow(QMainWindow):
         self.update_status(status_msg)
         
         # Show success message
+        num_files = metadata.get('num_files', 1)
+        file_text = f"{num_files} file" if num_files > 1 else "1 file"
+        
         QMessageBox.information(
             self,
             "OCR Selesai",
-            f"Berhasil mengekstrak {metadata['num_rows']} baris x {metadata['num_columns']} kolom!\n\n"
-            f"Waktu proses: {metadata['total_time']:.1f} detik\n"
-            f"Total deteksi: {metadata['num_detections']}\n\n"
+            f"Berhasil mengekstrak {metadata['num_rows']} baris dari {file_text}!\n\n"
+            f"Waktu proses: {metadata['total_time']:.1f} detik\n\n"
+            "Data sudah diurutkan otomatis:\n"
+            "• Kode SLS (ascending)\n"
+            "• Kode Sub-SLS (descending)\n\n"
             "Anda dapat mengedit tabel dan mengekspor hasil."
         )
     

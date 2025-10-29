@@ -17,6 +17,14 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import Qt, QThread, pyqtSignal, QTimer
 from PyQt5.QtGui import QPixmap, QColor, QFont, QIcon
 
+# Import QtAwesome for professional icons
+try:
+    import qtawesome as qta
+    ICONS_AVAILABLE = True
+except ImportError:
+    ICONS_AVAILABLE = False
+    print("⚠ QtAwesome not installed. Using text labels instead of icons.")
+
 # Import OCR pipeline
 import sys
 from pathlib import Path
@@ -363,6 +371,12 @@ class MainWindow(QMainWindow):
         
         self.init_ui()
     
+    def _get_icon(self, name: str, **kwargs):
+        """Get icon from QtAwesome or fallback to emoji"""
+        if ICONS_AVAILABLE:
+            return qta.icon(name, **kwargs)
+        return QIcon()  # Empty icon if not available
+    
     def load_stylesheet(self):
         """Load modern QSS stylesheet"""
         style_path = Path(__file__).parent / 'styles.qss'
@@ -372,8 +386,8 @@ class MainWindow(QMainWindow):
     
     def init_ui(self):
         """Initialize the user interface"""
-        self.setWindowTitle("Lab-untuk-OCR - BLOK III Table Extractor")
-        self.setMinimumSize(1400, 900)
+        self.setWindowTitle("Lab-untuk-OCR - BLOK III Table Extractor v3.1")
+        self.setMinimumSize(1280, 860)
         
         # Load QSS stylesheet
         self.load_stylesheet()
@@ -382,10 +396,10 @@ class MainWindow(QMainWindow):
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
         
-        # Main layout with generous spacing (Gen Z aesthetic)
+        # Main layout with proper spacing
         main_layout = QVBoxLayout(central_widget)
-        main_layout.setContentsMargins(32, 32, 32, 32)
-        main_layout.setSpacing(24)
+        main_layout.setContentsMargins(24, 24, 24, 24)
+        main_layout.setSpacing(16)
         
         # File selection area (simplified)
         file_group = self.create_file_selection_group()
@@ -402,11 +416,11 @@ class MainWindow(QMainWindow):
         main_layout.addWidget(self.progress_bar)
         
         # Single Export button
-        export_btn = QPushButton("Export Results")
+        export_btn = QPushButton(" Export Results" if ICONS_AVAILABLE else "💾 Export Results")
+        export_btn.setIcon(self._get_icon('fa5s.download', color='#2563EB'))
         export_btn.setObjectName("exportButton")
         export_btn.clicked.connect(self.export_results)
         export_btn.setEnabled(False)
-        export_btn.setCursor(Qt.PointingHandCursor)
         self.export_button = export_btn
         main_layout.addWidget(export_btn)
         
@@ -418,44 +432,39 @@ class MainWindow(QMainWindow):
     
     def create_file_selection_group(self):
         """Create file selection UI group with Start button"""
-        group = QGroupBox("FILE SELECTION & PROCESSING")
+        group = QGroupBox("📁 File Selection & Processing")
         layout = QHBoxLayout()
-        layout.setSpacing(20)
+        layout.setSpacing(12)
         
-        # File label with better styling
+        # File label
         self.file_label = QLabel("No file selected")
-        self.file_label.setStyleSheet(
-            "font-size: 11pt; "
-            "color: #64748B; "
-            "font-weight: 500; "
-            "padding: 8px;"
-        )
+        self.file_label.setStyleSheet("font-size: 11pt; color: #6B7280;")
         layout.addWidget(self.file_label, 1)
         
         # Browse button
-        browse_btn = QPushButton("Browse File")
+        browse_btn = QPushButton(" Browse File..." if ICONS_AVAILABLE else "📂 Browse File...")
+        browse_btn.setIcon(self._get_icon('fa5s.folder-open', color='#2563EB'))
         browse_btn.setObjectName("browse_btn")
         browse_btn.clicked.connect(self.browse_file)
         browse_btn.setMinimumWidth(140)
-        browse_btn.setCursor(Qt.PointingHandCursor)
         layout.addWidget(browse_btn)
         
         # Start OCR button
-        self.start_btn = QPushButton("Start OCR")
+        self.start_btn = QPushButton(" Start OCR" if ICONS_AVAILABLE else "▶ Start OCR")
+        self.start_btn.setIcon(self._get_icon('fa5s.play-circle', color='#10B981'))
         self.start_btn.setObjectName("start_btn")
         self.start_btn.clicked.connect(self.start_ocr)
         self.start_btn.setEnabled(False)  # Disabled until file selected
         self.start_btn.setMinimumWidth(140)
-        self.start_btn.setCursor(Qt.PointingHandCursor)
         layout.addWidget(self.start_btn)
         
         # Reset button
-        self.reset_btn = QPushButton("Reset")
+        self.reset_btn = QPushButton(" Reset" if ICONS_AVAILABLE else "🔄 Reset")
+        self.reset_btn.setIcon(self._get_icon('fa5s.sync-alt', color='#EF4444'))
         self.reset_btn.setObjectName("reset_btn")
         self.reset_btn.clicked.connect(self.reset_all)
         self.reset_btn.setEnabled(False)  # Disabled initially
         self.reset_btn.setMinimumWidth(140)
-        self.reset_btn.setCursor(Qt.PointingHandCursor)
         layout.addWidget(self.reset_btn)
         
         group.setLayout(layout)
@@ -463,7 +472,7 @@ class MainWindow(QMainWindow):
     
     def create_table_group(self):
         """Create table UI group"""
-        group = QGroupBox("EXTRACTED TABLE DATA")
+        group = QGroupBox("📊 Extracted Table (Double-click to edit)")
         layout = QVBoxLayout()
         
         # Create table widget (16 columns, removed "No" column)
@@ -550,15 +559,8 @@ class MainWindow(QMainWindow):
         if file_path:
             self.current_file = file_path
             file_name = Path(file_path).name
-            self.file_label.setText(f"Selected: {file_name}")
-            self.file_label.setStyleSheet(
-                "font-size: 11pt; "
-                "color: #10B981; "
-                "font-weight: 600; "
-                "padding: 8px; "
-                "background: rgba(16, 185, 129, 0.1); "
-                "border-radius: 6px;"
-            )
+            self.file_label.setText(f"✅ {file_name}")
+            self.file_label.setStyleSheet("color: #10B981; font-weight: 600; font-size: 11pt;")
             
             # Enable Start and Reset buttons
             self.start_btn.setEnabled(True)
@@ -944,12 +946,7 @@ class MainWindow(QMainWindow):
         # Clear file selection
         self.current_file = None
         self.file_label.setText("No file selected")
-        self.file_label.setStyleSheet(
-            "font-size: 11pt; "
-            "color: #64748B; "
-            "font-weight: 500; "
-            "padding: 8px;"
-        )
+        self.file_label.setStyleSheet("font-size: 11pt; color: #6B7280;")
         
         # Clear OCR results
         self.ocr_results = None

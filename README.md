@@ -3,13 +3,13 @@
 <div align="center">
 
 ![Accuracy](https://img.shields.io/badge/Accuracy-95.0%25-brightgreen?style=for-the-badge)
-![Version](https://img.shields.io/badge/Version-2.0-blue?style=for-the-badge)
+![Version](https://img.shields.io/badge/Version-3.1.0-blue?style=for-the-badge)
 ![Python](https://img.shields.io/badge/Python-3.8+-yellow?style=for-the-badge)
 ![Status](https://img.shields.io/badge/Status-Production%20Ready-success?style=for-the-badge)
 
-**High-accuracy OCR system for extracting BLOK III table data from statistical forms**
+**High-accuracy OCR system with GUI for extracting BLOK III table data from statistical forms**
 
-[Quick Start](#-quick-start) • [Features](#-features) • [Documentation](#-documentation) • [Performance](#-performance)
+[Quick Start](#-quick-start) • [GUI App](#-gui-application) • [Features](#-features) • [Performance](#-performance)
 
 </div>
 
@@ -19,18 +19,39 @@
 
 Lab OCR adalah sistem OCR (Optical Character Recognition) yang dirancang khusus untuk mengekstrak data dari tabel **BLOK III** pada formulir statistik dengan akurasi tinggi.
 
+**NEW! 🎨 GUI Application** - Kini tersedia aplikasi GUI yang user-friendly dengan fitur:
+- 📁 File browser untuk pilih PDF/Image
+- 🔄 Progress bar real-time
+- 📊 Interactive editable table
+- 💾 Multiple export formats (Excel, CSV, JSON, HTML)
+- 🎯 Color-coded confidence levels
+
 ### 🎯 Key Achievements
 - ✅ **95.0% Overall Accuracy** (152/160 cells correct)
 - ✅ **4 Rows with 100% Accuracy** (Perfect!)
 - ✅ **Exactly 10 Data Rows** detected (fixed template)
 - ✅ **17 Columns** detected automatically
-- ✅ **Production-Ready** with beautiful HTML visualization
+- ✅ **Production-Ready** with GUI & HTML visualization
 
 ---
 
 ## 🚀 Quick Start
 
-### 1️⃣ Installation
+### Option A: GUI Application (Recommended!)
+
+```bash
+# Clone repository
+git clone https://github.com/zulilmiihsn/lab-ocr.git
+cd lab-ocr
+
+# Install GUI dependencies
+pip install -r requirements-gui.txt
+
+# Run GUI app
+python app.py
+```
+
+### Option B: Command Line
 
 ```bash
 # Clone repository
@@ -39,19 +60,12 @@ cd lab-ocr
 
 # Install dependencies
 pip install -r requirements.txt
-```
 
-### 2️⃣ Run the System
-
-```bash
 # Navigate to pipeline folder
 cd pipeline
 
 # Run the main pipeline
-python run_ocr.py
-
-# View results in browser
-# Open: visualize_results.html
+python main.py
 ```
 
 ### 3️⃣ View Results

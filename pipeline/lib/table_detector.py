@@ -71,7 +71,7 @@ def _scan_top_for_rekapitulasi(image, search_region_top, width, search_height_to
         row = search_strip[row_offset, :]
         dark_pixels = np.sum(row < 128)
         if dark_pixels > width * 0.3:
-            blok3_y_start = y_search_start + row_offset + 15  # +15px margin (shift down)
+            blok3_y_start = max(y_search_start + row_offset - 15, 0)  # -15px margin (shift up, capped at 0)
             break
     
     return {

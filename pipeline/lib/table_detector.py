@@ -237,6 +237,11 @@ def detect_table_region(image: np.ndarray) -> Optional[Tuple[int, int, int, int]
         
         blok3_height = blok3_y_end - blok3_y_start
         
+        # Apply horizontal margins (crop 30px from left and right)
+        horizontal_margin = 30
+        blok3_x_start = min(horizontal_margin, width // 2)  # Safety: max 50% of width
+        blok3_width = max(width - (2 * horizontal_margin), width // 2)  # Safety: min 50% of width
+        
         # Calculate speedup
         sequential_time = elapsed_top + elapsed_bottom
         speedup = sequential_time / elapsed_total if elapsed_total > 0 else 1.0
@@ -246,9 +251,11 @@ def detect_table_region(image: np.ndarray) -> Optional[Tuple[int, int, int, int]
         print(f"    Parallel time:   {elapsed_total:.2f}s")
         print(f"    Speedup:         {speedup:.2f}x faster!")
         
-        print(f"\n  ✓ BLOK III region: y={blok3_y_start} to y={blok3_y_end} (height={blok3_height}px)")
+        print(f"\n  ✓ BLOK III region: x={blok3_x_start} to x={blok3_x_start + blok3_width}, y={blok3_y_start} to y={blok3_y_end}")
+        print(f"    Dimensions: {blok3_width}px (width) × {blok3_height}px (height)")
+        print(f"    Horizontal margin: {horizontal_margin}px (left & right cropped)")
         
-        return (0, blok3_y_start, width, blok3_height)
+        return (blok3_x_start, blok3_y_start, blok3_width, blok3_height)
         
     except Exception as e:
         print(f"  ✗ OCR scan failed: {e}")

@@ -29,7 +29,8 @@ from pipeline.lib.image_utils import load_image, save_image
 from pipeline.lib.table_detector import detect_table_region, crop_table
 from pipeline.ocr_engine import (
     run_full_document_ocr, detect_vertical_lines, detect_horizontal_lines,
-    detect_header_rows, learn_column_structure, build_table, validate_and_correct_by_template
+    detect_header_rows, learn_column_structure, build_table,
+    validate_and_correct_by_template
 )
 
 
@@ -185,7 +186,6 @@ class OCRWorker(QThread):
             
             # Build table with center-based detection mapping
             from collections import defaultdict
-            
             cells = defaultdict(lambda: {'detections': []})
             
             # ADVANCED CELL MAPPING with IoU + Fuzzy Logic
@@ -321,7 +321,7 @@ class OCRWorker(QThread):
                     cell = cells.get((row_idx, col_idx), {})
                     text = cell.get('text', '')
                     
-                    # Apply template-based validation for accuracy
+                    # Apply template-based validation for BLOK III accuracy
                     text_final = validate_and_correct_by_template(text, col_idx)
                     
                     row_cells[col_idx] = {

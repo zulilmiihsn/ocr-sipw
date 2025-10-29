@@ -71,7 +71,7 @@ from ocr_engine import (
     detect_vertical_lines,
     detect_header_rows,
     learn_column_structure,
-    validate_and_correct_by_template,
+    post_process_text,
     build_table
 )
 
@@ -189,10 +189,11 @@ t6 = time.time()
 rows = build_table(detections, columns, h_lines, v_lines, header_y_max)
 print(f"  ✓ Created {len(rows)} data rows (should be exactly 10!)")
 
-# Apply template-based validation
+# Apply post-processing
 for row in rows:
     for col_idx, cell in row['cells'].items():
-        cell['text_final'] = validate_and_correct_by_template(cell['text'], int(col_idx))
+        col_name = columns[int(col_idx)]['name'] if int(col_idx) < len(columns) else ''
+        cell['text_final'] = post_process_text(cell['text'], col_name)
 
 print(f"  ⏱ Time: {time.time() - t6:.2f}s")
 

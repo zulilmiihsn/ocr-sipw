@@ -57,6 +57,11 @@ pipeline/blok3_cropped.jpg
 pipeline/*.jpg
 pipeline/*.json
 
+# Diagnostic files (temporary analysis outputs)
+diagnose/*.jpg
+diagnose/*.json
+diagnose/*.html
+
 # Model files (jika ada model yang besar)
 *.pt
 *.pth

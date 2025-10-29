@@ -359,35 +359,50 @@ class CustomTableWidget(QTableWidget):
     
     def keyPressEvent(self, event):
         """Override key press to handle arrow navigation with wrapping"""
+        # Get current position
         current_row = self.currentRow()
         current_col = self.currentColumn()
         
+        # Check if we're in edit mode
+        current_item = self.currentItem()
+        is_editing = self.state() == QTableWidget.EditingState
+        
         # Arrow key navigation with wrapping
         if event.key() == Qt.Key_Up:
-            # Move up with wrapping
+            if is_editing:
+                self.closePersistentEditor(current_item)
             new_row = current_row - 1 if current_row > 0 else 9
             self.setCurrentCell(new_row, current_col)
+            event.accept()
             return
         
         elif event.key() == Qt.Key_Down:
-            # Move down with wrapping
+            if is_editing:
+                self.closePersistentEditor(current_item)
             new_row = current_row + 1 if current_row < 9 else 0
             self.setCurrentCell(new_row, current_col)
+            event.accept()
             return
         
         elif event.key() == Qt.Key_Left:
-            # Move left with wrapping
+            if is_editing:
+                self.closePersistentEditor(current_item)
             new_col = current_col - 1 if current_col > 0 else 15
             self.setCurrentCell(current_row, new_col)
+            event.accept()
             return
         
         elif event.key() == Qt.Key_Right:
-            # Move right with wrapping
+            if is_editing:
+                self.closePersistentEditor(current_item)
             new_col = current_col + 1 if current_col < 15 else 0
             self.setCurrentCell(current_row, new_col)
+            event.accept()
             return
         
         elif event.key() in (Qt.Key_Return, Qt.Key_Enter):
+            if is_editing:
+                self.closePersistentEditor(current_item)
             # Enter: move to next cell (right, then down)
             if current_col < 15:
                 self.setCurrentCell(current_row, current_col + 1)
@@ -395,9 +410,10 @@ class CustomTableWidget(QTableWidget):
                 self.setCurrentCell(current_row + 1, 0)
             else:
                 self.setCurrentCell(0, 0)
+            event.accept()
             return
         
-        # Pass other keys to default handler
+        # Pass other keys to default handler (for typing in cells)
         super().keyPressEvent(event)
 
 

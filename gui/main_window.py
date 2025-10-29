@@ -7,9 +7,6 @@ import json
 import time
 from pathlib import Path
 from typing import Optional, Dict, List
-from concurrent.futures import ThreadPoolExecutor, as_completed
-import os
-from threading import Lock
 
 from PyQt5.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
@@ -34,58 +31,8 @@ from pipeline.lib.pdf_handler import load_document, is_pdf
 from pipeline.ocr_engine import (
     run_full_document_ocr, detect_vertical_lines, detect_horizontal_lines,
     detect_header_rows, learn_column_structure, build_table,
-    validate_and_correct_by_template, PaddleOCREngine
+    validate_and_correct_by_template
 )
-
-
-class WarmUpWorker(QThread):
-    """Worker thread for warming up PaddleOCR instances"""
-    progress = pyqtSignal(int, str)
-    finished = pyqtSignal()
-    error = pyqtSignal(str)
-    
-    def __init__(self, num_instances=4):
-        super().__init__()
-        self.num_instances = num_instances
-    
-    def run(self):
-        """Pre-initialize PaddleOCR instances in thread pool"""
-        try:
-            from concurrent.futures import ThreadPoolExecutor
-            import numpy as np
-            
-            self.progress.emit(10, f"Memuat {self.num_instances} model OCR...")
-            
-            def init_ocr_instance(idx):
-                """Initialize OCR instance in thread"""
-                # Create dummy image for initialization
-                dummy_image = np.ones((100, 100, 3), dtype=np.uint8) * 255
-                
-                # Get OCR instance (triggers initialization)
-                ocr = PaddleOCREngine.get_instance()
-                
-                # Do a dummy prediction to fully initialize
-                try:
-                    ocr.predict(dummy_image)
-                except:
-                    pass  # Ignore errors, just for warm-up
-                
-                return idx
-            
-            # Initialize instances in parallel
-            with ThreadPoolExecutor(max_workers=self.num_instances) as executor:
-                futures = [executor.submit(init_ocr_instance, i) for i in range(self.num_instances)]
-                
-                for i, future in enumerate(futures):
-                    future.result()
-                    progress = int(10 + (i + 1) / self.num_instances * 80)
-                    self.progress.emit(progress, f"Model {i+1}/{self.num_instances} siap...")
-            
-            self.progress.emit(100, "Semua model siap!")
-            self.finished.emit()
-            
-        except Exception as e:
-            self.error.emit(f"Warm-up error: {str(e)}")
 
 
 class OCRWorker(QThread):
@@ -103,98 +50,56 @@ class OCRWorker(QThread):
         self.is_cancelled = False
     
     def run(self):
-        """Run OCR pipeline in background (PARALLEL multi-file/multi-page processing)"""
+        """Run OCR pipeline in background (supports multi-file/multi-page)"""
         try:
             start_time = time.time()
+            
+            # Aggregate all results from all files/pages
+            all_results = []
             total_files = len(self.file_paths)
             
-            # Stage 1: Load all documents first (sequential, fast)
-            self.progress.emit(5, "Loading documents...")
-            documents = []  # List of (file_name, file_idx, images)
-            
+            # Process each file
             for file_idx, file_path in enumerate(self.file_paths):
                 if self.is_cancelled:
                     return
                 
+                file_num = file_idx + 1
                 file_name = Path(file_path).name
+                
+                # Stage 1: Load Document (Image or PDF)
                 self.progress.emit(
-                    int(5 + (file_idx / total_files) * 10),
-                    f"Loading {file_name}..."
+                    int(10 + (file_idx / total_files) * 5),
+                    f"[{file_num}/{total_files}] Loading {file_name}..."
                 )
                 
-                try:
-                    images, doc_type = load_document(file_path, dpi=300)
-                    documents.append((file_name, file_idx, images))
-                except Exception as e:
-                    print(f"Failed to load {file_name}: {e}")
-                    continue
+                # Load document (supports both image and PDF)
+                images, doc_type = load_document(file_path, dpi=300)
             
-            if not documents:
-                self.error.emit("Failed to load any documents")
-                return
-            
-            # Stage 2: Prepare all image tasks for parallel processing
-            self.progress.emit(15, "Preparing parallel processing...")
-            tasks = []  # List of (image, file_name, file_idx, page_idx, page_num)
-            
-            for file_name, file_idx, images in documents:
+                # Process all pages from this file
                 for page_idx, image in enumerate(images):
-                    page_num = page_idx + 1
-                    tasks.append((image, file_name, file_idx, page_idx, page_num, len(images)))
-            
-            total_tasks = len(tasks)
-            if total_tasks == 0:
-                self.error.emit("No images to process")
-                return
-            
-            # Stage 3: Process all tasks in parallel with ThreadPoolExecutor
-            self.progress.emit(20, f"Processing {total_tasks} pages in parallel...")
-            
-            all_results = []
-            completed_tasks = 0
-            progress_lock = Lock()
-            
-            # Determine optimal worker count
-            max_workers = min(os.cpu_count() or 4, total_tasks, 8)  # Max 8 threads
-            
-            with ThreadPoolExecutor(max_workers=max_workers) as executor:
-                # Submit all tasks
-                future_to_task = {
-                    executor.submit(
-                        self._process_single_image_wrapper,
-                        image, file_name, file_idx, page_idx, page_num, total_pages
-                    ): (file_name, page_num)
-                    for image, file_name, file_idx, page_idx, page_num, total_pages in tasks
-                }
-                
-                # Process results as they complete
-                for future in as_completed(future_to_task):
                     if self.is_cancelled:
-                        executor.shutdown(wait=False, cancel_futures=True)
                         return
                     
-                    file_name, page_num = future_to_task[future]
+                    page_num = page_idx + 1
+                    if len(images) > 1:
+                        self.progress.emit(
+                            int(15 + (file_idx / total_files) * 5),
+                            f"[{file_num}/{total_files}] Page {page_num}/{len(images)}..."
+                        )
                     
-                    try:
-                        page_results = future.result()
+                    # Process this page/image
+                    page_results = self._process_single_image(
+                        image, file_idx, page_idx, total_files, len(images)
+                    )
+                    
+                    if page_results:
+                        # Add source info to each row
+                        for row in page_results:
+                            row['_source_file'] = file_name
+                            row['_source_page'] = page_num
                         
-                        if page_results:
-                            # Thread-safe append
-                            with progress_lock:
-                                all_results.extend(page_results)
-                                completed_tasks += 1
-                                
-                                # Update progress
-                                progress = int(20 + (completed_tasks / total_tasks) * 70)
-                                self.progress.emit(
-                                    progress,
-                                    f"Completed {completed_tasks}/{total_tasks} pages ({max_workers} threads)"
-                                )
-                    
-                    except Exception as e:
-                        print(f"Error processing {file_name} page {page_num}: {e}")
-                        with progress_lock:
-                            completed_tasks += 1
+                        # Append to aggregated results
+                        all_results.extend(page_results)
             
             # All files/pages processed - now sort and emit
             if not all_results:
@@ -222,46 +127,30 @@ class OCRWorker(QThread):
         except Exception as e:
             self.error.emit(f"OCR Error: {str(e)}")
     
-    def _process_single_image_wrapper(self, image, file_name, file_idx, page_idx, page_num, total_pages):
-        """Wrapper for parallel processing - adds source metadata to results"""
-        try:
-            # Process the image
-            page_results = self._process_single_image(image, file_idx, page_idx, 1, total_pages)
-            
-            if page_results:
-                # Add source info to each row
-                for row in page_results:
-                    row['_source_file'] = file_name
-                    row['_source_page'] = page_num
-            
-            return page_results
-        
-        except Exception as e:
-            print(f"Error in wrapper for {file_name} page {page_num}: {e}")
-            return []
-    
     def _process_single_image(self, image, file_idx, page_idx, total_files, total_pages):
-        """Process a single image/page and return table rows (thread-safe, no progress emit)"""
+        """Process a single image/page and return table rows"""
         try:
-            # Note: Progress tracking is handled by parallel executor, not here
+            # Stage 2: Detect BLOK III
+            progress_base = 20 + (file_idx / total_files) * 60
+            self.progress.emit(int(progress_base), "Detecting BLOK III region...")
             if self.is_cancelled:
-                return []
-            
-            # Detect BLOK III region
+                return
             bbox = detect_table_region(image)
             if bbox is None:
-                print("Warning: Failed to detect BLOK III table region")
-                return []
+                self.error.emit("Failed to detect BLOK III table region")
+                return
             cropped = crop_table(image, bbox)
             
-            # OCR Scan
+            # Stage 3: OCR Scan (Full Document)
+            self.progress.emit(30, "Stage 3/6: Performing OCR scan...")
             if self.is_cancelled:
-                return []
+                return
             ocr_results = run_full_document_ocr(cropped)
             
-            # Detect Lines
+            # Stage 4: Detect Lines
+            self.progress.emit(70, "Stage 4/6: Detecting table structure...")
             if self.is_cancelled:
-                return []
+                return
             all_h_lines = detect_horizontal_lines(cropped)
             vertical_lines = detect_vertical_lines(cropped)
             
@@ -356,15 +245,17 @@ class OCRWorker(QThread):
                     y = data_region_start + i * row_height
                     h_lines.append(int(y))
             
-            # Detect Headers and Columns
+            # Stage 5: Detect Headers and Columns
+            self.progress.emit(80, "Stage 5/6: Learning column structure...")
             if self.is_cancelled:
-                return []
+                return
             header_groups = detect_header_rows(ocr_results)
             column_structure = learn_column_structure(header_groups, vertical_lines)
             
-            # Build Table
+            # Stage 6: Build Table with improved mapping
+            self.progress.emit(90, "Stage 6/6: Building table...")
             if self.is_cancelled:
-                return []
+                return
             
             # Build table with center-based detection mapping
             from collections import defaultdict
@@ -618,17 +509,12 @@ class MainWindow(QMainWindow):
     
     def __init__(self):
         super().__init__()
-        self.current_files = None
+        self.current_file = None
         self.ocr_results = None
         self.ocr_worker = None
-        self.warmup_worker = None
-        self.is_warmed_up = False  # Track if models are pre-loaded
         self.edited_cells = {}  # Track edited cells
         
         self.init_ui()
-        
-        # Start warm-up initialization in background
-        QTimer.singleShot(500, self.start_warmup)
     
     def _get_icon(self, name: str, **kwargs):
         """Get icon from QtAwesome"""
@@ -810,52 +696,6 @@ class MainWindow(QMainWindow):
         group.setLayout(layout)
         return group
     
-    def start_warmup(self):
-        """Start warm-up initialization of PaddleOCR instances"""
-        if self.warmup_worker and self.warmup_worker.isRunning():
-            return
-        
-        # Show progress bar for warm-up
-        self.progress_bar.setVisible(True)
-        self.progress_bar.setFormat("Memuat model OCR... %p%")
-        
-        # Disable buttons during warm-up
-        self.start_btn.setEnabled(False)
-        
-        # Create and start warm-up worker
-        self.warmup_worker = WarmUpWorker(num_instances=4)
-        self.warmup_worker.progress.connect(self.on_warmup_progress)
-        self.warmup_worker.finished.connect(self.on_warmup_finished)
-        self.warmup_worker.error.connect(self.on_warmup_error)
-        self.warmup_worker.start()
-    
-    def on_warmup_progress(self, percentage, message):
-        """Update progress during warm-up"""
-        self.progress_bar.setValue(percentage)
-        self.progress_bar.setFormat(f"{message} %p%")
-    
-    def on_warmup_finished(self):
-        """Handle warm-up completion"""
-        self.is_warmed_up = True
-        self.progress_bar.setVisible(False)
-        self.start_btn.setEnabled(True)
-        self.update_status("✓ Model OCR siap! Pilih file untuk memulai.")
-        
-        # Show info message
-        QMessageBox.information(
-            self,
-            "Model Siap",
-            "Model OCR telah dimuat ke memory!\n\n"
-            "Proses OCR sekarang akan jauh lebih cepat.\n"
-            "Silakan pilih file untuk memulai."
-        )
-    
-    def on_warmup_error(self, error_msg):
-        """Handle warm-up error"""
-        self.progress_bar.setVisible(False)
-        self.start_btn.setEnabled(True)
-        self.update_status(f"⚠ Warm-up error: {error_msg}")
-        print(f"Warm-up error: {error_msg}")
     
     def browse_file(self):
         """Open file browser dialog (supports multi-select)"""
@@ -863,7 +703,7 @@ class MainWindow(QMainWindow):
             self,
             "Pilih File Gambar atau PDF (Multi-select untuk batch)",
             str(Path.home()),
-            "File Gambar (*.png *.jpg *.jpeg);;File PDF (*.pdf);;Semua File (*.*)"
+            "Semua File Didukung (*.png *.jpg *.jpeg *.pdf);;File Gambar (*.png *.jpg *.jpeg);;File PDF (*.pdf);;Semua File (*.*)"
         )
         
         if file_paths:

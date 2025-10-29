@@ -1,0 +1,54 @@
+
+================================================================================
+STAGE 2 - DUAL-DIRECTION BLOK III DETECTION REPORT
+================================================================================
+
+INPUT:
+  File: contoh gambar/1.png
+  Size: 1275x1650 pixels
+
+DETECTION METHOD:
+  ✓ Dual-direction OCR scanning
+  ✓ Upper boundary: Scan TOP 30% for "Rekapitulasi"
+  ✓ Lower boundary: Scan BOTTOM 30% for "Keterangan"
+
+RESULTS:
+  Upper boundary (Rekapitulasi): y = 289
+  Lower boundary (Keterangan):   y = 1125
+  BLOK III height:               836 pixels
+  Processing time:               4.59 seconds
+
+COMPARISON WITH OLD METHOD:
+  Old method (single direction):
+    - Scan TOP only
+    - Use image bottom as lower boundary
+    - Result: y=289 to y=1275 (height=986px)
+  
+  New method (dual direction):
+    - Scan TOP and BOTTOM
+    - Detect both boundaries
+    - Result: y=289 to y=1125 (height=836px)
+  
+  Improvement:
+    - Area reduced by: 150 pixels (15.2%)
+    - More precise cropping ✓
+    - Excludes "Keterangan" section ✓
+
+OUTPUT FILES:
+  1. stage2_detection_visualization.jpg
+     - Full image with bounding box and labels
+     - Red line: Upper boundary (Rekapitulasi)
+     - Blue line: Lower boundary (Keterangan)
+     - Green box: BLOK III region
+  
+  2. stage2_blok3_cropped.jpg
+     - Cropped BLOK III image only
+     - Ready for Stage 3 (OCR processing)
+  
+  3. stage2_comparison.jpg
+     - Side-by-side comparison
+     - Original vs Cropped
+
+================================================================================
+✓ STAGE 2 TEST COMPLETED SUCCESSFULLY!
+================================================================================

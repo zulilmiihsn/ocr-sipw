@@ -163,27 +163,11 @@ class PaddleOCREngine:
     def get_instance(cls):
         if cls._instance is None:
             from paddleocr import PaddleOCR
+            # Use basic config - version compatibility issue
+            # Phase 1 optimization: smart_resize + adaptive_preprocessing still active
             cls._instance = PaddleOCR(
                 lang=OCRConfig.PADDLE_LANG,
-                use_textline_orientation=OCRConfig.PADDLE_USE_TEXTLINE_ORIENTATION,
-                
-                # ============================================================
-                # CPU OPTIMIZATION (Phase 1)
-                # ============================================================
-                use_gpu=False,
-                enable_mkldnn=True,        # Intel CPU acceleration
-                cpu_threads=4,             # Use 4 cores
-                
-                # DETECTION OPTIMIZATION
-                det_db_thresh=0.2,         # Lower = more sensitive (default 0.3)
-                det_db_box_thresh=0.5,     # Lower = detect more boxes (default 0.6)
-                det_db_unclip_ratio=1.8,   # Larger boxes (default 1.5)
-                
-                # RECOGNITION OPTIMIZATION
-                rec_batch_num=6,           # Process 6 texts at once
-                
-                # SPEED vs ACCURACY BALANCE
-                drop_score=0.3,            # Drop low-confidence results
+                use_textline_orientation=OCRConfig.PADDLE_USE_TEXTLINE_ORIENTATION
             )
         return cls._instance
 

@@ -36,16 +36,17 @@ from pipeline.ocr_engine import (
 
 
 class OCRWorker(QThread):
-    """Background worker for OCR processing"""
+    """Background worker for OCR processing (supports multi-file/multi-page)"""
     
     # Signals
     progress = pyqtSignal(int, str)  # (percentage, stage_name)
-    finished = pyqtSignal(dict)  # OCR results
+    finished = pyqtSignal(dict)  # OCR results (now includes 'pages' list)
     error = pyqtSignal(str)  # Error message
     
-    def __init__(self, image_path: str):
+    def __init__(self, file_paths):
         super().__init__()
-        self.image_path = image_path
+        # Accept both single file (string) or multiple files (list)
+        self.file_paths = file_paths if isinstance(file_paths, list) else [file_paths]
         self.is_cancelled = False
     
     def run(self):
@@ -628,31 +629,35 @@ class MainWindow(QMainWindow):
     
     
     def browse_file(self):
-        """Open file browser dialog"""
-        file_path, _ = QFileDialog.getOpenFileName(
+        """Open file browser dialog (supports multi-select)"""
+        file_paths, _ = QFileDialog.getOpenFileNames(  # Changed to getOpenFileNames for multi-select
             self,
-            "Pilih File Gambar atau PDF",
+            "Pilih File Gambar atau PDF (Multi-select untuk batch)",
             str(Path.home()),
             "File Gambar (*.png *.jpg *.jpeg);;File PDF (*.pdf);;Semua File (*.*)"
         )
         
-        if file_path:
-            self.current_file = file_path
-            file_name = Path(file_path).name
+        if file_paths:
+            self.current_files = file_paths  # Changed to list
             
-            self.file_label.setText(file_name)
+            if len(file_paths) == 1:
+                file_name = Path(file_paths[0]).name
+                self.file_label.setText(file_name)
+                self.update_status(f"✓ File dimuat: {file_name} - Klik 'Mulai OCR' untuk memproses")
+            else:
+                self.file_label.setText(f"{len(file_paths)} file dipilih")
+                self.update_status(f"✓ {len(file_paths)} file dimuat untuk batch processing")
+            
             self.file_label.setStyleSheet("color: #10B981; font-weight: 600; font-size: 11pt;")
             
             # Enable Start and Reset buttons
             self.start_btn.setEnabled(True)
             self.reset_btn.setEnabled(True)
-            
-            self.update_status(f"✓ File dimuat: {file_name} - Klik 'Mulai OCR' untuk memproses")
     
     
     def start_ocr(self):
-        """Start OCR processing"""
-        if not self.current_file:
+        """Start OCR processing (supports multi-file/multi-page)"""
+        if not hasattr(self, 'current_files') or not self.current_files:
             return
         
         # Disable Start button and export button during processing
@@ -668,8 +673,8 @@ class MainWindow(QMainWindow):
         self.table.clearContents()
         self.edited_cells.clear()
         
-        # Start worker thread
-        self.ocr_worker = OCRWorker(self.current_file)
+        # Start worker thread with list of files
+        self.ocr_worker = OCRWorker(self.current_files)
         self.ocr_worker.progress.connect(self.on_progress)
         self.ocr_worker.finished.connect(self.on_ocr_finished)
         self.ocr_worker.error.connect(self.on_ocr_error)

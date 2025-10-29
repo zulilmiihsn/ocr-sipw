@@ -27,6 +27,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from pipeline.lib.image_utils import load_image, save_image
 from pipeline.lib.table_detector import detect_table_region, crop_table
+from pipeline.lib.pdf_handler import load_document, is_pdf
 from pipeline.ocr_engine import (
     run_full_document_ocr, detect_vertical_lines, detect_horizontal_lines,
     detect_header_rows, learn_column_structure, build_table,
@@ -52,11 +53,22 @@ class OCRWorker(QThread):
         try:
             start_time = time.time()
             
-            # Stage 1: Load Image
-            self.progress.emit(10, "Stage 1/6: Loading image...")
+            # Stage 1: Load Document (Image or PDF)
+            self.progress.emit(10, "Stage 1/6: Loading document...")
             if self.is_cancelled:
                 return
-            image = load_image(self.image_path)
+            
+            # Load document (supports both image and PDF)
+            images, doc_type = load_document(self.image_path, dpi=300)
+            
+            if doc_type == 'pdf':
+                if len(images) > 1:
+                    self.progress.emit(15, f"PDF detected: {len(images)} pages. Processing page 1...")
+                else:
+                    self.progress.emit(15, "PDF detected: 1 page")
+            
+            # Use first page/image for processing
+            image = images[0]
             
             # Stage 2: Detect BLOK III
             self.progress.emit(20, "Stage 2/6: Detecting BLOK III region...")

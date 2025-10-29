@@ -78,7 +78,6 @@ class PaddleOCREngine:
             
             cls._instance = PaddleOCR(
                 lang=OCRConfig.PADDLE_LANG,
-                use_textline_orientation=OCRConfig.PADDLE_USE_TEXTLINE_ORIENTATION,
                 # PERFORMANCE OPTIMIZATIONS:
                 use_angle_cls=False,           # Disable angle detection (faster)
                 use_gpu=False,                 # CPU with all cores

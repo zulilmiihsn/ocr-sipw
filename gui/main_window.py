@@ -378,10 +378,7 @@ class MainWindow(QMainWindow):
         # Load QSS stylesheet
         self.load_stylesheet()
         
-        # Create menu bar
-        self.create_menu_bar()
-        
-        # Create central widget
+        # Create central widget (no menu bar for clean interface)
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
         
@@ -417,31 +414,6 @@ class MainWindow(QMainWindow):
         self.setStatusBar(self.status_bar)
         self.update_status("Ready")
     
-    def create_menu_bar(self):
-        """Create menu bar"""
-        menubar = self.menuBar()
-        
-        # File menu
-        file_menu = menubar.addMenu("&File")
-        
-        open_action = QAction("&Open File...", self)
-        open_action.setShortcut("Ctrl+O")
-        open_action.triggered.connect(self.browse_file)
-        file_menu.addAction(open_action)
-        
-        file_menu.addSeparator()
-        
-        exit_action = QAction("E&xit", self)
-        exit_action.setShortcut("Ctrl+Q")
-        exit_action.triggered.connect(self.close)
-        file_menu.addAction(exit_action)
-        
-        # Help menu
-        help_menu = menubar.addMenu("&Help")
-        
-        about_action = QAction("&About", self)
-        about_action.triggered.connect(self.show_about)
-        help_menu.addAction(about_action)
     
     def create_file_selection_group(self):
         """Create simplified file selection UI group"""
@@ -886,23 +858,6 @@ class MainWindow(QMainWindow):
         """Update status bar"""
         self.status_bar.showMessage(message)
     
-    def show_about(self):
-        """Show about dialog"""
-        QMessageBox.about(
-            self,
-            "About Lab-untuk-OCR",
-            "<h2>Lab-untuk-OCR v3.1.0</h2>"
-            "<p>BLOK III Table Extraction System</p>"
-            "<p>Powered by PaddleOCR + Adaptive Mapping</p>"
-            "<p><b>Features:</b></p>"
-            "<ul>"
-            "<li>Intelligent table detection</li>"
-            "<li>95% accuracy OCR</li>"
-            "<li>Interactive table editing</li>"
-            "<li>Multiple export formats</li>"
-            "</ul>"
-            "<p>© 2025 Lab OCR Team</p>"
-        )
     
     def closeEvent(self, event):
         """Handle window close"""

@@ -66,9 +66,9 @@ from adaptive_ocr import (
     detect_horizontal_lines,
     detect_vertical_lines,
     detect_header_rows,
-    learn_column_names_from_lines,
+    learn_column_structure,
     post_process_text,
-    map_to_table
+    build_table
 )
 
 # Stage 3: Run OCR
@@ -173,8 +173,8 @@ print(f"  ⏱ Time: {time.time() - t4:.2f}s")
 print("\n[Stage 5] Learning column structure...")
 t5 = time.time()
 
-header_groups = detect_header_rows(detections, y_threshold=header_y_max)
-columns = learn_column_names_from_lines(header_groups, v_lines)
+header_groups = detect_header_rows(detections)
+columns = learn_column_structure(header_groups, v_lines)
 print(f"  ✓ Learned {len(columns)} columns")
 print(f"  ⏱ Time: {time.time() - t5:.2f}s")
 
@@ -182,7 +182,7 @@ print(f"  ⏱ Time: {time.time() - t5:.2f}s")
 print("\n[Stage 6] Mapping detections to table...")
 t6 = time.time()
 
-rows = map_to_table(detections, columns, h_lines, v_lines, header_y_max)
+rows = build_table(detections, columns, h_lines, v_lines, header_y_max)
 print(f"  ✓ Created {len(rows)} data rows (should be exactly 10!)")
 
 # Apply post-processing

@@ -50,29 +50,89 @@ class OCRWorker(QThread):
         self.is_cancelled = False
     
     def run(self):
-        """Run OCR pipeline in background"""
+        """Run OCR pipeline in background (supports multi-file/multi-page)"""
         try:
             start_time = time.time()
             
-            # Stage 1: Load Document (Image or PDF)
-            self.progress.emit(10, "Stage 1/6: Loading document...")
-            if self.is_cancelled:
+            # Aggregate all results from all files/pages
+            all_results = []
+            total_files = len(self.file_paths)
+            
+            # Process each file
+            for file_idx, file_path in enumerate(self.file_paths):
+                if self.is_cancelled:
+                    return
+                
+                file_num = file_idx + 1
+                file_name = Path(file_path).name
+                
+                # Stage 1: Load Document (Image or PDF)
+                self.progress.emit(
+                    int(10 + (file_idx / total_files) * 5),
+                    f"[{file_num}/{total_files}] Loading {file_name}..."
+                )
+                
+                # Load document (supports both image and PDF)
+                images, doc_type = load_document(file_path, dpi=300)
+            
+                # Process all pages from this file
+                for page_idx, image in enumerate(images):
+                    if self.is_cancelled:
+                        return
+                    
+                    page_num = page_idx + 1
+                    if len(images) > 1:
+                        self.progress.emit(
+                            int(15 + (file_idx / total_files) * 5),
+                            f"[{file_num}/{total_files}] Page {page_num}/{len(images)}..."
+                        )
+                    
+                    # Process this page/image
+                    page_results = self._process_single_image(
+                        image, file_idx, page_idx, total_files, len(images)
+                    )
+                    
+                    if page_results:
+                        # Add source info to each row
+                        for row in page_results:
+                            row['_source_file'] = file_name
+                            row['_source_page'] = page_num
+                        
+                        # Append to aggregated results
+                        all_results.extend(page_results)
+            
+            # All files/pages processed - now sort and emit
+            if not all_results:
+                self.error.emit("No data extracted from any file")
                 return
             
-            # Load document (supports both image and PDF)
-            images, doc_type = load_document(self.image_path, dpi=300)
+            # SORTING: 2-level sort (Col1 ASC, Col2 DESC)
+            self.progress.emit(95, "Sorting results...")
+            all_results = self._sort_results(all_results)
             
-            if doc_type == 'pdf':
-                if len(images) > 1:
-                    self.progress.emit(15, f"PDF detected: {len(images)} pages. Processing page 1...")
-                else:
-                    self.progress.emit(15, "PDF detected: 1 page")
+            # Calculate total time
+            total_time = time.time() - start_time
             
-            # Use first page/image for processing
-            image = images[0]
+            # Emit aggregated results
+            self.progress.emit(100, "Complete!")
+            self.finished.emit({
+                'table': all_results,
+                'metadata': {
+                    'total_time': total_time,
+                    'num_files': total_files,
+                    'num_rows': len(all_results)
+                }
+            })
             
+        except Exception as e:
+            self.error.emit(f"OCR Error: {str(e)}")
+    
+    def _process_single_image(self, image, file_idx, page_idx, total_files, total_pages):
+        """Process a single image/page and return table rows"""
+        try:
             # Stage 2: Detect BLOK III
-            self.progress.emit(20, "Stage 2/6: Detecting BLOK III region...")
+            progress_base = 20 + (file_idx / total_files) * 60
+            self.progress.emit(int(progress_base), "Detecting BLOK III region...")
             if self.is_cancelled:
                 return
             bbox = detect_table_region(image)
@@ -350,22 +410,31 @@ class OCRWorker(QThread):
                     'cells': row_cells
                 })
             
-            total_time = time.time() - start_time
-            
-            # Emit results
-            self.progress.emit(100, "Complete!")
-            self.finished.emit({
-                'table': table_data,
-                'metadata': {
-                    'total_time': total_time,
-                    'num_detections': len(ocr_results),
-                    'num_columns': len(column_structure),
-                    'num_rows': len(table_data)
-                }
-            })
+            # Return table data for this image/page
+            return table_data
             
         except Exception as e:
-            self.error.emit(f"OCR Error: {str(e)}")
+            print(f"Error processing image: {str(e)}")
+            return []  # Return empty list on error
+    
+    def _sort_results(self, results):
+        """Sort results with 2-level sorting: Col1 ASC, Col2 DESC"""
+        def get_sort_key(row):
+            """Extract sort key from row"""
+            cells = row.get('cells', {})
+            
+            # Col 1 (Kode SLS) - index 1 (0 is row number, skipped)
+            col1_text = cells.get(1, {}).get('text_final', '0000')
+            col1_val = int(''.join(c for c in col1_text if c.isdigit()) or '0')
+            
+            # Col 2 (Kode Sub-SLS) - index 2
+            col2_text = cells.get(2, {}).get('text_final', '00')
+            col2_val = int(''.join(c for c in col2_text if c.isdigit()) or '0')
+            
+            # Sort: Col1 ascending, Col2 descending (negative for DESC)
+            return (col1_val, -col2_val)
+        
+        return sorted(results, key=get_sort_key)
     
     def cancel(self):
         """Cancel the operation"""
@@ -736,14 +805,20 @@ class MainWindow(QMainWindow):
         )
     
     def populate_table(self, table_data: List[Dict]):
-        """Populate table with OCR results (skip col 0 = No, use vertical header)"""
+        """Populate table with OCR results (supports multi-page, dynamic row count)"""
         # Block signals to avoid triggering itemChanged
         self.table.blockSignals(True)
         
+        # Update table row count dynamically
+        num_rows = len(table_data)
+        self.table.setRowCount(num_rows)
+        
+        # Update vertical headers (row numbers 1, 2, 3, ...)
+        for i in range(num_rows):
+            self.table.setVerticalHeaderItem(i, QTableWidgetItem(str(i + 1)))
+        
+        # Populate cells
         for row_idx, row_data in enumerate(table_data):
-            if row_idx >= 10:
-                break
-            
             # Skip column 0 (No), start from column 1 (Kode SLS/Non-SLS)
             for ocr_col_idx in range(1, 17):  # OCR columns 1-16
                 gui_col_idx = ocr_col_idx - 1  # GUI columns 0-15 (shifted left)
@@ -890,8 +965,9 @@ class MainWindow(QMainWindow):
             cell.fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
             cell.alignment = Alignment(horizontal="center")
         
-        # Write data
-        for row in range(10):
+        # Write data (dynamic row count)
+        num_rows = self.table.rowCount()
+        for row in range(num_rows):
             # Write row number (No column)
             ws.cell(row + 2, 1, row + 1)
             
@@ -914,8 +990,9 @@ class MainWindow(QMainWindow):
             headers = ["No"] + [self.table.horizontalHeaderItem(i).text() for i in range(16)]
             writer.writerow(headers)
             
-            # Data
-            for row in range(10):
+            # Data (dynamic row count)
+            num_rows = self.table.rowCount()
+            for row in range(num_rows):
                 row_data = [row + 1]  # Start with row number
                 for col in range(16):
                     item = self.table.item(row, col)
@@ -929,7 +1006,9 @@ class MainWindow(QMainWindow):
             'table': []
         }
         
-        for row in range(10):
+        # Dynamic row count
+        num_rows = self.table.rowCount()
+        for row in range(num_rows):
             row_data = {'row_number': row + 1, 'cells': {}}
             
             # Add "No" as column 0
@@ -975,8 +1054,8 @@ class MainWindow(QMainWindow):
         
         metadata = self.ocr_results['metadata']
         html += f"        <p><strong>Processing Time:</strong> {metadata['total_time']:.1f}s</p>\n"
-        html += f"        <p><strong>Total Detections:</strong> {metadata['num_detections']}</p>\n"
-        html += f"        <p><strong>Rows:</strong> {metadata['num_rows']} | <strong>Columns:</strong> {metadata['num_columns']}</p>\n"
+        html += f"        <p><strong>Total Files:</strong> {metadata.get('num_files', 1)}</p>\n"
+        html += f"        <p><strong>Total Rows:</strong> {metadata['num_rows']}</p>\n"
         html += "    </div>\n"
         
         html += "    <table>\n        <tr>\n"
@@ -987,8 +1066,9 @@ class MainWindow(QMainWindow):
             html += f"            <th>{header}</th>\n"
         html += "        </tr>\n"
         
-        # Data
-        for row in range(10):
+        # Data (dynamic row count)
+        num_rows = self.table.rowCount()
+        for row in range(num_rows):
             html += "        <tr>\n"
             # Add row number
             html += f"            <td>{row + 1}</td>\n"

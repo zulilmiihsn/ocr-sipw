@@ -416,12 +416,12 @@ class MainWindow(QMainWindow):
     
     
     def create_file_selection_group(self):
-        """Create simplified file selection UI group"""
-        group = QGroupBox("📁 File Selection")
+        """Create file selection UI group with Start button"""
+        group = QGroupBox("📁 File Selection & Processing")
         layout = QHBoxLayout()
         layout.setSpacing(12)
         
-        # File label (compact)
+        # File label
         self.file_label = QLabel("No file selected")
         self.file_label.setStyleSheet("font-size: 11pt; color: #6B7280;")
         layout.addWidget(self.file_label, 1)
@@ -430,8 +430,16 @@ class MainWindow(QMainWindow):
         browse_btn = QPushButton("📂 Browse File...")
         browse_btn.setObjectName("browse_btn")
         browse_btn.clicked.connect(self.browse_file)
-        browse_btn.setMinimumWidth(150)
+        browse_btn.setMinimumWidth(140)
         layout.addWidget(browse_btn)
+        
+        # Start OCR button
+        self.start_btn = QPushButton("▶ Start OCR")
+        self.start_btn.setObjectName("start_btn")
+        self.start_btn.clicked.connect(self.start_ocr)
+        self.start_btn.setEnabled(False)  # Disabled until file selected
+        self.start_btn.setMinimumWidth(140)
+        layout.addWidget(self.start_btn)
         
         group.setLayout(layout)
         return group
@@ -514,7 +522,7 @@ class MainWindow(QMainWindow):
     
     
     def browse_file(self):
-        """Open file browser dialog and auto-start OCR"""
+        """Open file browser dialog"""
         file_path, _ = QFileDialog.getOpenFileName(
             self,
             "Select PDF or Image File",
@@ -528,10 +536,10 @@ class MainWindow(QMainWindow):
             self.file_label.setText(f"✅ {file_name}")
             self.file_label.setStyleSheet("color: #10B981; font-weight: 600; font-size: 11pt;")
             
-            self.update_status(f"✅ File loaded: {file_name}")
+            # Enable Start button
+            self.start_btn.setEnabled(True)
             
-            # AUTO-START OCR immediately
-            self.start_ocr()
+            self.update_status(f"✅ File loaded: {file_name} - Click 'Start OCR' to begin")
     
     
     def start_ocr(self):
@@ -539,7 +547,8 @@ class MainWindow(QMainWindow):
         if not self.current_file:
             return
         
-        # Disable export button
+        # Disable Start button and export button during processing
+        self.start_btn.setEnabled(False)
         self.enable_export_buttons(False)
         
         # Show progress bar
@@ -576,7 +585,8 @@ class MainWindow(QMainWindow):
         # Populate table
         self.populate_table(results['table'])
         
-        # Enable export button
+        # Re-enable Start button and export button
+        self.start_btn.setEnabled(True)
         self.enable_export_buttons(True)
         
         # Update status
@@ -600,6 +610,10 @@ class MainWindow(QMainWindow):
     def on_ocr_error(self, error_msg: str):
         """Handle OCR error"""
         self.progress_bar.setVisible(False)
+        
+        # Re-enable Start button on error
+        self.start_btn.setEnabled(True)
+        
         self.update_status(f"❌ Error: {error_msg}")
         
         QMessageBox.critical(

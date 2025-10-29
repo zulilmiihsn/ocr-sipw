@@ -64,27 +64,62 @@ class OCRConfig:
 # ============================================================================
 
 class PaddleOCREngine:
-    """Singleton PaddleOCR instance for performance"""
+    """Singleton PaddleOCR instance for MAXIMUM PERFORMANCE"""
     _instance = None
     
     @classmethod
     def get_instance(cls):
         if cls._instance is None:
             from paddleocr import PaddleOCR
+            import paddle
+            
+            # Enable all performance optimizations
+            paddle.set_device('cpu')  # Use all CPU cores
+            
             cls._instance = PaddleOCR(
                 lang=OCRConfig.PADDLE_LANG,
-                use_textline_orientation=OCRConfig.PADDLE_USE_TEXTLINE_ORIENTATION
+                use_textline_orientation=OCRConfig.PADDLE_USE_TEXTLINE_ORIENTATION,
+                # PERFORMANCE OPTIMIZATIONS:
+                use_angle_cls=False,           # Disable angle detection (faster)
+                use_gpu=False,                 # CPU with all cores
+                enable_mkldnn=True,            # Intel MKL-DNN acceleration
+                cpu_threads=0,                 # 0 = use all CPU cores
+                # Model optimizations:
+                det_limit_side_len=1920,       # Larger detection limit (better accuracy)
+                det_limit_type='max',          # Max limit (more aggressive)
+                rec_batch_num=16,              # Larger batch for recognition (faster)
+                max_batch_size=16,             # Process multiple texts in parallel
+                use_dilation=True,             # Better text detection
+                det_db_box_thresh=0.5,         # Detection confidence threshold
+                det_db_unclip_ratio=1.8,       # Text box expansion
+                # Memory optimization (allow heavy usage):
+                total_process_num=1,           # Single process, all threads
+                use_mp=False,                  # No multiprocessing overhead
+                show_log=False                 # Suppress logs for speed
             )
         return cls._instance
 
 
 def run_full_document_ocr(image):
     """
-    Run PaddleOCR on full document
+    Run PaddleOCR on full document with preprocessing optimization
     
     Returns:
         List of detections with text, confidence, and position
     """
+    # Preprocessing optimization for better OCR
+    # Increase contrast and sharpness for better text detection
+    import cv2
+    
+    # Convert to grayscale if needed (faster processing)
+    if len(image.shape) == 3:
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        # Apply CLAHE (Contrast Limited Adaptive Histogram Equalization) for better contrast
+        clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
+        enhanced = clahe.apply(gray)
+        # Convert back to BGR for PaddleOCR
+        image = cv2.cvtColor(enhanced, cv2.COLOR_GRAY2BGR)
+    
     ocr = PaddleOCREngine.get_instance()
     result = ocr.predict(image)
     

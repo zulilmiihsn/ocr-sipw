@@ -76,7 +76,7 @@ class PaddleOCREngine:
             print("🔧 Initializing PP-OCRv5 with optimized settings...")
             
             # PP-OCRv5 OPTIMIZED CONFIG
-            # Only use well-tested, widely supported parameters
+            # Only use parameters that are confirmed working
             ocr_config = {
                 # Basic settings
                 'lang': OCRConfig.PADDLE_LANG,
@@ -89,7 +89,6 @@ class PaddleOCREngine:
                 
                 # Recognition optimization
                 'rec_batch_num': 6,          # Batch processing for speed
-                'drop_score': 0.4,           # Drop low confidence results
             }
             
             cls._instance = PaddleOCR(**ocr_config)

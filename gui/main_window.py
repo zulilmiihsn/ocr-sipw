@@ -442,9 +442,9 @@ class MainWindow(QMainWindow):
     
     def init_ui(self):
         """Initialize the user interface"""
-        self.setWindowTitle("Lab-untuk-OCR - Ekstraksi Tabel BLOK III v3.2")
-        self.setMinimumSize(1280, 860)
-        self.setWindowIcon(self._get_icon('fa5s.table', color='#2563EB'))
+        self.setWindowTitle("Lab-untuk-OCR - Ekstraksi Tabel BLOK III")
+        self.setMinimumSize(1280, 800)
+        self.setWindowIcon(self._get_icon('fa5s.table', color='white'))
         
         # Load QSS stylesheet
         self.load_stylesheet()
@@ -453,10 +453,10 @@ class MainWindow(QMainWindow):
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
         
-        # Main layout with proper spacing
+        # Main layout - compact spacing
         main_layout = QVBoxLayout(central_widget)
-        main_layout.setContentsMargins(24, 24, 24, 24)
-        main_layout.setSpacing(16)
+        main_layout.setContentsMargins(16, 16, 16, 16)
+        main_layout.setSpacing(12)
         
         # File selection area (simplified)
         file_group = self.create_file_selection_group()
@@ -474,7 +474,7 @@ class MainWindow(QMainWindow):
         
         # Single Export button
         export_btn = QPushButton(" Ekspor Hasil")
-        export_btn.setIcon(self._get_icon('fa5s.download', color='#2563EB'))
+        export_btn.setIcon(self._get_icon('fa5s.download', color='white'))
         export_btn.setObjectName("exportButton")
         export_btn.clicked.connect(self.export_results)
         export_btn.setEnabled(False)
@@ -489,21 +489,21 @@ class MainWindow(QMainWindow):
     
     def create_file_selection_group(self):
         """Create file selection UI group with Start button"""
-        group = QGroupBox("PILIH FILE & PROSES")
+        group = QGroupBox("Pilih File & Proses")
         layout = QHBoxLayout()
-        layout.setSpacing(12)
+        layout.setSpacing(16)
         
         # File label with icon
         file_icon = QLabel()
-        file_icon.setPixmap(self._get_icon('fa5s.file-image', color='#6B7280').pixmap(20, 20))
+        file_icon.setPixmap(self._get_icon('fa5s.file-image', color='#64748B').pixmap(24, 24))
         layout.addWidget(file_icon)
         
         self.file_label = QLabel("Belum ada file dipilih")
-        self.file_label.setStyleSheet("font-size: 11pt; color: #6B7280;")
+        self.file_label.setStyleSheet("font-size: 10pt; color: #64748B; font-weight: 500;")
         layout.addWidget(self.file_label, 1)
         
         # Browse button
-        browse_btn = QPushButton(" Pilih File...")
+        browse_btn = QPushButton(" Pilih File")
         browse_btn.setIcon(self._get_icon('fa5s.folder-open', color='#2563EB'))
         browse_btn.setObjectName("browse_btn")
         browse_btn.clicked.connect(self.browse_file)
@@ -512,7 +512,7 @@ class MainWindow(QMainWindow):
         
         # Start OCR button
         self.start_btn = QPushButton(" Mulai OCR")
-        self.start_btn.setIcon(self._get_icon('fa5s.play-circle', color='#10B981'))
+        self.start_btn.setIcon(self._get_icon('fa5s.play-circle', color='white'))
         self.start_btn.setObjectName("start_btn")
         self.start_btn.clicked.connect(self.start_ocr)
         self.start_btn.setEnabled(False)  # Disabled until file selected
@@ -521,7 +521,7 @@ class MainWindow(QMainWindow):
         
         # Reset button
         self.reset_btn = QPushButton(" Reset")
-        self.reset_btn.setIcon(self._get_icon('fa5s.redo-alt', color='#EF4444'))
+        self.reset_btn.setIcon(self._get_icon('fa5s.redo-alt', color='#2563EB'))
         self.reset_btn.setObjectName("reset_btn")
         self.reset_btn.clicked.connect(self.reset_all)
         self.reset_btn.setEnabled(False)  # Disabled initially
@@ -533,7 +533,7 @@ class MainWindow(QMainWindow):
     
     def create_table_group(self):
         """Create table UI group"""
-        group = QGroupBox("HASIL EKSTRAKSI TABEL")
+        group = QGroupBox("Hasil Ekstraksi Tabel")
         layout = QVBoxLayout()
         
         # Create custom table widget with arrow key navigation
@@ -566,25 +566,25 @@ class MainWindow(QMainWindow):
         for i in range(10):
             self.table.setVerticalHeaderItem(i, QTableWidgetItem(str(i + 1)))
         
-        # Adjust column widths based on content (removed "No" column width)
+        # Adjust column widths - COMPACT for 1 page fit
         header = self.table.horizontalHeader()
         column_widths = [
-            120,  # Kode SLS/Non-SLS
-            90,   # Kode Sub-SLS
-            180,  # Nama SLS/Non-SLS
-            140,  # Perkiraan Jumlah Muatan KK
-            120,  # BTT
-            150,  # BTT Kosong
-            120,  # BKU
-            180,  # Bangunan Bukan Tempat Tinggal
-            140,  # Perkiraan Jumlah Muatan Usaha
-            100,  # Total Muatan
-            180,  # Nama Wilayah Konsentrasi
-            150,  # Jumlah Shift
-            120,  # Jam Operasional
-            160,  # Contact - Telepon/Email
-            140,  # Contact - Muatan Dominan
-            120   # Perubahan batas (reko)
+            80,   # Kode SLS/Non-SLS
+            70,   # Kode Sub-SLS
+            120,  # Nama SLS/Non-SLS
+            90,   # Perkiraan Jumlah Muatan KK
+            70,   # BTT
+            80,   # BTT Kosong
+            70,   # BKU
+            100,  # Bangunan Bukan Tempat Tinggal
+            80,   # Perkiraan Jumlah Muatan Usaha
+            70,   # Total Muatan
+            100,  # Nama Wilayah Konsentrasi
+            80,   # Jumlah Shift
+            80,   # Jam Operasional
+            100,  # Contact - Telepon/Email
+            80,   # Contact - Muatan Dominan
+            70    # Perubahan batas (reko)
         ]
         
         for i, width in enumerate(column_widths):

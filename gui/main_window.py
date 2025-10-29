@@ -25,9 +25,8 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from pipeline.lib.image_utils import load_image, save_image
 from pipeline.lib.table_detector import detect_table_region, crop_table
 from pipeline.ocr_engine import (
-    preprocess_image, perform_full_document_ocr,
-    detect_vertical_lines, detect_header_rows, learn_column_structure,
-    detect_smart_rows, build_table
+    run_full_document_ocr, detect_vertical_lines, detect_horizontal_lines,
+    detect_header_rows, learn_column_structure, build_table
 )
 
 
@@ -65,32 +64,38 @@ class OCRWorker(QThread):
                 return
             cropped = crop_table(image, bbox)
             
-            # Stage 3: Preprocess
-            self.progress.emit(30, "Stage 3/6: Preprocessing image...")
+            # Stage 3: OCR Scan (Full Document)
+            self.progress.emit(30, "Stage 3/6: Performing OCR scan (this may take ~70s)...")
             if self.is_cancelled:
                 return
-            preprocessed = preprocess_image(cropped)
+            ocr_results = run_full_document_ocr(cropped)
             
-            # Stage 4: OCR Scan
-            self.progress.emit(40, "Stage 4/6: Performing OCR scan (this may take ~70s)...")
+            # Stage 4: Detect Lines
+            self.progress.emit(70, "Stage 4/6: Detecting table structure...")
             if self.is_cancelled:
                 return
-            ocr_results = perform_full_document_ocr(preprocessed)
+            horizontal_lines = detect_horizontal_lines(cropped)
+            vertical_lines = detect_vertical_lines(cropped)
             
-            # Stage 5: Detect Structure
-            self.progress.emit(70, "Stage 5/6: Detecting table structure...")
+            # Stage 5: Detect Headers and Columns
+            self.progress.emit(80, "Stage 5/6: Learning column structure...")
             if self.is_cancelled:
                 return
-            vertical_lines = detect_vertical_lines(preprocessed)
-            header_rows = detect_header_rows(ocr_results)
-            column_structure = learn_column_structure(header_rows, vertical_lines)
-            smart_rows = detect_smart_rows(ocr_results, header_rows)
+            header_groups = detect_header_rows(ocr_results)
+            column_structure = learn_column_structure(header_groups, vertical_lines)
+            
+            # Get header y_max for table building
+            header_y_max = 0
+            if header_groups:
+                for group in header_groups:
+                    for det in group:
+                        header_y_max = max(header_y_max, det['y_max'])
             
             # Stage 6: Build Table
             self.progress.emit(90, "Stage 6/6: Building table...")
             if self.is_cancelled:
                 return
-            table_data = build_table(ocr_results, column_structure, smart_rows)
+            table_data = build_table(ocr_results, column_structure, horizontal_lines, vertical_lines, header_y_max)
             
             total_time = time.time() - start_time
             
@@ -432,7 +437,7 @@ class MainWindow(QMainWindow):
             
             for col_idx in range(17):
                 cell_data = row_data['cells'].get(col_idx, {})
-                text = cell_data.get('text_final', cell_data.get('text', ''))
+                text = cell_data.get('text', '')
                 confidence = cell_data.get('confidence', 0.0)
                 
                 # Create item

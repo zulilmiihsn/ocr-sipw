@@ -369,9 +369,10 @@ def validate_and_correct_by_template(text, column_index):
             return digits[:2]
         return digits.zfill(2) if digits else '00'
     
-    # Column 2: RT/RW format
+    # Column 2: RT/RW format (MUST include "RT" and "RW" text)
     elif column_index == 2:
         import re
+        # Try to extract RT and RW numbers
         rt_match = re.search(r'RT[\s\.]?(\d+)', text.upper())
         rw_match = re.search(r'RW[\s\.]?(\d+)', text.upper())
         
@@ -379,7 +380,20 @@ def validate_and_correct_by_template(text, column_index):
             rt_num = rt_match.group(1).zfill(3)
             rw_num = rw_match.group(1).zfill(3)
             return f"RT {rt_num} RW {rw_num}"
-        return text  # Keep original if pattern not found
+        
+        # Fallback: Try to find any numbers and format as RT/RW
+        digits = re.findall(r'\d+', text)
+        if len(digits) >= 2:
+            rt_num = digits[0].zfill(3)
+            rw_num = digits[1].zfill(3)
+            return f"RT {rt_num} RW {rw_num}"
+        elif len(digits) == 1:
+            # Only one number found, use for both
+            num = digits[0].zfill(3)
+            return f"RT {num} RW {num}"
+        
+        # If no numbers at all, return formatted empty
+        return "RT 000 RW 000"
     
     # Column 3-9: Numbers (BTT, BTT Kosong, BKU, BBTT, Muatan, Total)
     elif column_index in [3, 4, 5, 6, 7, 8, 9]:

@@ -25,7 +25,7 @@ if sys.stdout.encoding != 'utf-8':
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 # Add project root
-project_root = Path(__file__).parent.parent.parent
+project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
 from src.utils.pdf_handler import load_image
@@ -43,7 +43,7 @@ total_start = time.time()
 # Stage 1: Load
 print("[Stage 1] Loading 1.png...")
 t1 = time.time()
-image = load_image('contoh gambar/1.png')
+image = load_image('../contoh gambar/1.png')
 print(f"  ✓ Loaded: {image.shape}")
 print(f"  ⏱ Time: {time.time() - t1:.2f}s")
 
@@ -56,23 +56,24 @@ print(f"  ✓ Cropped: {blok3_img.shape}")
 print(f"  ⏱ Time: {time.time() - t2:.2f}s")
 
 # Save cropped
-output_path = project_root / 'experiments' / 'final_system' / 'blok3_for_smart_rows.jpg'
+output_path = Path(__file__).parent / 'blok3_cropped.jpg'
 cv2.imwrite(str(output_path), blok3_img)
 print(f"  ✓ Saved: {output_path}")
 
-# Stage 3: Run OCR
-print("\n[Stage 3] Running PaddleOCR...")
-t3 = time.time()
-
-sys.path.insert(0, str(project_root / 'experiments' / 'stage5_ocr'))
-from test_adaptive_mapping_v2 import (
+# Import adaptive OCR functions
+from adaptive_ocr import (
     run_full_document_ocr,
     detect_horizontal_lines,
     detect_vertical_lines,
     detect_header_rows,
     learn_column_names_from_lines,
-    post_process_text
+    post_process_text,
+    map_to_table
 )
+
+# Stage 3: Run OCR
+print("\n[Stage 3] Running PaddleOCR...")
+t3 = time.time()
 
 detections = run_full_document_ocr(blok3_img)
 print(f"  ✓ Detected {len(detections)} text regions")
@@ -181,8 +182,6 @@ print(f"  ⏱ Time: {time.time() - t5:.2f}s")
 print("\n[Stage 6] Mapping detections to table...")
 t6 = time.time()
 
-from test_adaptive_mapping_v2 import map_to_table
-
 rows = map_to_table(detections, columns, h_lines, v_lines, header_y_max)
 print(f"  ✓ Created {len(rows)} data rows (should be exactly 10!)")
 
@@ -209,7 +208,7 @@ results = {
     'rows': rows
 }
 
-results_path = project_root / 'experiments' / 'final_system' / 'ADAPTIVE_V2_SMART_RESULTS.json'
+results_path = Path(__file__).parent / 'ocr_results.json'
 with open(results_path, 'w', encoding='utf-8') as f:
     json.dump(results, f, indent=2, ensure_ascii=False)
 

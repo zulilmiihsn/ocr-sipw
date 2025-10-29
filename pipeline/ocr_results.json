@@ -2,7 +2,7 @@
   "metadata": {
     "method": "Adaptive v2.1 - Smart Row Detection",
     "input": "contoh gambar/1.png",
-    "total_time": "89.14s",
+    "total_time": "74.16s",
     "detections": 227,
     "columns": 17,
     "data_rows": 10,

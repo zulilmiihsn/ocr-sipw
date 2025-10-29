@@ -45,13 +45,26 @@ def pdf_to_images(pdf_path: str, dpi: int = 300) -> List[np.ndarray]:
         
         return cv_images
         
-    except ImportError:
+    except ImportError as e:
         raise ImportError(
             "pdf2image library not found. Install with: pip install pdf2image\n"
-            "Also requires poppler: https://poppler.freedesktop.org/"
-        )
+            "Also requires poppler-utils. See installation guide in README."
+        ) from e
     except Exception as e:
-        raise RuntimeError(f"Failed to convert PDF: {str(e)}")
+        # Check if it's poppler-related error
+        error_msg = str(e).lower()
+        if 'poppler' in error_msg or 'unable to get page count' in error_msg:
+            raise RuntimeError(
+                "Poppler tidak terinstall!\n\n"
+                "Untuk Windows:\n"
+                "1. Download poppler: https://github.com/oschwartz10612/poppler-windows/releases\n"
+                "2. Extract ke folder (contoh: C:\\poppler)\n"
+                "3. Tambahkan ke PATH: C:\\poppler\\Library\\bin\n"
+                "4. Restart aplikasi\n\n"
+                "Atau install via conda: conda install -c conda-forge poppler"
+            ) from e
+        else:
+            raise RuntimeError(f"Failed to convert PDF: {str(e)}") from e
 
 
 def load_document(file_path: str, dpi: int = 300) -> Tuple[List[np.ndarray], str]:

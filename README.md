@@ -20,9 +20,11 @@
 Lab OCR adalah sistem OCR (Optical Character Recognition) yang dirancang khusus untuk mengekstrak data dari tabel **BLOK III** pada formulir statistik dengan akurasi tinggi.
 
 **NEW! 🎨 GUI Application** - Kini tersedia aplikasi GUI yang user-friendly dengan fitur:
-- 📁 File browser untuk pilih PDF/Image
+- 📁 Multi-file selection (batch processing)
+- 📄 Multi-page PDF support (automatic)
 - 🔄 Progress bar real-time
 - 📊 Interactive editable table
+- 🔀 Auto-sort by Kode SLS & Sub-SLS
 - 💾 Multiple export formats (Excel, CSV, JSON, HTML)
 - 🎯 Color-coded confidence levels
 
@@ -37,6 +39,35 @@ Lab OCR adalah sistem OCR (Optical Character Recognition) yang dirancang khusus 
 
 ## 🚀 Quick Start
 
+### Prerequisites
+
+**For PDF Support (Required for multi-page PDFs):**
+
+**Windows:**
+```bash
+# Download poppler from:
+# https://github.com/oschwartz10612/poppler-windows/releases
+
+# Extract to C:\poppler (or any folder)
+# Add to PATH: C:\poppler\Library\bin
+# Restart terminal/IDE
+```
+
+**Linux:**
+```bash
+sudo apt-get install poppler-utils
+```
+
+**macOS:**
+```bash
+brew install poppler
+```
+
+**Or via Conda (all platforms):**
+```bash
+conda install -c conda-forge poppler
+```
+
 ### Option A: GUI Application (Recommended!)
 
 ```bash
@@ -44,8 +75,8 @@ Lab OCR adalah sistem OCR (Optical Character Recognition) yang dirancang khusus 
 git clone https://github.com/zulilmiihsn/lab-ocr.git
 cd lab-ocr
 
-# Install GUI dependencies
-pip install -r requirements-gui.txt
+# Install dependencies
+pip install -r requirements.txt
 
 # Run GUI app
 python app.py

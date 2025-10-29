@@ -183,41 +183,107 @@ class OCRWorker(QThread):
             
             cells = defaultdict(lambda: {'detections': []})
             
-            # Map detections to cells using Y-center instead of Y-min
+            # ADVANCED CELL MAPPING with IoU + Fuzzy Logic
+            def calculate_iou(box1, box2):
+                """Calculate Intersection over Union"""
+                x1_min, y1_min, x1_max, y1_max = box1
+                x2_min, y2_min, x2_max, y2_max = box2
+                
+                # Intersection
+                inter_x_min = max(x1_min, x2_min)
+                inter_y_min = max(y1_min, y2_min)
+                inter_x_max = min(x1_max, x2_max)
+                inter_y_max = min(y1_max, y2_max)
+                
+                if inter_x_max < inter_x_min or inter_y_max < inter_y_min:
+                    return 0.0
+                
+                inter_area = (inter_x_max - inter_x_min) * (inter_y_max - inter_y_min)
+                
+                # Union
+                box1_area = (x1_max - x1_min) * (y1_max - y1_min)
+                box2_area = (x2_max - x2_min) * (y2_max - y2_min)
+                union_area = box1_area + box2_area - inter_area
+                
+                return inter_area / union_area if union_area > 0 else 0.0
+            
+            def fuzzy_score(det, cell_box, confidence):
+                """Calculate fuzzy logic score for cell assignment"""
+                det_box = (det['x_min'], det['y_min'], det['x_max'], det['y_max'])
+                cell_x_min, cell_y_min, cell_x_max, cell_y_max = cell_box
+                
+                # 1. Center position match (40%)
+                det_center_x = (det['x_min'] + det['x_max']) / 2
+                det_center_y = (det['y_min'] + det['y_max']) / 2
+                
+                in_x = cell_x_min <= det_center_x < cell_x_max
+                in_y = cell_y_min <= det_center_y < cell_y_max
+                center_score = 1.0 if (in_x and in_y) else 0.0
+                
+                # 2. IoU overlap (30%)
+                iou = calculate_iou(det_box, cell_box)
+                
+                # 3. Distance to cell center (20%)
+                cell_center_x = (cell_x_min + cell_x_max) / 2
+                cell_center_y = (cell_y_min + cell_y_max) / 2
+                
+                distance = ((det_center_x - cell_center_x)**2 + (det_center_y - cell_center_y)**2)**0.5
+                cell_width = cell_x_max - cell_x_min
+                cell_height = cell_y_max - cell_y_min
+                max_distance = ((cell_width/2)**2 + (cell_height/2)**2)**0.5
+                
+                distance_score = 1.0 - min(distance / max_distance, 1.0) if max_distance > 0 else 0.0
+                
+                # 4. Confidence weight (10%)
+                conf_score = confidence
+                
+                # Weighted combination
+                total_score = (
+                    center_score * 0.40 +
+                    iou * 0.30 +
+                    distance_score * 0.20 +
+                    conf_score * 0.10
+                )
+                
+                return total_score
+            
+            # Map detections to cells using advanced scoring
             for det in ocr_results:
-                # Use center point for more accurate row detection
                 y_center = (det['y_min'] + det['y_max']) / 2
-                x_center = (det['x_min'] + det['x_max']) / 2
                 
                 # Skip headers
                 if y_center <= header_y_max:
                     continue
                 
-                # Find row (use center Y)
-                row = -1
+                # Find best matching cell using fuzzy scoring
+                best_score = 0.0
+                best_row = -1
+                best_col = -1
+                
                 for i in range(len(h_lines) - 1):
-                    # Check if center is within row bounds
-                    row_start = h_lines[i]
-                    row_end = h_lines[i + 1]
-                    row_mid = (row_start + row_end) / 2
+                    row_y_min = h_lines[i]
+                    row_y_max = h_lines[i + 1]
                     
-                    # Use center-based comparison with tolerance
-                    if row_start <= y_center < row_end:
-                        row = i
-                        break
-                
-                # Find column (use center X)
-                col = -1
-                for j in range(len(column_structure)):
-                    col_start = column_structure[j]['x_start']
-                    col_end = column_structure[j]['x_end']
+                    # Skip if detection is far from this row
+                    if y_center < row_y_min - 20 or y_center > row_y_max + 20:
+                        continue
                     
-                    if col_start <= x_center < col_end:
-                        col = j
-                        break
+                    for j in range(len(column_structure)):
+                        col_x_min = column_structure[j]['x_start']
+                        col_x_max = column_structure[j]['x_end']
+                        
+                        cell_box = (col_x_min, row_y_min, col_x_max, row_y_max)
+                        
+                        # Calculate fuzzy score
+                        score = fuzzy_score(det, cell_box, det['confidence'])
+                        
+                        if score > best_score and score > 0.3:  # Minimum threshold
+                            best_score = score
+                            best_row = i
+                            best_col = j
                 
-                if row >= 0 and col >= 0:
-                    cells[(row, col)]['detections'].append(det)
+                if best_row >= 0 and best_col >= 0:
+                    cells[(best_row, best_col)]['detections'].append(det)
             
             # Merge detections in same cell
             for (row, col), cell in cells.items():

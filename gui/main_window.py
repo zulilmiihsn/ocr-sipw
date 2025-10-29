@@ -158,10 +158,20 @@ class MainWindow(QMainWindow):
         
         self.init_ui()
     
+    def load_stylesheet(self):
+        """Load modern QSS stylesheet"""
+        style_path = Path(__file__).parent / 'styles.qss'
+        if style_path.exists():
+            with open(style_path, 'r', encoding='utf-8') as f:
+                self.setStyleSheet(f.read())
+    
     def init_ui(self):
         """Initialize the user interface"""
         self.setWindowTitle("Lab-untuk-OCR - BLOK III Table Extractor v3.1")
-        self.setMinimumSize(1200, 800)
+        self.setMinimumSize(1280, 860)
+        
+        # Load QSS stylesheet
+        self.load_stylesheet()
         
         # Create menu bar
         self.create_menu_bar()
@@ -170,10 +180,10 @@ class MainWindow(QMainWindow):
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
         
-        # Main layout
+        # Main layout with proper spacing
         main_layout = QVBoxLayout(central_widget)
-        main_layout.setContentsMargins(10, 10, 10, 10)
-        main_layout.setSpacing(10)
+        main_layout.setContentsMargins(24, 24, 24, 24)
+        main_layout.setSpacing(16)
         
         # File selection area
         file_group = self.create_file_selection_group()
@@ -182,14 +192,29 @@ class MainWindow(QMainWindow):
         # Splitter for image preview and table
         splitter = QSplitter(Qt.Horizontal)
         
-        # Image preview
+        # Image preview card
+        preview_card = QGroupBox("📷 Image Preview")
+        preview_layout = QVBoxLayout()
+        preview_layout.setContentsMargins(8, 8, 8, 8)
+        
         self.image_label = QLabel()
-        self.image_label.setMinimumSize(400, 300)
-        self.image_label.setMaximumSize(500, 400)
-        self.image_label.setStyleSheet("border: 2px solid #ccc; background: #f0f0f0;")
+        self.image_label.setMinimumSize(420, 340)
+        self.image_label.setMaximumSize(520, 440)
+        self.image_label.setStyleSheet(
+            "QLabel { "
+            "border: 2px dashed #E5E7EB; "
+            "border-radius: 8px; "
+            "background: #F9FAFB; "
+            "color: #9CA3AF; "
+            "font-size: 11pt; "
+            "}"
+        )
         self.image_label.setAlignment(Qt.AlignCenter)
-        self.image_label.setText("📷 Image Preview\n\nSelect a file to see preview")
-        splitter.addWidget(self.image_label)
+        self.image_label.setText("📷\n\nDrag & drop or browse\nto select an image")
+        preview_layout.addWidget(self.image_label)
+        
+        preview_card.setLayout(preview_layout)
+        splitter.addWidget(preview_card)
         
         # Table area
         table_group = self.create_table_group()
@@ -245,21 +270,35 @@ class MainWindow(QMainWindow):
         """Create file selection UI group"""
         group = QGroupBox("📁 File Selection")
         layout = QHBoxLayout()
+        layout.setSpacing(12)
+        
+        # File info container
+        file_container = QWidget()
+        file_layout = QVBoxLayout(file_container)
+        file_layout.setContentsMargins(0, 0, 0, 0)
+        file_layout.setSpacing(4)
         
         self.file_label = QLabel("No file selected")
-        self.file_label.setStyleSheet("color: #666;")
-        layout.addWidget(self.file_label, 1)
+        self.file_label.setObjectName("subtitle_label")
+        file_layout.addWidget(self.file_label)
         
-        browse_btn = QPushButton("Browse...")
+        self.file_path_label = QLabel("")
+        self.file_path_label.setStyleSheet("color: #9CA3AF; font-size: 9pt;")
+        self.file_path_label.setVisible(False)
+        file_layout.addWidget(self.file_path_label)
+        
+        layout.addWidget(file_container, 1)
+        
+        browse_btn = QPushButton("📂 Browse...")
+        browse_btn.setObjectName("browse_btn")
         browse_btn.clicked.connect(self.browse_file)
-        browse_btn.setMinimumWidth(100)
+        browse_btn.setMinimumWidth(120)
         layout.addWidget(browse_btn)
         
         self.start_btn = QPushButton("🚀 Start OCR")
         self.start_btn.clicked.connect(self.start_ocr)
         self.start_btn.setEnabled(False)
-        self.start_btn.setMinimumWidth(120)
-        self.start_btn.setStyleSheet("font-weight: bold; padding: 8px;")
+        self.start_btn.setMinimumWidth(140)
         layout.addWidget(self.start_btn)
         
         group.setLayout(layout)
@@ -306,37 +345,48 @@ class MainWindow(QMainWindow):
     
     def create_export_buttons(self):
         """Create export buttons"""
+        # Card for export buttons
+        export_card = QGroupBox("💾 Export Results")
         layout = QHBoxLayout()
+        layout.setSpacing(12)
         
-        layout.addStretch()
-        
-        self.export_excel_btn = QPushButton("💾 Export to Excel")
+        self.export_excel_btn = QPushButton("📊 Excel")
         self.export_excel_btn.clicked.connect(lambda: self.export_results("excel"))
         self.export_excel_btn.setEnabled(False)
-        self.export_excel_btn.setMinimumWidth(150)
+        self.export_excel_btn.setMinimumWidth(140)
+        self.export_excel_btn.setToolTip("Export to Excel with formatting")
         layout.addWidget(self.export_excel_btn)
         
-        self.export_csv_btn = QPushButton("💾 Export to CSV")
+        self.export_csv_btn = QPushButton("📄 CSV")
         self.export_csv_btn.clicked.connect(lambda: self.export_results("csv"))
         self.export_csv_btn.setEnabled(False)
-        self.export_csv_btn.setMinimumWidth(150)
+        self.export_csv_btn.setMinimumWidth(140)
+        self.export_csv_btn.setToolTip("Export to CSV (comma-separated)")
         layout.addWidget(self.export_csv_btn)
         
-        self.export_json_btn = QPushButton("💾 Export to JSON")
+        self.export_json_btn = QPushButton("🔧 JSON")
         self.export_json_btn.clicked.connect(lambda: self.export_results("json"))
         self.export_json_btn.setEnabled(False)
-        self.export_json_btn.setMinimumWidth(150)
+        self.export_json_btn.setMinimumWidth(140)
+        self.export_json_btn.setToolTip("Export to JSON with metadata")
         layout.addWidget(self.export_json_btn)
         
-        self.export_html_btn = QPushButton("🌐 Export to HTML")
+        self.export_html_btn = QPushButton("🌐 HTML")
         self.export_html_btn.clicked.connect(lambda: self.export_results("html"))
         self.export_html_btn.setEnabled(False)
-        self.export_html_btn.setMinimumWidth(150)
+        self.export_html_btn.setMinimumWidth(140)
+        self.export_html_btn.setToolTip("Export to HTML (interactive view)")
         layout.addWidget(self.export_html_btn)
         
         layout.addStretch()
         
-        return layout
+        export_card.setLayout(layout)
+        
+        # Wrap in container
+        container_layout = QVBoxLayout()
+        container_layout.addWidget(export_card)
+        
+        return container_layout
     
     def browse_file(self):
         """Open file browser dialog"""
@@ -349,32 +399,46 @@ class MainWindow(QMainWindow):
         
         if file_path:
             self.current_file = file_path
-            self.file_label.setText(Path(file_path).name)
-            self.file_label.setStyleSheet("color: #000; font-weight: bold;")
+            file_name = Path(file_path).name
+            self.file_label.setText(f"✅ {file_name}")
+            self.file_label.setStyleSheet("color: #10B981; font-weight: 600; font-size: 11pt;")
+            
+            # Show file path
+            self.file_path_label.setText(str(Path(file_path).parent))
+            self.file_path_label.setVisible(True)
+            
             self.start_btn.setEnabled(True)
             
             # Load and display image preview
             self.load_image_preview(file_path)
             
-            self.update_status(f"File loaded: {Path(file_path).name}")
+            self.update_status(f"✅ File loaded: {file_name}")
     
     def load_image_preview(self, file_path: str):
         """Load and display image preview"""
         try:
             pixmap = QPixmap(file_path)
             if not pixmap.isNull():
+                # Update style for loaded image
+                self.image_label.setStyleSheet(
+                    "QLabel { "
+                    "border: 2px solid #E5E7EB; "
+                    "border-radius: 8px; "
+                    "background: white; "
+                    "}"
+                )
                 # Scale to fit label while maintaining aspect ratio
                 scaled_pixmap = pixmap.scaled(
-                    self.image_label.width() - 10,
-                    self.image_label.height() - 10,
+                    self.image_label.width() - 20,
+                    self.image_label.height() - 20,
                     Qt.KeepAspectRatio,
                     Qt.SmoothTransformation
                 )
                 self.image_label.setPixmap(scaled_pixmap)
             else:
-                self.image_label.setText("📷 Image Preview\n\n(Preview not available)")
+                self.image_label.setText("📷\n\nPreview not available")
         except Exception as e:
-            self.image_label.setText(f"📷 Image Preview\n\n(Error: {str(e)})")
+            self.image_label.setText(f"📷\n\nError loading preview\n{str(e)[:30]}")
     
     def start_ocr(self):
         """Start OCR processing"""

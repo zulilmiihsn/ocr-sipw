@@ -17,13 +17,8 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import Qt, QThread, pyqtSignal, QTimer
 from PyQt5.QtGui import QPixmap, QColor, QFont, QIcon
 
-# Import QtAwesome for professional icons
-try:
-    import qtawesome as qta
-    ICONS_AVAILABLE = True
-except ImportError:
-    ICONS_AVAILABLE = False
-    print("⚠ QtAwesome not installed. Using text labels instead of icons.")
+# Import QtAwesome for professional icons (REQUIRED)
+import qtawesome as qta
 
 # Import OCR pipeline
 import sys
@@ -372,10 +367,8 @@ class MainWindow(QMainWindow):
         self.init_ui()
     
     def _get_icon(self, name: str, **kwargs):
-        """Get icon from QtAwesome or fallback to emoji"""
-        if ICONS_AVAILABLE:
-            return qta.icon(name, **kwargs)
-        return QIcon()  # Empty icon if not available
+        """Get icon from QtAwesome"""
+        return qta.icon(name, **kwargs)
     
     def load_stylesheet(self):
         """Load modern QSS stylesheet"""
@@ -386,8 +379,9 @@ class MainWindow(QMainWindow):
     
     def init_ui(self):
         """Initialize the user interface"""
-        self.setWindowTitle("Lab-untuk-OCR - BLOK III Table Extractor v3.1")
+        self.setWindowTitle("Lab-untuk-OCR - Ekstraksi Tabel BLOK III v3.2")
         self.setMinimumSize(1280, 860)
+        self.setWindowIcon(self._get_icon('fa5s.table', color='#2563EB'))
         
         # Load QSS stylesheet
         self.load_stylesheet()
@@ -416,7 +410,7 @@ class MainWindow(QMainWindow):
         main_layout.addWidget(self.progress_bar)
         
         # Single Export button
-        export_btn = QPushButton(" Export Results" if ICONS_AVAILABLE else "💾 Export Results")
+        export_btn = QPushButton(" Ekspor Hasil")
         export_btn.setIcon(self._get_icon('fa5s.download', color='#2563EB'))
         export_btn.setObjectName("exportButton")
         export_btn.clicked.connect(self.export_results)
@@ -427,22 +421,26 @@ class MainWindow(QMainWindow):
         # Status bar
         self.status_bar = QStatusBar()
         self.setStatusBar(self.status_bar)
-        self.update_status("Ready")
+        self.update_status("Siap - Pilih file untuk memulai")
     
     
     def create_file_selection_group(self):
         """Create file selection UI group with Start button"""
-        group = QGroupBox("FILE SELECTION & PROCESSING")
+        group = QGroupBox("PILIH FILE & PROSES")
         layout = QHBoxLayout()
         layout.setSpacing(12)
         
-        # File label
-        self.file_label = QLabel("No file selected")
+        # File label with icon
+        file_icon = QLabel()
+        file_icon.setPixmap(self._get_icon('fa5s.file-image', color='#6B7280').pixmap(20, 20))
+        layout.addWidget(file_icon)
+        
+        self.file_label = QLabel("Belum ada file dipilih")
         self.file_label.setStyleSheet("font-size: 11pt; color: #6B7280;")
         layout.addWidget(self.file_label, 1)
         
         # Browse button
-        browse_btn = QPushButton(" Browse File..." if ICONS_AVAILABLE else "📂 Browse File...")
+        browse_btn = QPushButton(" Pilih File...")
         browse_btn.setIcon(self._get_icon('fa5s.folder-open', color='#2563EB'))
         browse_btn.setObjectName("browse_btn")
         browse_btn.clicked.connect(self.browse_file)
@@ -450,7 +448,7 @@ class MainWindow(QMainWindow):
         layout.addWidget(browse_btn)
         
         # Start OCR button
-        self.start_btn = QPushButton(" Start OCR" if ICONS_AVAILABLE else "▶ Start OCR")
+        self.start_btn = QPushButton(" Mulai OCR")
         self.start_btn.setIcon(self._get_icon('fa5s.play-circle', color='#10B981'))
         self.start_btn.setObjectName("start_btn")
         self.start_btn.clicked.connect(self.start_ocr)
@@ -459,8 +457,8 @@ class MainWindow(QMainWindow):
         layout.addWidget(self.start_btn)
         
         # Reset button
-        self.reset_btn = QPushButton(" Reset" if ICONS_AVAILABLE else "🔄 Reset")
-        self.reset_btn.setIcon(self._get_icon('fa5s.sync-alt', color='#EF4444'))
+        self.reset_btn = QPushButton(" Reset")
+        self.reset_btn.setIcon(self._get_icon('fa5s.redo-alt', color='#EF4444'))
         self.reset_btn.setObjectName("reset_btn")
         self.reset_btn.clicked.connect(self.reset_all)
         self.reset_btn.setEnabled(False)  # Disabled initially
@@ -472,7 +470,7 @@ class MainWindow(QMainWindow):
     
     def create_table_group(self):
         """Create table UI group"""
-        group = QGroupBox("EXTRACTED TABLE (Double-click to edit)")
+        group = QGroupBox("HASIL EKSTRAKSI TABEL")
         layout = QVBoxLayout()
         
         # Create table widget (16 columns, removed "No" column)
@@ -551,24 +549,23 @@ class MainWindow(QMainWindow):
         """Open file browser dialog"""
         file_path, _ = QFileDialog.getOpenFileName(
             self,
-            "Select PDF or Image File",
+            "Pilih File Gambar atau PDF",
             str(Path.home()),
-            "Image Files (*.png *.jpg *.jpeg);;PDF Files (*.pdf);;All Files (*.*)"
+            "File Gambar (*.png *.jpg *.jpeg);;File PDF (*.pdf);;Semua File (*.*)"
         )
         
         if file_path:
             self.current_file = file_path
             file_name = Path(file_path).name
-            # Update file label with icon (if available) or checkmark
-            file_indicator = "✓" if ICONS_AVAILABLE else "✅"
-            self.file_label.setText(f"{file_indicator} {file_name}")
+            
+            self.file_label.setText(file_name)
             self.file_label.setStyleSheet("color: #10B981; font-weight: 600; font-size: 11pt;")
             
             # Enable Start and Reset buttons
             self.start_btn.setEnabled(True)
             self.reset_btn.setEnabled(True)
             
-            self.update_status(f"{file_indicator} File loaded: {file_name} - Click 'Start OCR' to begin")
+            self.update_status(f"✓ File dimuat: {file_name} - Klik 'Mulai OCR' untuk memproses")
     
     
     def start_ocr(self):
@@ -583,7 +580,7 @@ class MainWindow(QMainWindow):
         # Show progress bar
         self.progress_bar.setVisible(True)
         self.progress_bar.setValue(0)
-        self.progress_bar.setFormat("Initializing...")
+        self.progress_bar.setFormat("Menginisialisasi...")
         
         # Clear table
         self.table.clearContents()
@@ -596,7 +593,7 @@ class MainWindow(QMainWindow):
         self.ocr_worker.error.connect(self.on_ocr_error)
         self.ocr_worker.start()
         
-        self.update_status("Processing...")
+        self.update_status("Memproses...")
     
     def on_progress(self, percentage: int, stage: str):
         """Update progress bar"""
@@ -620,21 +617,20 @@ class MainWindow(QMainWindow):
         
         # Update status
         metadata = results['metadata']
-        success_icon = "✓" if ICONS_AVAILABLE else "✅"
         status_msg = (
-            f"{success_icon} Complete! {metadata['num_rows']} rows extracted in "
-            f"{metadata['total_time']:.1f}s | Accuracy: ~95% | Ready to export"
+            f"✓ Selesai! {metadata['num_rows']} baris diekstrak dalam "
+            f"{metadata['total_time']:.1f} detik | Akurasi: ~95% | Siap ekspor"
         )
         self.update_status(status_msg)
         
         # Show success message
         QMessageBox.information(
             self,
-            "OCR Complete",
-            f"Successfully extracted {metadata['num_rows']} rows x {metadata['num_columns']} columns!\n\n"
-            f"Processing time: {metadata['total_time']:.1f}s\n"
-            f"Total detections: {metadata['num_detections']}\n\n"
-            "You can now edit the table and export results."
+            "OCR Selesai",
+            f"Berhasil mengekstrak {metadata['num_rows']} baris x {metadata['num_columns']} kolom!\n\n"
+            f"Waktu proses: {metadata['total_time']:.1f} detik\n"
+            f"Total deteksi: {metadata['num_detections']}\n\n"
+            "Anda dapat mengedit tabel dan mengekspor hasil."
         )
     
     def on_ocr_error(self, error_msg: str):
@@ -644,13 +640,12 @@ class MainWindow(QMainWindow):
         # Re-enable Start button on error
         self.start_btn.setEnabled(True)
         
-        error_icon = "✗" if ICONS_AVAILABLE else "❌"
-        self.update_status(f"{error_icon} Error: {error_msg}")
+        self.update_status(f"✗ Error: {error_msg}")
         
         QMessageBox.critical(
             self,
-            "OCR Error",
-            f"An error occurred during OCR processing:\n\n{error_msg}"
+            "Error OCR",
+            f"Terjadi kesalahan saat memproses OCR:\n\n{error_msg}"
         )
     
     def populate_table(self, table_data: List[Dict]):
@@ -718,19 +713,19 @@ class MainWindow(QMainWindow):
         from PyQt5.QtWidgets import QDialog, QVBoxLayout, QRadioButton, QDialogButtonBox, QLabel
         
         dialog = QDialog(self)
-        dialog.setWindowTitle("Select Export Format")
+        dialog.setWindowTitle("Pilih Format Ekspor")
         dialog.setMinimumWidth(350)
         
         layout = QVBoxLayout()
-        layout.addWidget(QLabel("Choose export format:"))
+        layout.addWidget(QLabel("Pilih format ekspor:"))
         layout.addSpacing(8)
         
         # Format options
-        excel_radio = QRadioButton("Excel (.xlsx) - Recommended")
+        excel_radio = QRadioButton("Excel (.xlsx) - Disarankan")
         excel_radio.setChecked(True)
-        csv_radio = QRadioButton("CSV (.csv) - Plain text")
-        json_radio = QRadioButton("JSON (.json) - With metadata")
-        html_radio = QRadioButton("HTML (.html) - Interactive view")
+        csv_radio = QRadioButton("CSV (.csv) - Teks biasa")
+        json_radio = QRadioButton("JSON (.json) - Dengan metadata")
+        html_radio = QRadioButton("HTML (.html) - Tampilan interaktif")
         
         layout.addWidget(excel_radio)
         layout.addWidget(csv_radio)
@@ -783,12 +778,11 @@ class MainWindow(QMainWindow):
             elif format_name == 'html':
                 self.export_to_html(file_path)
             
-            success_icon = "✓" if ICONS_AVAILABLE else "✅"
-            self.update_status(f"{success_icon} Exported to {Path(file_path).name}")
-            QMessageBox.information(self, "Export Successful", f"Results exported to:\n{file_path}")
+            self.update_status(f"✓ Diekspor ke {Path(file_path).name}")
+            QMessageBox.information(self, "Ekspor Berhasil", f"Hasil diekspor ke:\n{file_path}")
             
         except Exception as e:
-            QMessageBox.critical(self, "Export Error", f"Failed to export:\n{str(e)}")
+            QMessageBox.critical(self, "Error Ekspor", f"Gagal mengekspor:\n{str(e)}")
     
     def export_to_excel(self, file_path: str):
         """Export to Excel with formatting (includes No column)"""
@@ -934,8 +928,8 @@ class MainWindow(QMainWindow):
         # Confirm reset
         reply = QMessageBox.question(
             self,
-            "Reset Confirmation",
-            "Are you sure you want to reset?\n\nThis will clear:\n• Selected file\n• OCR results\n• Table data\n• All edits",
+            "Konfirmasi Reset",
+            "Apakah Anda yakin ingin mereset?\n\nIni akan menghapus:\n• File yang dipilih\n• Hasil OCR\n• Data tabel\n• Semua editan",
             QMessageBox.Yes | QMessageBox.No,
             QMessageBox.No
         )
@@ -950,7 +944,7 @@ class MainWindow(QMainWindow):
         
         # Clear file selection
         self.current_file = None
-        self.file_label.setText("No file selected")
+        self.file_label.setText("Belum ada file dipilih")
         self.file_label.setStyleSheet("font-size: 11pt; color: #6B7280;")
         
         # Clear OCR results
@@ -970,12 +964,12 @@ class MainWindow(QMainWindow):
         self.enable_export_buttons(False)
         
         # Update status
-        self.update_status("Ready - Select a file to begin")
+        self.update_status("Siap - Pilih file untuk memulai")
         
         QMessageBox.information(
             self,
-            "Reset Complete",
-            "All data has been cleared.\n\nYou can now select a new file to process."
+            "Reset Selesai",
+            "Semua data telah dihapus.\n\nAnda dapat memilih file baru untuk diproses."
         )
     
     def eventFilter(self, source, event):
@@ -1046,8 +1040,8 @@ class MainWindow(QMainWindow):
         if self.ocr_worker and self.ocr_worker.isRunning():
             reply = QMessageBox.question(
                 self,
-                "OCR In Progress",
-                "OCR processing is still running. Are you sure you want to exit?",
+                "OCR Sedang Berjalan",
+                "Proses OCR masih berjalan. Apakah Anda yakin ingin keluar?",
                 QMessageBox.Yes | QMessageBox.No,
                 QMessageBox.No
             )

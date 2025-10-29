@@ -74,8 +74,32 @@ class OCRWorker(QThread):
             self.progress.emit(70, "Stage 4/6: Detecting table structure...")
             if self.is_cancelled:
                 return
-            horizontal_lines = detect_horizontal_lines(cropped)
+            all_h_lines = detect_horizontal_lines(cropped)
             vertical_lines = detect_vertical_lines(cropped)
+            
+            # Smart row detection: Force exactly 10 data rows
+            image_height = cropped.shape[0]
+            lines = sorted(all_h_lines)
+            
+            # Find header end
+            header_candidates = [y for y in lines if y < image_height * 0.25]
+            if len(header_candidates) >= 2:
+                header_end = max(header_candidates)
+            else:
+                header_end = lines[0] if lines else 0
+            
+            # Create exactly 10 equal rows
+            data_region_start = header_end
+            data_region_end = max(lines) if lines else image_height
+            data_height = data_region_end - data_region_start
+            row_height = data_height / 10
+            
+            h_lines = []
+            for i in range(11):
+                y = data_region_start + i * row_height
+                h_lines.append(int(y))
+            
+            header_y_max = header_end
             
             # Stage 5: Detect Headers and Columns
             self.progress.emit(80, "Stage 5/6: Learning column structure...")
@@ -84,18 +108,21 @@ class OCRWorker(QThread):
             header_groups = detect_header_rows(ocr_results)
             column_structure = learn_column_structure(header_groups, vertical_lines)
             
-            # Get header y_max for table building
-            header_y_max = 0
-            if header_groups:
-                for group in header_groups:
-                    for det in group:
-                        header_y_max = max(header_y_max, det['y_max'])
-            
             # Stage 6: Build Table
             self.progress.emit(90, "Stage 6/6: Building table...")
             if self.is_cancelled:
                 return
-            table_data = build_table(ocr_results, column_structure, horizontal_lines, vertical_lines, header_y_max)
+            table_data = build_table(ocr_results, column_structure, h_lines, vertical_lines, header_y_max)
+            
+            # Apply post-processing (text cleanup)
+            from pipeline.ocr_engine import post_process_text
+            for row in table_data:
+                for col_idx, cell in row['cells'].items():
+                    if isinstance(col_idx, int) and col_idx < len(column_structure):
+                        col_name = column_structure[col_idx]['name']
+                        cell['text_final'] = post_process_text(cell['text'], col_name)
+                    else:
+                        cell['text_final'] = cell['text']
             
             total_time = time.time() - start_time
             
@@ -437,7 +464,7 @@ class MainWindow(QMainWindow):
             
             for col_idx in range(17):
                 cell_data = row_data['cells'].get(col_idx, {})
-                text = cell_data.get('text', '')
+                text = cell_data.get('text_final', cell_data.get('text', ''))
                 confidence = cell_data.get('confidence', 0.0)
                 
                 # Create item

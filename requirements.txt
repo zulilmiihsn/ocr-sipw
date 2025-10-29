@@ -52,3 +52,6 @@ tqdm==4.66.1
 
 # Data manipulation (for potential future use)
 pandas>=2.0.0
+
+# Scientific computing for advanced cell mapping
+scipy>=1.11.0

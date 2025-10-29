@@ -172,21 +172,96 @@ class OCRWorker(QThread):
             header_groups = detect_header_rows(ocr_results)
             column_structure = learn_column_structure(header_groups, vertical_lines)
             
-            # Stage 6: Build Table
+            # Stage 6: Build Table with improved mapping
             self.progress.emit(90, "Stage 6/6: Building table...")
             if self.is_cancelled:
                 return
-            table_data = build_table(ocr_results, column_structure, h_lines, vertical_lines, header_y_max)
             
-            # Apply post-processing (text cleanup)
+            # Build table with center-based detection mapping
+            from collections import defaultdict
             from pipeline.ocr_engine import post_process_text
-            for row in table_data:
-                for col_idx, cell in row['cells'].items():
-                    if isinstance(col_idx, int) and col_idx < len(column_structure):
+            
+            cells = defaultdict(lambda: {'detections': []})
+            
+            # Map detections to cells using Y-center instead of Y-min
+            for det in ocr_results:
+                # Use center point for more accurate row detection
+                y_center = (det['y_min'] + det['y_max']) / 2
+                x_center = (det['x_min'] + det['x_max']) / 2
+                
+                # Skip headers
+                if y_center <= header_y_max:
+                    continue
+                
+                # Find row (use center Y)
+                row = -1
+                for i in range(len(h_lines) - 1):
+                    # Check if center is within row bounds
+                    row_start = h_lines[i]
+                    row_end = h_lines[i + 1]
+                    row_mid = (row_start + row_end) / 2
+                    
+                    # Use center-based comparison with tolerance
+                    if row_start <= y_center < row_end:
+                        row = i
+                        break
+                
+                # Find column (use center X)
+                col = -1
+                for j in range(len(column_structure)):
+                    col_start = column_structure[j]['x_start']
+                    col_end = column_structure[j]['x_end']
+                    
+                    if col_start <= x_center < col_end:
+                        col = j
+                        break
+                
+                if row >= 0 and col >= 0:
+                    cells[(row, col)]['detections'].append(det)
+            
+            # Merge detections in same cell
+            for (row, col), cell in cells.items():
+                dets = cell['detections']
+                if len(dets) == 1:
+                    cell['text'] = dets[0]['text']
+                    cell['confidence'] = dets[0]['confidence']
+                else:
+                    # Sort by X position
+                    dets.sort(key=lambda d: d['x_min'])
+                    cell['text'] = ' '.join(d['text'] for d in dets)
+                    cell['confidence'] = sum(d['confidence'] for d in dets) / len(dets)
+            
+            # Create rows structure
+            table_data = []
+            for row_idx in range(len(h_lines) - 1):
+                y_center = (h_lines[row_idx] + h_lines[row_idx + 1]) / 2
+                if y_center <= header_y_max:
+                    continue
+                
+                row_cells = {}
+                for col_idx in range(len(column_structure)):
+                    cell = cells.get((row_idx, col_idx), {})
+                    text = cell.get('text', '')
+                    
+                    # Apply post-processing
+                    if col_idx < len(column_structure):
                         col_name = column_structure[col_idx]['name']
-                        cell['text_final'] = post_process_text(cell['text'], col_name)
+                        text_final = post_process_text(text, col_name)
                     else:
-                        cell['text_final'] = cell['text']
+                        text_final = text
+                    
+                    row_cells[col_idx] = {
+                        'text': text,
+                        'text_final': text_final,
+                        'confidence': cell.get('confidence', 0.0)
+                    }
+                
+                table_data.append({
+                    'row_index': len(table_data),
+                    'y_top': h_lines[row_idx],
+                    'y_bottom': h_lines[row_idx + 1],
+                    'cells': row_cells
+                })
             
             total_time = time.time() - start_time
             

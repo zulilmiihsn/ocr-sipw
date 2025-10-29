@@ -441,6 +441,14 @@ class MainWindow(QMainWindow):
         self.start_btn.setMinimumWidth(140)
         layout.addWidget(self.start_btn)
         
+        # Reset button
+        self.reset_btn = QPushButton("🔄 Reset")
+        self.reset_btn.setObjectName("reset_btn")
+        self.reset_btn.clicked.connect(self.reset_all)
+        self.reset_btn.setEnabled(False)  # Disabled initially
+        self.reset_btn.setMinimumWidth(140)
+        layout.addWidget(self.reset_btn)
+        
         group.setLayout(layout)
         return group
     
@@ -536,8 +544,9 @@ class MainWindow(QMainWindow):
             self.file_label.setText(f"✅ {file_name}")
             self.file_label.setStyleSheet("color: #10B981; font-weight: 600; font-size: 11pt;")
             
-            # Enable Start button
+            # Enable Start and Reset buttons
             self.start_btn.setEnabled(True)
+            self.reset_btn.setEnabled(True)
             
             self.update_status(f"✅ File loaded: {file_name} - Click 'Start OCR' to begin")
     
@@ -896,6 +905,55 @@ class MainWindow(QMainWindow):
     def update_status(self, message: str):
         """Update status bar"""
         self.status_bar.showMessage(message)
+    
+    def reset_all(self):
+        """Reset all data and UI to initial state"""
+        # Confirm reset
+        reply = QMessageBox.question(
+            self,
+            "Reset Confirmation",
+            "Are you sure you want to reset?\n\nThis will clear:\n• Selected file\n• OCR results\n• Table data\n• All edits",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No
+        )
+        
+        if reply == QMessageBox.No:
+            return
+        
+        # Stop OCR worker if running
+        if self.ocr_worker and self.ocr_worker.isRunning():
+            self.ocr_worker.cancel()
+            self.ocr_worker.wait()
+        
+        # Clear file selection
+        self.current_file = None
+        self.file_label.setText("No file selected")
+        self.file_label.setStyleSheet("font-size: 11pt; color: #6B7280;")
+        
+        # Clear OCR results
+        self.ocr_results = None
+        self.edited_cells.clear()
+        
+        # Clear table
+        self.table.clearContents()
+        
+        # Hide progress bar
+        self.progress_bar.setVisible(False)
+        self.progress_bar.setValue(0)
+        
+        # Disable buttons
+        self.start_btn.setEnabled(False)
+        self.reset_btn.setEnabled(False)
+        self.enable_export_buttons(False)
+        
+        # Update status
+        self.update_status("Ready - Select a file to begin")
+        
+        QMessageBox.information(
+            self,
+            "Reset Complete",
+            "All data has been cleared.\n\nYou can now select a new file to process."
+        )
     
     def eventFilter(self, source, event):
         """Handle Enter key navigation in table"""

@@ -39,35 +39,6 @@ Lab OCR adalah sistem OCR (Optical Character Recognition) yang dirancang khusus 
 
 ## 🚀 Quick Start
 
-### Prerequisites
-
-**For PDF Support (Required for multi-page PDFs):**
-
-**Windows:**
-```bash
-# Download poppler from:
-# https://github.com/oschwartz10612/poppler-windows/releases
-
-# Extract to C:\poppler (or any folder)
-# Add to PATH: C:\poppler\Library\bin
-# Restart terminal/IDE
-```
-
-**Linux:**
-```bash
-sudo apt-get install poppler-utils
-```
-
-**macOS:**
-```bash
-brew install poppler
-```
-
-**Or via Conda (all platforms):**
-```bash
-conda install -c conda-forge poppler
-```
-
 ### Option A: GUI Application (Recommended!)
 
 ```bash

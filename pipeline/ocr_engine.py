@@ -355,12 +355,15 @@ def validate_and_correct_by_template(text, column_index):
     # Clean whitespace
     text = ' '.join(text.split())
     
-    # Column 0: Kode SLS (4 digits, force format)
+    # Column 0: Kode SLS (EXACTLY 4 digits, pad with zeros)
     if column_index == 0:
         digits = ''.join(c for c in text if c.isdigit())
-        if len(digits) >= 4:
+        if not digits:
+            return '0000'
+        # Always pad to 4 digits (or truncate if longer)
+        if len(digits) > 4:
             return digits[:4]
-        return digits.zfill(4) if digits else '0000'
+        return digits.zfill(4)
     
     # Column 1: Kode Sub-SLS (2 digits, force format)
     elif column_index == 1:
@@ -400,10 +403,10 @@ def validate_and_correct_by_template(text, column_index):
         digits = ''.join(c for c in text if c.isdigit())
         return digits if digits else '0'
     
-    # Column 10: Text only (Nama Wilayah)
+    # Column 10: Text (Nama Wilayah) - keep as is, just clean artifacts
     elif column_index == 10:
-        # Remove numbers, keep letters and spaces
-        text = ''.join(c for c in text if c.isalpha() or c.isspace())
+        # Keep text as is, just remove common OCR artifacts
+        text = text.replace('|', '').replace('_', '').replace('[', '').replace(']', '')
         return text.strip()
     
     # Column 11: Number (Jumlah Shift)

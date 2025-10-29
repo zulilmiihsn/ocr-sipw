@@ -529,8 +529,7 @@ class MainWindow(QMainWindow):
         if not self.current_file:
             return
         
-        # Disable buttons
-        self.start_btn.setEnabled(False)
+        # Disable export button
         self.enable_export_buttons(False)
         
         # Show progress bar
@@ -567,8 +566,7 @@ class MainWindow(QMainWindow):
         # Populate table
         self.populate_table(results['table'])
         
-        # Enable buttons
-        self.start_btn.setEnabled(True)
+        # Enable export button
         self.enable_export_buttons(True)
         
         # Update status
@@ -592,7 +590,6 @@ class MainWindow(QMainWindow):
     def on_ocr_error(self, error_msg: str):
         """Handle OCR error"""
         self.progress_bar.setVisible(False)
-        self.start_btn.setEnabled(True)
         self.update_status(f"❌ Error: {error_msg}")
         
         QMessageBox.critical(

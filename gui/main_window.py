@@ -172,16 +172,130 @@ class OCRWorker(QThread):
             header_groups = detect_header_rows(ocr_results)
             column_structure = learn_column_structure(header_groups, vertical_lines)
             
-            # Stage 6: Build Table with ULTRA-ADVANCED mapping
-            self.progress.emit(90, "Stage 6/6: Building table (Advanced Mapping V2)...")
+            # Stage 6: Build Table with improved mapping
+            self.progress.emit(90, "Stage 6/6: Building table...")
             if self.is_cancelled:
                 return
             
-            # Use NEW Advanced Cell Mapping System V2
-            from pipeline.advanced_cell_mapper import map_with_advanced_system
+            # Build table with center-based detection mapping
+            from collections import defaultdict
             from pipeline.ocr_engine import post_process_text
             
-            cells = map_with_advanced_system(ocr_results, h_lines, vertical_lines, column_structure, header_y_max)
+            cells = defaultdict(lambda: {'detections': []})
+            
+            # ADVANCED CELL MAPPING with IoU + Fuzzy Logic
+            def calculate_iou(box1, box2):
+                """Calculate Intersection over Union"""
+                x1_min, y1_min, x1_max, y1_max = box1
+                x2_min, y2_min, x2_max, y2_max = box2
+                
+                # Intersection
+                inter_x_min = max(x1_min, x2_min)
+                inter_y_min = max(y1_min, y2_min)
+                inter_x_max = min(x1_max, x2_max)
+                inter_y_max = min(y1_max, y2_max)
+                
+                if inter_x_max < inter_x_min or inter_y_max < inter_y_min:
+                    return 0.0
+                
+                inter_area = (inter_x_max - inter_x_min) * (inter_y_max - inter_y_min)
+                
+                # Union
+                box1_area = (x1_max - x1_min) * (y1_max - y1_min)
+                box2_area = (x2_max - x2_min) * (y2_max - y2_min)
+                union_area = box1_area + box2_area - inter_area
+                
+                return inter_area / union_area if union_area > 0 else 0.0
+            
+            def fuzzy_score(det, cell_box, confidence):
+                """Calculate fuzzy logic score for cell assignment"""
+                det_box = (det['x_min'], det['y_min'], det['x_max'], det['y_max'])
+                cell_x_min, cell_y_min, cell_x_max, cell_y_max = cell_box
+                
+                # 1. Center position match (40%)
+                det_center_x = (det['x_min'] + det['x_max']) / 2
+                det_center_y = (det['y_min'] + det['y_max']) / 2
+                
+                in_x = cell_x_min <= det_center_x < cell_x_max
+                in_y = cell_y_min <= det_center_y < cell_y_max
+                center_score = 1.0 if (in_x and in_y) else 0.0
+                
+                # 2. IoU overlap (30%)
+                iou = calculate_iou(det_box, cell_box)
+                
+                # 3. Distance to cell center (20%)
+                cell_center_x = (cell_x_min + cell_x_max) / 2
+                cell_center_y = (cell_y_min + cell_y_max) / 2
+                
+                distance = ((det_center_x - cell_center_x)**2 + (det_center_y - cell_center_y)**2)**0.5
+                cell_width = cell_x_max - cell_x_min
+                cell_height = cell_y_max - cell_y_min
+                max_distance = ((cell_width/2)**2 + (cell_height/2)**2)**0.5
+                
+                distance_score = 1.0 - min(distance / max_distance, 1.0) if max_distance > 0 else 0.0
+                
+                # 4. Confidence weight (10%)
+                conf_score = confidence
+                
+                # Weighted combination (STRICTER: More weight on center position)
+                total_score = (
+                    center_score * 0.50 +    # Increased from 40% to 50%
+                    iou * 0.25 +             # Decreased from 30% to 25%
+                    distance_score * 0.15 +  # Decreased from 20% to 15%
+                    conf_score * 0.10        # Kept at 10%
+                )
+                
+                return total_score
+            
+            # Map detections to cells using advanced scoring
+            for det in ocr_results:
+                y_center = (det['y_min'] + det['y_max']) / 2
+                
+                # Skip headers
+                if y_center <= header_y_max:
+                    continue
+                
+                # Find best matching cell using fuzzy scoring
+                best_score = 0.0
+                best_row = -1
+                best_col = -1
+                
+                for i in range(len(h_lines) - 1):
+                    row_y_min = h_lines[i]
+                    row_y_max = h_lines[i + 1]
+                    
+                    # Skip if detection is far from this row (STRICTER: 10px tolerance)
+                    if y_center < row_y_min - 10 or y_center > row_y_max + 10:
+                        continue
+                    
+                    for j in range(len(column_structure)):
+                        col_x_min = column_structure[j]['x_left']
+                        col_x_max = column_structure[j]['x_right']
+                        
+                        cell_box = (col_x_min, row_y_min, col_x_max, row_y_max)
+                        
+                        # Calculate fuzzy score
+                        score = fuzzy_score(det, cell_box, det['confidence'])
+                        
+                        if score > best_score and score > 0.4:  # STRICTER: 40% minimum threshold
+                            best_score = score
+                            best_row = i
+                            best_col = j
+                
+                if best_row >= 0 and best_col >= 0:
+                    cells[(best_row, best_col)]['detections'].append(det)
+            
+            # Merge detections in same cell
+            for (row, col), cell in cells.items():
+                dets = cell['detections']
+                if len(dets) == 1:
+                    cell['text'] = dets[0]['text']
+                    cell['confidence'] = dets[0]['confidence']
+                else:
+                    # Sort by X position
+                    dets.sort(key=lambda d: d['x_min'])
+                    cell['text'] = ' '.join(d['text'] for d in dets)
+                    cell['confidence'] = sum(d['confidence'] for d in dets) / len(dets)
             
             # Create rows structure
             table_data = []
@@ -327,14 +441,13 @@ class MainWindow(QMainWindow):
         group = QGroupBox("📊 Extracted Table (Double-click to edit)")
         layout = QVBoxLayout()
         
-        # Create table widget
+        # Create table widget (16 columns, removed "No" column)
         self.table = QTableWidget()
-        self.table.setColumnCount(17)
+        self.table.setColumnCount(16)
         self.table.setRowCount(10)
         
-        # Set headers (column names) - sesuai form asli
+        # Set headers (column names) - WITHOUT "No" column
         headers = [
-            "No",
             "Kode SLS/Non-SLS",
             "Kode Sub-SLS",
             "Nama SLS/Non-SLS",
@@ -354,10 +467,13 @@ class MainWindow(QMainWindow):
         ]
         self.table.setHorizontalHeaderLabels(headers)
         
-        # Adjust column widths based on content
+        # Set vertical headers (row numbers 1-10) - auto-generated
+        for i in range(10):
+            self.table.setVerticalHeaderItem(i, QTableWidgetItem(str(i + 1)))
+        
+        # Adjust column widths based on content (removed "No" column width)
         header = self.table.horizontalHeader()
         column_widths = [
-            60,   # No
             120,  # Kode SLS/Non-SLS
             90,   # Kode Sub-SLS
             180,  # Nama SLS/Non-SLS
@@ -485,7 +601,7 @@ class MainWindow(QMainWindow):
         )
     
     def populate_table(self, table_data: List[Dict]):
-        """Populate table with OCR results"""
+        """Populate table with OCR results (skip col 0 = No, use vertical header)"""
         # Block signals to avoid triggering itemChanged
         self.table.blockSignals(True)
         
@@ -493,8 +609,11 @@ class MainWindow(QMainWindow):
             if row_idx >= 10:
                 break
             
-            for col_idx in range(17):
-                cell_data = row_data['cells'].get(col_idx, {})
+            # Skip column 0 (No), start from column 1 (Kode SLS/Non-SLS)
+            for ocr_col_idx in range(1, 17):  # OCR columns 1-16
+                gui_col_idx = ocr_col_idx - 1  # GUI columns 0-15 (shifted left)
+                
+                cell_data = row_data['cells'].get(ocr_col_idx, {})
                 text = cell_data.get('text_final', cell_data.get('text', ''))
                 confidence = cell_data.get('confidence', 0.0)
                 
@@ -515,7 +634,7 @@ class MainWindow(QMainWindow):
                 # Set tooltip with confidence
                 item.setToolTip(f"Confidence: {confidence*100:.1f}%")
                 
-                self.table.setItem(row_idx, col_idx, item)
+                self.table.setItem(row_idx, gui_col_idx, item)
         
         # Re-enable signals
         self.table.blockSignals(False)
@@ -618,7 +737,7 @@ class MainWindow(QMainWindow):
             QMessageBox.critical(self, "Export Error", f"Failed to export:\n{str(e)}")
     
     def export_to_excel(self, file_path: str):
-        """Export to Excel with formatting"""
+        """Export to Excel with formatting (includes No column)"""
         from openpyxl import Workbook
         from openpyxl.styles import PatternFill, Font, Alignment
         
@@ -626,8 +745,8 @@ class MainWindow(QMainWindow):
         ws = wb.active
         ws.title = "BLOK III"
         
-        # Headers - get from table
-        headers = [self.table.horizontalHeaderItem(i).text() for i in range(17)]
+        # Headers - prepend "No" column
+        headers = ["No"] + [self.table.horizontalHeaderItem(i).text() for i in range(16)]
         
         # Write headers
         for col, header in enumerate(headers, 1):
@@ -638,34 +757,38 @@ class MainWindow(QMainWindow):
         
         # Write data
         for row in range(10):
-            for col in range(17):
+            # Write row number (No column)
+            ws.cell(row + 2, 1, row + 1)
+            
+            # Write remaining columns
+            for col in range(16):
                 item = self.table.item(row, col)
                 if item:
-                    ws.cell(row + 2, col + 1, item.text())
+                    ws.cell(row + 2, col + 2, item.text())
         
         wb.save(file_path)
     
     def export_to_csv(self, file_path: str):
-        """Export to CSV"""
+        """Export to CSV (includes No column)"""
         import csv
         
         with open(file_path, 'w', newline='', encoding='utf-8') as f:
             writer = csv.writer(f)
             
-            # Headers
-            headers = [self.table.horizontalHeaderItem(i).text() for i in range(17)]
+            # Headers - prepend "No"
+            headers = ["No"] + [self.table.horizontalHeaderItem(i).text() for i in range(16)]
             writer.writerow(headers)
             
             # Data
             for row in range(10):
-                row_data = []
-                for col in range(17):
+                row_data = [row + 1]  # Start with row number
+                for col in range(16):
                     item = self.table.item(row, col)
                     row_data.append(item.text() if item else '')
                 writer.writerow(row_data)
     
     def export_to_json(self, file_path: str):
-        """Export to JSON"""
+        """Export to JSON (includes No column)"""
         data = {
             'metadata': self.ocr_results['metadata'],
             'table': []
@@ -673,10 +796,18 @@ class MainWindow(QMainWindow):
         
         for row in range(10):
             row_data = {'row_number': row + 1, 'cells': {}}
-            for col in range(17):
+            
+            # Add "No" as column 0
+            row_data['cells'][0] = {
+                'text': str(row + 1),
+                'edited': False
+            }
+            
+            # Add remaining columns (shifted by 1)
+            for col in range(16):
                 item = self.table.item(row, col)
                 if item and item.text().strip():
-                    row_data['cells'][col] = {
+                    row_data['cells'][col + 1] = {
                         'text': item.text(),
                         'edited': (row, col) in self.edited_cells
                     }
@@ -715,8 +846,8 @@ class MainWindow(QMainWindow):
         
         html += "    <table>\n        <tr>\n"
         
-        # Headers
-        headers = [self.table.horizontalHeaderItem(i).text() for i in range(17)]
+        # Headers - prepend "No"
+        headers = ["No"] + [self.table.horizontalHeaderItem(i).text() for i in range(16)]
         for header in headers:
             html += f"            <th>{header}</th>\n"
         html += "        </tr>\n"
@@ -724,7 +855,10 @@ class MainWindow(QMainWindow):
         # Data
         for row in range(10):
             html += "        <tr>\n"
-            for col in range(17):
+            # Add row number
+            html += f"            <td>{row + 1}</td>\n"
+            # Add remaining columns
+            for col in range(16):
                 item = self.table.item(row, col)
                 text = item.text() if item else ''
                 html += f"            <td>{text}</td>\n"

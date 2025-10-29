@@ -974,18 +974,54 @@ class MainWindow(QMainWindow):
         )
     
     def eventFilter(self, source, event):
-        """Handle Enter key navigation in table"""
+        """Handle keyboard navigation in table"""
         from PyQt5.QtCore import QEvent
         from PyQt5.QtGui import QKeyEvent
         
         if source == self.table and event.type() == QEvent.KeyPress:
             key_event = event
+            current_row = self.table.currentRow()
+            current_col = self.table.currentColumn()
             
-            # Check for Enter or NumPad Enter
-            if key_event.key() in (Qt.Key_Return, Qt.Key_Enter):
-                current_row = self.table.currentRow()
-                current_col = self.table.currentColumn()
-                
+            # Arrow key navigation
+            if key_event.key() == Qt.Key_Up:
+                # Move up
+                if current_row > 0:
+                    self.table.setCurrentCell(current_row - 1, current_col)
+                else:
+                    # Wrap to bottom
+                    self.table.setCurrentCell(9, current_col)
+                return True
+            
+            elif key_event.key() == Qt.Key_Down:
+                # Move down
+                if current_row < 9:
+                    self.table.setCurrentCell(current_row + 1, current_col)
+                else:
+                    # Wrap to top
+                    self.table.setCurrentCell(0, current_col)
+                return True
+            
+            elif key_event.key() == Qt.Key_Left:
+                # Move left
+                if current_col > 0:
+                    self.table.setCurrentCell(current_row, current_col - 1)
+                else:
+                    # Wrap to last column
+                    self.table.setCurrentCell(current_row, 15)
+                return True
+            
+            elif key_event.key() == Qt.Key_Right:
+                # Move right
+                if current_col < 15:
+                    self.table.setCurrentCell(current_row, current_col + 1)
+                else:
+                    # Wrap to first column
+                    self.table.setCurrentCell(current_row, 0)
+                return True
+            
+            # Enter or NumPad Enter - move to next cell (Excel-like)
+            elif key_event.key() in (Qt.Key_Return, Qt.Key_Enter):
                 # Move to next cell (right, then down to next row)
                 if current_col < 15:  # Not last column (16 columns, 0-15)
                     self.table.setCurrentCell(current_row, current_col + 1)

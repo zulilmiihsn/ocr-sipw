@@ -11,9 +11,10 @@ from typing import Optional, Dict, List
 from PyQt5.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
     QFileDialog, QTableWidget, QTableWidgetItem, QLabel, QProgressBar,
-    QStatusBar, QMessageBox, QHeaderView, QApplication, QGroupBox
+    QStatusBar, QMessageBox, QHeaderView, QApplication, QGroupBox,
+    QStyledItemDelegate, QLineEdit
 )
-from PyQt5.QtCore import Qt, QThread, pyqtSignal, QTimer
+from PyQt5.QtCore import Qt, QThread, pyqtSignal, QTimer, QEvent
 from PyQt5.QtGui import QColor, QFont
 
 # Import QtAwesome for professional icons
@@ -431,66 +432,88 @@ class OCRWorker(QThread):
         self.is_cancelled = True
 
 
+class CellDelegate(QStyledItemDelegate):
+    """Custom delegate for table cells - handles Enter key and sizing"""
+    
+    def createEditor(self, parent, option, index):
+        """Create editor that fills the entire cell"""
+        editor = QLineEdit(parent)
+        editor.setFrame(False)  # Remove border
+        return editor
+    
+    def setEditorData(self, editor, index):
+        """Set initial data in editor"""
+        value = index.model().data(index, Qt.EditRole)
+        editor.setText(str(value) if value else "")
+    
+    def setModelData(self, editor, model, index):
+        """Save data from editor to model"""
+        model.setData(index, editor.text(), Qt.EditRole)
+    
+    def updateEditorGeometry(self, editor, option, index):
+        """Make editor fill entire cell"""
+        editor.setGeometry(option.rect)
+    
+    def eventFilter(self, editor, event):
+        """Handle Enter key to commit and move to next cell"""
+        if event.type() == QEvent.KeyPress:
+            if event.key() in (Qt.Key_Return, Qt.Key_Enter):
+                # Commit the data
+                self.commitData.emit(editor)
+                self.closeEditor.emit(editor, QStyledItemDelegate.NoHint)
+                return True
+        return super().eventFilter(editor, event)
+
+
 class CustomTableWidget(QTableWidget):
-    """Custom table widget with arrow key navigation"""
+    """Custom table widget with enhanced navigation"""
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._moving_after_edit = False
     
     def keyPressEvent(self, event):
-        """Override key press to handle arrow navigation with wrapping"""
-        # Get current position
+        """Override key press for smart navigation"""
         current_row = self.currentRow()
         current_col = self.currentColumn()
-        
-        # Check if we're in edit mode
-        current_item = self.currentItem()
         is_editing = self.state() == QTableWidget.EditingState
         
-        # Arrow key navigation with wrapping
-        if event.key() == Qt.Key_Up:
+        # Handle Enter key - commit and move to next cell
+        if event.key() in (Qt.Key_Return, Qt.Key_Enter):
             if is_editing:
-                self.closePersistentEditor(current_item)
-            new_row = current_row - 1 if current_row > 0 else 9
-            self.setCurrentCell(new_row, current_col)
-            event.accept()
-            return
-        
-        elif event.key() == Qt.Key_Down:
-            if is_editing:
-                self.closePersistentEditor(current_item)
-            new_row = current_row + 1 if current_row < 9 else 0
-            self.setCurrentCell(new_row, current_col)
-            event.accept()
-            return
-        
-        elif event.key() == Qt.Key_Left:
-            if is_editing:
-                self.closePersistentEditor(current_item)
-            new_col = current_col - 1 if current_col > 0 else 15
-            self.setCurrentCell(current_row, new_col)
-            event.accept()
-            return
-        
-        elif event.key() == Qt.Key_Right:
-            if is_editing:
-                self.closePersistentEditor(current_item)
-            new_col = current_col + 1 if current_col < 15 else 0
-            self.setCurrentCell(current_row, new_col)
-            event.accept()
-            return
-        
-        elif event.key() in (Qt.Key_Return, Qt.Key_Enter):
-            if is_editing:
-                self.closePersistentEditor(current_item)
-            # Enter: move to next cell (right, then down)
-            if current_col < 15:
+                # Close editor (delegate will commit data)
+                self.closeEditor(self.itemDelegate().createEditor(self, None, self.model().index(current_row, current_col)), QStyledItemDelegate.NoHint)
+            
+            # Move to next cell
+            total_cols = self.columnCount()
+            total_rows = self.rowCount()
+            
+            if current_col < total_cols - 1:
                 self.setCurrentCell(current_row, current_col + 1)
-            elif current_row < 9:
+            elif current_row < total_rows - 1:
                 self.setCurrentCell(current_row + 1, 0)
             else:
                 self.setCurrentCell(0, 0)
+            
             event.accept()
             return
         
-        # Pass other keys to default handler (for typing in cells)
+        # Arrow key navigation
+        elif event.key() == Qt.Key_Up and not is_editing:
+            total_rows = self.rowCount()
+            new_row = current_row - 1 if current_row > 0 else total_rows - 1
+            self.setCurrentCell(new_row, current_col)
+            event.accept()
+            return
+        
+        elif event.key() == Qt.Key_Down and not is_editing:
+            total_rows = self.rowCount()
+            new_row = current_row + 1 if current_row < total_rows - 1 else 0
+            self.setCurrentCell(new_row, current_col)
+            event.accept()
+            return
+        
+        # Default behavior for other keys
         super().keyPressEvent(event)
 
 
@@ -617,6 +640,9 @@ class MainWindow(QMainWindow):
         self.table = CustomTableWidget()
         self.table.setColumnCount(16)
         self.table.setRowCount(10)
+        
+        # Set custom delegate for better cell editing
+        self.table.setItemDelegate(CellDelegate())
         
         # Set headers (column names) - WITHOUT "No" column
         headers = [

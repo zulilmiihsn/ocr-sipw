@@ -12,10 +12,10 @@ from PyQt5.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
     QFileDialog, QTableWidget, QTableWidgetItem, QLabel, QProgressBar,
     QStatusBar, QMessageBox, QHeaderView, QApplication, QGroupBox,
-    QStyledItemDelegate, QLineEdit
+    QStyledItemDelegate, QLineEdit, QListWidget, QListWidgetItem, QAbstractItemView
 )
 from PyQt5.QtCore import Qt, QThread, pyqtSignal, QTimer, QEvent
-from PyQt5.QtGui import QColor, QFont
+from PyQt5.QtGui import QColor, QFont, QIcon
 
 # Import QtAwesome for professional icons
 import qtawesome as qta
@@ -628,27 +628,60 @@ class MainWindow(QMainWindow):
     
     
     def create_file_selection_group(self):
-        """Create file selection UI group with Start button"""
+        """Create file selection UI group with interactive file list"""
         group = QGroupBox("Pilih File & Proses")
-        layout = QHBoxLayout()
-        layout.setSpacing(16)
+        layout = QVBoxLayout()
         
-        # File label with icon
-        file_icon = QLabel()
-        file_icon.setPixmap(self._get_icon('fa5s.file-alt', color='#94A3B8').pixmap(20, 20))
-        layout.addWidget(file_icon)
-        
-        self.file_label = QLabel("Belum ada file dipilih")
-        self.file_label.setStyleSheet("font-size: 9pt; color: #94A3B8; font-weight: 400;")
-        layout.addWidget(self.file_label, 1)
+        # Top row: Browse button
+        top_row = QHBoxLayout()
+        top_row.setSpacing(10)
         
         # Browse button
-        browse_btn = QPushButton(" Pilih File")
+        browse_btn = QPushButton(" Pilih File Gambar")
         browse_btn.setIcon(self._get_icon('fa5s.folder-open', color='#64748B'))
         browse_btn.setObjectName("browse_btn")
         browse_btn.clicked.connect(self.browse_file)
-        browse_btn.setMinimumWidth(120)
-        layout.addWidget(browse_btn)
+        browse_btn.setMinimumWidth(140)
+        top_row.addWidget(browse_btn)
+        
+        # Info label
+        info_label = QLabel("Drag & drop untuk mengubah urutan")
+        info_label.setStyleSheet("font-size: 8pt; color: #94A3B8; font-style: italic;")
+        top_row.addWidget(info_label, 1)
+        
+        layout.addLayout(top_row)
+        
+        # Interactive file list (drag & drop enabled)
+        self.file_list = QListWidget()
+        self.file_list.setMaximumHeight(120)
+        self.file_list.setDragDropMode(QAbstractItemView.InternalMove)
+        self.file_list.setSelectionMode(QAbstractItemView.ExtendedSelection)
+        self.file_list.setStyleSheet("""
+            QListWidget {
+                background-color: #F8FAFC;
+                border: 1px solid #E2E8F0;
+                border-radius: 4px;
+                padding: 4px;
+            }
+            QListWidget::item {
+                padding: 6px 8px;
+                border-radius: 3px;
+                margin: 2px 0px;
+            }
+            QListWidget::item:hover {
+                background-color: #EFF6FF;
+            }
+            QListWidget::item:selected {
+                background-color: #DBEAFE;
+                color: #1E293B;
+            }
+        """)
+        self.file_list.setVisible(False)  # Hidden until files selected
+        layout.addWidget(self.file_list)
+        
+        # Bottom row: Action buttons
+        bottom_row = QHBoxLayout()
+        bottom_row.setSpacing(10)
         
         # Start OCR button
         self.start_btn = QPushButton(" Mulai OCR")
@@ -657,7 +690,7 @@ class MainWindow(QMainWindow):
         self.start_btn.clicked.connect(self.start_ocr)
         self.start_btn.setEnabled(False)  # Disabled until file selected
         self.start_btn.setMinimumWidth(120)
-        layout.addWidget(self.start_btn)
+        bottom_row.addWidget(self.start_btn)
         
         # Sort button
         self.sort_btn = QPushButton(" Urutkan")
@@ -667,7 +700,7 @@ class MainWindow(QMainWindow):
         self.sort_btn.setEnabled(False)  # Disabled until OCR done
         self.sort_btn.setMinimumWidth(120)
         self.sort_btn.setToolTip("Urutkan tabel berdasarkan Kode SLS (↑) dan Sub-SLS (↓)")
-        layout.addWidget(self.sort_btn)
+        bottom_row.addWidget(self.sort_btn)
         
         # Reset button
         self.reset_btn = QPushButton(" Reset")
@@ -676,7 +709,9 @@ class MainWindow(QMainWindow):
         self.reset_btn.clicked.connect(self.reset_all)
         self.reset_btn.setEnabled(False)  # Disabled initially
         self.reset_btn.setMinimumWidth(120)
-        layout.addWidget(self.reset_btn)
+        bottom_row.addWidget(self.reset_btn)
+        
+        layout.addLayout(bottom_row)
         
         group.setLayout(layout)
         return group
@@ -799,27 +834,65 @@ class MainWindow(QMainWindow):
         )
         
         if file_paths:
-            self.current_files = file_paths  # Changed to list
+            self.current_files = file_paths
             
+            # Populate interactive file list
+            self.populate_file_list(file_paths)
+            
+            # Show file list
+            self.file_list.setVisible(True)
+            
+            # Update status
             if len(file_paths) == 1:
-                file_name = Path(file_paths[0]).name
-                self.file_label.setText(file_name)
-                self.update_status(f"✓ File dimuat: {file_name} - Klik 'Mulai OCR' untuk memproses")
+                self.update_status(f"✓ 1 file dimuat - Klik 'Mulai OCR' untuk memproses")
             else:
-                self.file_label.setText(f"{len(file_paths)} file dipilih")
-                self.update_status(f"✓ {len(file_paths)} file dimuat untuk batch processing")
-            
-            self.file_label.setStyleSheet("color: #10B981; font-weight: 600; font-size: 11pt;")
+                self.update_status(f"✓ {len(file_paths)} file dimuat - Drag & drop untuk mengubah urutan")
             
             # Enable Start and Reset buttons
             self.start_btn.setEnabled(True)
             self.reset_btn.setEnabled(True)
+    
+    def populate_file_list(self, file_paths):
+        """Populate file list with icons and names"""
+        self.file_list.clear()
+        
+        for file_path in file_paths:
+            file_name = Path(file_path).name
+            item = QListWidgetItem()
+            
+            # Set icon based on file extension
+            ext = Path(file_path).suffix.lower()
+            if ext in ['.png']:
+                icon = self._get_icon('fa5s.file-image', color='#8B5CF6')  # Purple for PNG
+            elif ext in ['.jpg', '.jpeg']:
+                icon = self._get_icon('fa5s.file-image', color='#3B82F6')  # Blue for JPG
+            else:
+                icon = self._get_icon('fa5s.file', color='#64748B')  # Gray for others
+            
+            item.setIcon(icon)
+            item.setText(file_name)
+            item.setData(Qt.UserRole, file_path)  # Store full path in data
+            item.setToolTip(file_path)  # Show full path on hover
+            
+            self.file_list.addItem(item)
+    
+    def get_ordered_file_paths(self):
+        """Get file paths in current list order (after drag & drop)"""
+        file_paths = []
+        for i in range(self.file_list.count()):
+            item = self.file_list.item(i)
+            file_path = item.data(Qt.UserRole)
+            file_paths.append(file_path)
+        return file_paths
     
     
     def start_ocr(self):
         """Start OCR processing (supports multi-file/multi-page)"""
         if not hasattr(self, 'current_files') or not self.current_files:
             return
+        
+        # Get file paths in current list order (respects drag & drop reorder)
+        ordered_files = self.get_ordered_file_paths()
         
         # Disable Start button and export button during processing
         self.start_btn.setEnabled(False)
@@ -834,8 +907,8 @@ class MainWindow(QMainWindow):
         self.table.clearContents()
         self.edited_cells.clear()
         
-        # Start worker thread with list of files
-        self.ocr_worker = OCRWorker(self.current_files)
+        # Start worker thread with ordered list of files (after drag & drop)
+        self.ocr_worker = OCRWorker(ordered_files)
         self.ocr_worker.progress.connect(self.on_progress)
         self.ocr_worker.finished.connect(self.on_ocr_finished)
         self.ocr_worker.error.connect(self.on_ocr_error)
@@ -989,7 +1062,7 @@ class MainWindow(QMainWindow):
         self.table.hide_floating_buttons()
     
     def remove_row_at_hover(self):
-        """Remove the hovered row"""
+        """Remove the hovered row (instant, no confirmation)"""
         hovered_row = self.table.hovered_row
         if hovered_row < 0:
             return
@@ -997,24 +1070,15 @@ class MainWindow(QMainWindow):
         # Hide buttons first
         self.table.hide_floating_buttons()
         
-        # Confirm deletion
-        reply = QMessageBox.question(
-            self,
-            "Konfirmasi Hapus",
-            f"Hapus baris {hovered_row + 1}?",
-            QMessageBox.Yes | QMessageBox.No,
-            QMessageBox.No
-        )
+        # Delete row instantly
+        self.table.removeRow(hovered_row)
         
-        if reply == QMessageBox.Yes:
-            self.table.removeRow(hovered_row)
-            
-            # Update vertical headers (row numbers)
-            for i in range(self.table.rowCount()):
-                self.table.setVerticalHeaderItem(i, QTableWidgetItem(str(i + 1)))
-            
-            # Update status
-            self.update_status(f"✓ Baris {hovered_row + 1} dihapus (Total: {self.table.rowCount()} baris)")
+        # Update vertical headers (row numbers)
+        for i in range(self.table.rowCount()):
+            self.table.setVerticalHeaderItem(i, QTableWidgetItem(str(i + 1)))
+        
+        # Update status
+        self.update_status(f"✓ Baris {hovered_row + 1} dihapus (Total: {self.table.rowCount()} baris)")
     
     def sort_table(self):
         """Sort table by Kode SLS (ASC) and Sub-SLS (DESC)"""
@@ -1317,9 +1381,9 @@ class MainWindow(QMainWindow):
             self.ocr_worker.wait()
         
         # Clear file selection
-        self.current_file = None
-        self.file_label.setText("Belum ada file dipilih")
-        self.file_label.setStyleSheet("font-size: 11pt; color: #6B7280;")
+        self.current_files = []
+        self.file_list.clear()
+        self.file_list.setVisible(False)
         
         # Clear OCR results
         self.ocr_results = None

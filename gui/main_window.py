@@ -798,24 +798,24 @@ class MainWindow(QMainWindow):
         # Set custom delegate for better cell editing
         self.table.setItemDelegate(CellDelegate())
         
-        # Set headers (column names) - WITHOUT "No" column
+        # Set headers (column names) - WITH manual line breaks for better fit
         headers = [
-            "Kode SLS/Non-SLS",
-            "Kode Sub-SLS",
-            "Nama SLS/Non-SLS",
-            "Perkiraan Jumlah Muatan KK (Keluarga)",
-            "Bangunan Tempat Tinggal (BTT)",
-            "Bangunan Tempat Tinggal Kosong (BTT Kosong)",
-            "Bangunan Khusus Usaha (BKU)",
-            "Bangunan Bukan Tempat Tinggal non Usaha",
-            "Perkiraan Jumlah Muatan Usaha",
-            "Total Muatan",
-            "Nama Wilayah Konsentrasi Ekonomi",
-            "Jumlah Shift Pola Kerja Konsentrasi Ekonomi",
-            "Jam Operasional",
-            "Contact Person - Telepon/Email",
-            "Muatan Dominan",
-            "Apakah memiliki perubahan batas (reko)?)\n1 = Ya\n2 = Tidak"
+            "Kode\nSLS/Non-SLS",
+            "Kode\nSub-SLS",
+            "Nama\nSLS/Non-SLS",
+            "Perkiraan\nJumlah Muatan\nKK (Keluarga)",
+            "Bangunan\nTempat Tinggal\n(BTT)",
+            "Bangunan\nTempat Tinggal\nKosong\n(BTT Kosong)",
+            "Bangunan\nKhusus Usaha\n(BKU)",
+            "Bangunan\nBukan Tempat\nTinggal\nnon Usaha",
+            "Perkiraan\nJumlah Muatan\nUsaha",
+            "Total\nMuatan",
+            "Nama Wilayah\nKonsentrasi\nEkonomi",
+            "Jumlah Shift\nPola Kerja\nKonsentrasi\nEkonomi",
+            "Jam\nOperasional",
+            "Contact Person\nTelepon/Email",
+            "Muatan\nDominan",
+            "Perubahan\nbatas (reko)?\n1 = Ya\n2 = Tidak"
         ]
         self.table.setHorizontalHeaderLabels(headers)
         

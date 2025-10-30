@@ -582,7 +582,7 @@ class MainWindow(QMainWindow):
     
     def init_ui(self):
         """Initialize the user interface"""
-        self.setWindowTitle("OCR SiPW - Ekstraksi Tabel BLOK III")
+        self.setWindowTitle("OCR SiPW")
         self.setMinimumSize(1280, 800)
         self.setWindowIcon(self._get_icon('fa5s.table', color='#2563EB'))
         
@@ -753,10 +753,13 @@ class MainWindow(QMainWindow):
             "Jumlah Shift Pola Kerja Konsentrasi Ekonomi",
             "Jam Operasional",
             "Contact Person - Telepon/Email",
-            "Contact Person - Muatan Dominan ?)",
+            "Muatan Dominan",
             "Apakah memiliki perubahan batas (reko)?)\n1 = Ya\n2 = Tidak"
         ]
         self.table.setHorizontalHeaderLabels(headers)
+        
+        # Enable word wrap for headers (multi-line text support)
+        self.table.horizontalHeader().setWordWrap(True)
         
         # Set vertical headers (row numbers 1-10) - auto-generated
         for i in range(10):

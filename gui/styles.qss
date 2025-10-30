@@ -180,18 +180,19 @@ QTableWidget::item:focus {
     outline: none;
 }
 
-/* Table Header - Clean Professional with Text Wrapping */
+/* Table Header - Clean Professional with Word Wrap Support */
 QHeaderView::section {
     background-color: #F8FAFC;
     color: #475569;
-    padding: 8px 6px;
+    padding: 10px 8px;
     border: none;
     border-right: 1px solid #E2E8F0;
     border-bottom: 1px solid #E2E8F0;
     font-weight: 500;
-    font-size: 7pt;
+    font-size: 7.5pt;
     letter-spacing: 0.2px;
-    min-height: 40px;
+    line-height: 1.4;
+    min-height: 50px;
 }
 
 QHeaderView::section:hover {

@@ -91,7 +91,7 @@ class PaddleOCREngine:
                 'det_db_unclip_ratio': 1.6,  # Unclip ratio (larger boxes, better coverage)
                 
                 # Recognition optimization
-                'rec_batch_num': 6,          # Batch processing for speed
+                'rec_batch_num': 16,         # Increased batch for speed (tuneable)
             }
             
             cls._instance = PaddleOCR(**ocr_config)
@@ -99,7 +99,27 @@ class PaddleOCREngine:
         return cls._instance
 
 
-def run_full_document_ocr(image):
+from typing import Dict, Any
+import hashlib
+
+# Simple in-memory cache for OCR results (keyed by image hash)
+_OCR_CACHE: Dict[str, Any] = {}
+_OCR_CACHE_MAX = 16
+
+
+def _hash_image(image) -> str:
+    # Hash a compressed representation to avoid huge memory usage
+    try:
+        ok, buf = cv2.imencode('.png', image)
+        if ok:
+            return hashlib.sha1(buf.tobytes()).hexdigest()
+    except Exception:
+        pass
+    # Fallback: hash raw bytes
+    return hashlib.sha1(image.tobytes()).hexdigest()
+
+
+def run_full_document_ocr(image, use_cache: bool = True):
     """
     Run PaddleOCR on full document with OPTIMIZED preprocessing
     
@@ -136,6 +156,16 @@ def run_full_document_ocr(image):
     # Convert back to BGR for PaddleOCR
     image = cv2.cvtColor(enhanced, cv2.COLOR_GRAY2BGR)
     
+    # Cache lookup
+    cache_key = None
+    if use_cache:
+        try:
+            cache_key = _hash_image(image)
+            if cache_key in _OCR_CACHE:
+                return _OCR_CACHE[cache_key]
+        except Exception:
+            cache_key = None
+
     ocr = PaddleOCREngine.get_instance()
     result = ocr.predict(image)
     
@@ -165,6 +195,15 @@ def run_full_document_ocr(image):
                 'height': y_max - y_min
             })
     
+    # Store into cache (bounded)
+    if use_cache and cache_key and detections is not None:
+        try:
+            if len(_OCR_CACHE) >= _OCR_CACHE_MAX:
+                # remove oldest arbitrary item
+                _OCR_CACHE.pop(next(iter(_OCR_CACHE)))
+            _OCR_CACHE[cache_key] = detections
+        except Exception:
+            pass
     return detections
 
 

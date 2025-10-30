@@ -283,8 +283,34 @@ class OCRWorker(QThread):
                 
                 return inter_area / union_area if union_area > 0 else 0.0
             
-            def fuzzy_score(det, cell_box, confidence):
-                """Calculate fuzzy logic score for cell assignment"""
+            def compute_rule_prior(text_value: str, column_index: int) -> float:
+                """Small prior boost based on expected column content (0.0 - 0.15)."""
+                if not text_value:
+                    return 0.0
+                t = str(text_value).strip().upper()
+                is_digits = t.replace(' ', '').isdigit()
+                has_rt = 'RT' in t
+                has_rw = 'RW' in t
+                # Column groups
+                numeric_cols = set([1, 2] + list(range(4, 11)) + [12, 15, 16])  # Kode SLS, Sub, BTT..Total, Shift, Muatan Dominan, Perubahan
+                if column_index == 3:  # RT/RW
+                    if has_rt and has_rw:
+                        return 0.15
+                    if has_rt or has_rw:
+                        return 0.10
+                    return 0.0
+                if column_index in numeric_cols:
+                    # Stronger prior for Muatan Dominan (col 15)
+                    if column_index == 15:
+                        return 0.15 if is_digits else 0.0
+                    return 0.12 if is_digits else 0.0
+                if column_index == 11:  # Nama Wilayah (texty)
+                    return 0.08 if not is_digits else 0.0
+                # Free text columns (13-14): neutral
+                return 0.0
+
+            def fuzzy_score(det, cell_box, confidence, column_index: int):
+                """Calculate fuzzy logic score for cell assignment (with rule prior)."""
                 det_box = (det['x_min'], det['y_min'], det['x_max'], det['y_max'])
                 cell_x_min, cell_y_min, cell_x_max, cell_y_max = cell_box
                 
@@ -322,6 +348,8 @@ class OCRWorker(QThread):
                     distance_score * 0.20 +  # INCREASED from 15% to 20%
                     conf_score * 0.10        # Kept at 10%
                 )
+                # Rule prior (bias towards expected column content)
+                total_score += compute_rule_prior(det.get('text', ''), column_index)
                 
                 return total_score
             
@@ -374,8 +402,8 @@ class OCRWorker(QThread):
                         
                         cell_box = (col_x_min, row_y_min, col_x_max, row_y_max)
                         
-                        # Calculate fuzzy score
-                        score = fuzzy_score(det, cell_box, det['confidence'])
+                        # Calculate fuzzy score (with rule prior)
+                        score = fuzzy_score(det, cell_box, det['confidence'], col_idx)
                         
                         # LOWERED threshold from 0.4 to 0.12 for narrow columns
                         if score > best_score and score > 0.12:
@@ -398,6 +426,152 @@ class OCRWorker(QThread):
                     cell['text'] = ' '.join(d['text'] for d in dets)
                     cell['confidence'] = sum(d['confidence'] for d in dets) / len(dets)
             
+            # SECONDARY PASS: Fill mandatory numeric columns if empty using overlap+prior
+            mandatory_numeric_cols = [1, 2, 15]  # Kode SLS, Sub-SLS, Muatan Dominan
+            for row_idx in range(len(h_lines) - 1):
+                y_center = (h_lines[row_idx] + h_lines[row_idx + 1]) / 2
+                if y_center <= header_y_max:
+                    continue
+                row_y_min = h_lines[row_idx]
+                row_y_max = h_lines[row_idx + 1]
+                for col_idx in mandatory_numeric_cols:
+                    key = (row_idx, col_idx)
+                    cur = cells.get(key, {})
+                    if cur.get('text'):
+                        continue  # already filled
+                    # Search best detection overlapping this cell
+                    col_x_min = column_structure[col_idx]['x_left']
+                    col_x_max = column_structure[col_idx]['x_right']
+                    cell_box = (col_x_min, row_y_min, col_x_max, row_y_max)
+                    best_det = None
+                    best_score = 0.0
+                    for det in ocr_results:
+                        det_center_y = (det['y_min'] + det['y_max']) / 2
+                        if det_center_y <= header_y_max:
+                            continue
+                        # quick y filter
+                        if det['y_max'] < row_y_min - adaptive_row_tolerance or det['y_min'] > row_y_max + adaptive_row_tolerance:
+                            continue
+                        # quick x filter (allow small margin ±8px to catch near-boundary values)
+                        if det['x_max'] < (col_x_min - 8) or det['x_min'] > (col_x_max + 8):
+                            continue
+                        # compute simple score: IoU heavy + rule prior
+                        iou = calculate_iou((det['x_min'], det['y_min'], det['x_max'], det['y_max']), cell_box)
+                        if iou <= 0.01:
+                            continue
+                        prior = compute_rule_prior(det.get('text', ''), col_idx)
+                        det_center_x = (det['x_min'] + det['x_max']) / 2
+                        det_center_y = (det['y_min'] + det['y_max']) / 2
+                        cell_cx = (col_x_min + col_x_max) / 2
+                        cell_cy = (row_y_min + row_y_max) / 2
+                        cell_w = max(1, col_x_max - col_x_min)
+                        cell_h = max(1, row_y_max - row_y_min)
+                        max_d = ((cell_w/2)**2 + (cell_h/2)**2)**0.5
+                        dist = ((det_center_x - cell_cx)**2 + (det_center_y - cell_cy)**2)**0.5
+                        dist_score = 1.0 - min(dist / max_d, 1.0)
+                        # Prefer numeric-looking text for mandatory numeric columns
+                        txt = str(det.get('text', '')).strip()
+                        is_digits = txt.replace(' ', '').isdigit()
+                        digits_bonus = 0.06 if is_digits else 0.0
+                        score = iou * 0.6 + dist_score * 0.28 + prior * 0.4 + digits_bonus
+                        if score > best_score:
+                            best_score = score
+                            best_det = det
+                    if best_det and best_score > 0.12:  # small threshold
+                        cells[key]['detections'] = [best_det]
+                        cells[key]['text'] = best_det['text']
+                        cells[key]['confidence'] = best_det['confidence']
+
+            # HELPER: validators for per-row pattern
+            def _only_digits(text: str) -> bool:
+                return text.isdigit()
+
+            def _digits_len(text: str, n: int) -> bool:
+                return text.isdigit() and len(text) == n
+
+            def _looks_rt_rw(text: str) -> bool:
+                t = text.upper()
+                return ('RT' in t) and ('RW' in t)
+
+            # TERTIARY PASS: Per-row pattern validation and small-swap
+            # Expected pattern (0-indexed):
+            # 1: 4 digits, 2: 2 digits, 3: RT/RW, 4-10: digits, 11: text, 12: digits, 15: digits, 16: {1,2}
+            numeric_range = list(range(4, 11))
+            for row_idx in range(len(h_lines) - 1):
+                y_center = (h_lines[row_idx] + h_lines[row_idx + 1]) / 2
+                if y_center <= header_y_max:
+                    continue
+                # Collect row texts
+                row_texts = {}
+                for c in range(len(column_structure)):
+                    row_texts[c] = str(cells.get((row_idx, c), {}).get('text', '')).strip()
+
+                # Small-swap helper between adjacent columns
+                def _try_swap(ca: int, cb: int) -> None:
+                    ta = row_texts.get(ca, '')
+                    tb = row_texts.get(cb, '')
+                    if not ta and tb:
+                        cells[(row_idx, ca)] = cells.get((row_idx, cb), {}).copy()
+                        cells[(row_idx, cb)] = {'detections': []}
+                        row_texts[ca], row_texts[cb] = tb, ''
+
+                # Enforce col 1 = 4 digits
+                t1 = row_texts.get(1, '')
+                if not _digits_len(t1.replace(' ', ''), 4):
+                    # Try pull from neighbor col 0 or 2
+                    t0 = row_texts.get(0, '')
+                    t2 = row_texts.get(2, '')
+                    if _digits_len(t0.replace(' ', ''), 4):
+                        _try_swap(1, 0)
+                    elif _digits_len(t2.replace(' ', ''), 4):
+                        _try_swap(1, 2)
+
+                # Enforce col 2 = 2 digits
+                t2 = row_texts.get(2, '')
+                if not _digits_len(t2.replace(' ', ''), 2):
+                    t1 = row_texts.get(1, '')
+                    t3 = row_texts.get(3, '')
+                    if _digits_len(t1.replace(' ', ''), 2):
+                        _try_swap(2, 1)
+                    elif _digits_len(t3.replace(' ', ''), 2):
+                        _try_swap(2, 3)
+
+                # Enforce col 3 RT/RW
+                t3 = row_texts.get(3, '')
+                if not _looks_rt_rw(t3):
+                    # Try pull from neighbors 2 or 4 if they look like RT/RW
+                    if _looks_rt_rw(row_texts.get(2, '')):
+                        _try_swap(3, 2)
+                    elif _looks_rt_rw(row_texts.get(4, '')):
+                        _try_swap(3, 4)
+
+                # Enforce numeric columns 4-10
+                for c in numeric_range:
+                    tc = row_texts.get(c, '')
+                    if tc and not _only_digits(tc.replace(' ', '')):
+                        # If neighbor has digits and this cell not, swap toward digits
+                        if _only_digits(row_texts.get(c-1, '').replace(' ', '')):
+                            _try_swap(c, c-1)
+                        elif _only_digits(row_texts.get(c+1, '').replace(' ', '')):
+                            _try_swap(c, c+1)
+
+                # Enforce Muatan Dominan (15) numeric
+                t15 = row_texts.get(15, '')
+                if not _only_digits(t15.replace(' ', '')):
+                    if _only_digits(row_texts.get(14, '').replace(' ', '')):
+                        _try_swap(15, 14)
+                    elif _only_digits(row_texts.get(16, '').replace(' ', '')):
+                        _try_swap(15, 16)
+
+                # Enforce Perubahan Batas (16) in {1,2}
+                t16 = row_texts.get(16, '')
+                if t16 not in ('1', '2'):
+                    # If neighbor equals '1' or '2', swap
+                    if row_texts.get(15, '') in ('1', '2'):
+                        _try_swap(16, 15)
+                    elif row_texts.get(14, '') in ('1', '2'):
+                        _try_swap(16, 14)
+
             # Create rows structure
             table_data = []
             for row_idx in range(len(h_lines) - 1):

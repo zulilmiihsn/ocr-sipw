@@ -21,8 +21,20 @@ from pathlib import Path
 warnings.filterwarnings('ignore')
 os.environ['PYTHONWARNINGS'] = 'ignore'
 
-# Suppress PaddlePaddle/PaddleOCR logs
-os.environ['FLAGS_paddle_num_threads'] = '1'
+# Suppress PaddlePaddle/PaddleOCR logs and optimize threading
+try:
+    import multiprocessing as _mp
+    _cpu = str(max(1, _mp.cpu_count()))
+except Exception:
+    _cpu = '4'
+
+# Threading/BLAS env for better CPU performance
+os.environ.setdefault('OMP_NUM_THREADS', _cpu)
+os.environ.setdefault('MKL_NUM_THREADS', _cpu)
+os.environ.setdefault('KMP_AFFINITY', 'granularity=fine,compact,1,0')
+
+# Paddle threads
+os.environ['FLAGS_paddle_num_threads'] = _cpu
 os.environ['FLAGS_allocator_strategy'] = 'auto_growth'
 os.environ['GLOG_minloglevel'] = '3'  # Suppress GLOG (Paddle uses glog)
 os.environ['PPOCR_LOG_LEVEL'] = 'ERROR'  # Only show errors

@@ -27,7 +27,6 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from pipeline.lib.image_utils import load_image, save_image
 from pipeline.lib.table_detector import detect_table_region, crop_table
-from pipeline.lib.pdf_handler import load_document, is_pdf
 from pipeline.ocr_engine import (
     run_full_document_ocr, detect_vertical_lines, detect_horizontal_lines,
     detect_header_rows, learn_column_structure, build_table,
@@ -66,40 +65,35 @@ class OCRWorker(QThread):
                 file_num = file_idx + 1
                 file_name = Path(file_path).name
                 
-                # Stage 1: Load Document (Image or PDF)
+                # Stage 1: Load Image
                 self.progress.emit(
                     int(10 + (file_idx / total_files) * 5),
                     f"[{file_num}/{total_files}] Loading {file_name}..."
                 )
                 
-                # Load document (supports both image and PDF)
-                images, doc_type = load_document(file_path, dpi=300)
-            
-                # Process all pages from this file
-                for page_idx, image in enumerate(images):
-                    if self.is_cancelled:
-                        return
+                # Load image file
+                import cv2
+                image = cv2.imread(file_path)
+                if image is None:
+                    self.error.emit(f"Failed to load image: {file_name}")
+                    continue
+                
+                if self.is_cancelled:
+                    return
+                
+                # Process this image
+                page_results = self._process_single_image(
+                    image, file_idx, 0, total_files, 1
+                )
+                
+                if page_results:
+                    # Add source info to each row
+                    for row in page_results:
+                        row['_source_file'] = file_name
+                        row['_source_page'] = 1
                     
-                    page_num = page_idx + 1
-                    if len(images) > 1:
-                        self.progress.emit(
-                            int(15 + (file_idx / total_files) * 5),
-                            f"[{file_num}/{total_files}] Page {page_num}/{len(images)}..."
-                        )
-                    
-                    # Process this page/image
-                    page_results = self._process_single_image(
-                        image, file_idx, page_idx, total_files, len(images)
-                    )
-                    
-                    if page_results:
-                        # Add source info to each row
-                        for row in page_results:
-                            row['_source_file'] = file_name
-                            row['_source_page'] = page_num
-                        
-                        # Append to aggregated results
-                        all_results.extend(page_results)
+                    # Append to aggregated results
+                    all_results.extend(page_results)
             
             # All files/pages processed - now sort and emit
             if not all_results:
@@ -698,12 +692,12 @@ class MainWindow(QMainWindow):
     
     
     def browse_file(self):
-        """Open file browser dialog (supports multi-select)"""
-        file_paths, _ = QFileDialog.getOpenFileNames(  # Changed to getOpenFileNames for multi-select
+        """Open file browser dialog (supports multi-select images only)"""
+        file_paths, _ = QFileDialog.getOpenFileNames(
             self,
-            "Pilih File Gambar atau PDF (Multi-select untuk batch)",
+            "Pilih File Gambar (Multi-select untuk batch)",
             str(Path.home()),
-            "Semua File Didukung (*.png *.jpg *.jpeg *.pdf);;File Gambar (*.png *.jpg *.jpeg);;File PDF (*.pdf);;Semua File (*.*)"
+            "File Gambar (*.png *.jpg *.jpeg);;Semua File (*.*)"
         )
         
         if file_paths:

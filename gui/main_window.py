@@ -623,6 +623,44 @@ class MainWindow(QMainWindow):
         group = QGroupBox("Hasil Ekstraksi Tabel")
         layout = QVBoxLayout()
         
+        # Minimalist row controls (add/remove) - horizontal layout
+        row_controls = QHBoxLayout()
+        row_controls.setSpacing(5)
+        
+        # Add row button (minimalist)
+        self.add_row_btn = QPushButton()
+        self.add_row_btn.setIcon(self._get_icon('fa5s.plus', color='#10B981', scale_factor=0.8))
+        self.add_row_btn.setToolTip("Tambah baris baru di bawah")
+        self.add_row_btn.setFixedSize(28, 28)
+        self.add_row_btn.setObjectName("icon_btn")
+        self.add_row_btn.clicked.connect(self.add_row)
+        self.add_row_btn.setEnabled(False)
+        row_controls.addWidget(self.add_row_btn)
+        
+        # Remove row button (minimalist)
+        self.remove_row_btn = QPushButton()
+        self.remove_row_btn.setIcon(self._get_icon('fa5s.minus', color='#EF4444', scale_factor=0.8))
+        self.remove_row_btn.setToolTip("Hapus baris yang dipilih")
+        self.remove_row_btn.setFixedSize(28, 28)
+        self.remove_row_btn.setObjectName("icon_btn")
+        self.remove_row_btn.clicked.connect(self.remove_row)
+        self.remove_row_btn.setEnabled(False)
+        row_controls.addWidget(self.remove_row_btn)
+        
+        # Spacer to push buttons to the left
+        row_controls.addStretch()
+        
+        # Info label (subtle)
+        info_label = QLabel("Baris:")
+        info_label.setStyleSheet("color: #64748B; font-size: 11px;")
+        row_controls.addWidget(info_label)
+        
+        self.row_count_label = QLabel("0")
+        self.row_count_label.setStyleSheet("color: #1E293B; font-weight: bold; font-size: 11px;")
+        row_controls.addWidget(self.row_count_label)
+        
+        layout.addLayout(row_controls)
+        
         # Create custom table widget with arrow key navigation
         self.table = CustomTableWidget()
         self.table.setColumnCount(16)
@@ -770,9 +808,11 @@ class MainWindow(QMainWindow):
         # Populate table
         self.populate_table(results['table'])
         
-        # Re-enable Start button, Sort button, and export button
+        # Re-enable Start button, Sort button, row controls, and export button
         self.start_btn.setEnabled(True)
         self.sort_btn.setEnabled(True)
+        self.add_row_btn.setEnabled(True)
+        self.remove_row_btn.setEnabled(True)
         self.enable_export_buttons(True)
         
         # Update status
@@ -826,6 +866,9 @@ class MainWindow(QMainWindow):
         for i in range(num_rows):
             self.table.setVerticalHeaderItem(i, QTableWidgetItem(str(i + 1)))
         
+        # Update row count label
+        self.update_row_count()
+        
         # Populate cells
         for row_idx, row_data in enumerate(table_data):
             # Skip column 0 (No), start from column 1 (Kode SLS/Non-SLS)
@@ -869,6 +912,63 @@ class MainWindow(QMainWindow):
         
         # Update status
         self.update_status(f"Edited cell ({row+1}, {col+1}) | Total edits: {len(self.edited_cells)}")
+    
+    def add_row(self):
+        """Add a new empty row at the end of the table"""
+        current_rows = self.table.rowCount()
+        self.table.insertRow(current_rows)
+        
+        # Set vertical header for new row
+        self.table.setVerticalHeaderItem(current_rows, QTableWidgetItem(str(current_rows + 1)))
+        
+        # Initialize empty cells with white background
+        for col in range(self.table.columnCount()):
+            item = QTableWidgetItem("")
+            item.setBackground(QColor(255, 255, 255))
+            self.table.setItem(current_rows, col, item)
+        
+        # Update row count label
+        self.update_row_count()
+        
+        # Update status
+        self.update_status(f"✓ Baris baru ditambahkan (Total: {self.table.rowCount()} baris)")
+        
+        # Scroll to new row
+        self.table.scrollToItem(self.table.item(current_rows, 0))
+    
+    def remove_row(self):
+        """Remove the currently selected row"""
+        current_row = self.table.currentRow()
+        
+        if current_row < 0:
+            QMessageBox.warning(self, "Peringatan", "Pilih baris yang ingin dihapus terlebih dahulu")
+            return
+        
+        # Confirm deletion
+        reply = QMessageBox.question(
+            self,
+            "Konfirmasi Hapus",
+            f"Hapus baris {current_row + 1}?",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No
+        )
+        
+        if reply == QMessageBox.Yes:
+            self.table.removeRow(current_row)
+            
+            # Update vertical headers (row numbers)
+            for i in range(self.table.rowCount()):
+                self.table.setVerticalHeaderItem(i, QTableWidgetItem(str(i + 1)))
+            
+            # Update row count label
+            self.update_row_count()
+            
+            # Update status
+            self.update_status(f"✓ Baris dihapus (Total: {self.table.rowCount()} baris)")
+    
+    def update_row_count(self):
+        """Update row count label"""
+        self.row_count_label.setText(str(self.table.rowCount()))
     
     def sort_table(self):
         """Sort table by Kode SLS (ASC) and Sub-SLS (DESC)"""
@@ -1179,8 +1279,14 @@ class MainWindow(QMainWindow):
         self.ocr_results = None
         self.edited_cells.clear()
         
-        # Clear table
+        # Clear table and reset to default 10 rows
         self.table.clearContents()
+        self.table.setRowCount(10)
+        for i in range(10):
+            self.table.setVerticalHeaderItem(i, QTableWidgetItem(str(i + 1)))
+        
+        # Update row count label
+        self.update_row_count()
         
         # Hide progress bar
         self.progress_bar.setVisible(False)
@@ -1189,6 +1295,8 @@ class MainWindow(QMainWindow):
         # Disable buttons
         self.start_btn.setEnabled(False)
         self.sort_btn.setEnabled(False)
+        self.add_row_btn.setEnabled(False)
+        self.remove_row_btn.setEnabled(False)
         self.reset_btn.setEnabled(False)
         self.enable_export_buttons(False)
         

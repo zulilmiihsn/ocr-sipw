@@ -72,6 +72,31 @@ QPushButton#reset_btn:disabled {
     border: 1px solid #F1F5F9;
 }
 
+/* Icon Button Style - Minimalist */
+QPushButton#icon_btn {
+    background-color: transparent;
+    border: 1px solid #E2E8F0;
+    border-radius: 4px;
+    padding: 4px;
+    min-height: 28px;
+    min-width: 28px;
+}
+
+QPushButton#icon_btn:hover {
+    background-color: #F8FAFC;
+    border: 1px solid #CBD5E1;
+}
+
+QPushButton#icon_btn:pressed {
+    background-color: #F1F5F9;
+}
+
+QPushButton#icon_btn:disabled {
+    background-color: transparent;
+    border: 1px solid #F1F5F9;
+    opacity: 0.5;
+}
+
 /* ============================================================================
    GROUP BOX - Minimal Clean
    ============================================================================ */

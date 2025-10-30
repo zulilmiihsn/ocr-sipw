@@ -451,10 +451,10 @@ class HeaderDelegate(QStyledItemDelegate):
         painter.restore()
     
     def sizeHint(self, option, index):
-        """Calculate size hint for wrapped text"""
+        """Calculate size hint for wrapped text (centered)"""
         text = index.data(Qt.DisplayRole)
         if not text:
-            return QSize(100, 50)
+            return QSize(100, 60)
         
         font = QFont()
         font.setPointSize(8)
@@ -463,11 +463,11 @@ class HeaderDelegate(QStyledItemDelegate):
         fm = QFontMetrics(font)
         text_rect = fm.boundingRect(
             QRect(0, 0, option.rect.width() - 16, 1000),
-            Qt.AlignLeft | Qt.AlignVCenter | Qt.TextWordWrap,
+            Qt.AlignCenter | Qt.TextWordWrap,
             text
         )
         
-        return QSize(option.rect.width(), max(50, text_rect.height() + 8))
+        return QSize(option.rect.width(), max(60, text_rect.height() + 12))
 
 
 class CellDelegate(QStyledItemDelegate):
@@ -719,37 +719,41 @@ class MainWindow(QMainWindow):
         self.file_list.setFlow(QListWidget.LeftToRight)  # Horizontal flow
         self.file_list.setWrapping(True)  # Wrap to next line if needed
         self.file_list.setResizeMode(QListWidget.Adjust)
-        self.file_list.setSpacing(12)
+        self.file_list.setSpacing(16)
         self.file_list.setViewMode(QListWidget.IconMode)  # Icon mode for large icons
-        self.file_list.setIconSize(QSize(64, 64))  # Large icons
-        self.file_list.setGridSize(QSize(140, 120))  # Grid cell size
-        self.file_list.setMinimumHeight(140)
-        self.file_list.setMaximumHeight(280)
+        self.file_list.setIconSize(QSize(80, 80))  # Larger icons
+        self.file_list.setGridSize(QSize(160, 140))  # Bigger grid cell size
+        self.file_list.setMinimumHeight(180)
+        self.file_list.setMaximumHeight(360)
         self.file_list.setDragDropMode(QAbstractItemView.InternalMove)
         self.file_list.setSelectionMode(QAbstractItemView.ExtendedSelection)
-        self.file_list.setMovement(QListWidget.Free)  # Free movement for reordering
+        self.file_list.setMovement(QListWidget.Static)  # Static for grid-based reordering
+        self.file_list.setUniformItemSizes(True)  # Better performance
         self.file_list.setStyleSheet("""
             QListWidget {
-                background-color: #F8FAFC;
-                border: 2px dashed #CBD5E1;
-                border-radius: 8px;
-                padding: 16px;
+                background-color: #FFFFFF;
+                border: 3px dashed #94A3B8;
+                border-radius: 12px;
+                padding: 24px;
+                outline: none;
             }
             QListWidget::item {
-                background-color: #FFFFFF;
+                background-color: #FAFAFA;
                 border: 2px solid #E2E8F0;
-                border-radius: 8px;
-                padding: 12px;
-                text-align: center;
+                border-radius: 12px;
+                padding: 16px 8px;
+                margin: 4px;
             }
             QListWidget::item:hover {
                 background-color: #EFF6FF;
-                border: 2px solid #3B82F6;
+                border: 2px solid #60A5FA;
+                transform: translateY(-2px);
             }
             QListWidget::item:selected {
                 background-color: #DBEAFE;
-                border: 2px solid #2563EB;
+                border: 3px solid #2563EB;
                 color: #1E293B;
+                font-weight: 600;
             }
         """)
         self.file_list.setVisible(False)  # Hidden until files selected
@@ -958,17 +962,17 @@ class MainWindow(QMainWindow):
             # Set large icon based on file extension
             ext = Path(file_path).suffix.lower()
             if ext in ['.png']:
-                icon = self._get_icon('fa5s.file-image', color='#8B5CF6', scale_factor=3.0)  # Large Purple for PNG
+                icon = self._get_icon('fa5s.file-image', color='#8B5CF6', scale_factor=4.0)  # Extra Large Purple for PNG
             elif ext in ['.jpg', '.jpeg']:
-                icon = self._get_icon('fa5s.file-image', color='#3B82F6', scale_factor=3.0)  # Large Blue for JPG
+                icon = self._get_icon('fa5s.file-image', color='#3B82F6', scale_factor=4.0)  # Extra Large Blue for JPG
             else:
-                icon = self._get_icon('fa5s.file', color='#64748B', scale_factor=3.0)  # Large Gray for others
+                icon = self._get_icon('fa5s.file', color='#64748B', scale_factor=4.0)  # Extra Large Gray for others
             
             item.setIcon(icon)
             
-            # Shorten filename if too long (show first 15 chars + extension)
-            if len(file_name) > 18:
-                name_part = file_name[:15]
+            # Shorten filename if too long (show first 18 chars + extension)
+            if len(file_name) > 22:
+                name_part = file_name[:18]
                 ext_part = Path(file_name).suffix
                 display_name = f"{name_part}...{ext_part}"
             else:
@@ -976,12 +980,13 @@ class MainWindow(QMainWindow):
             
             item.setText(display_name)
             item.setData(Qt.UserRole, file_path)  # Store full path in data
-            item.setToolTip(f"{file_name}\n\nDrag to reorder")  # Show full name + instruction on hover
+            item.setToolTip(f"📄 {file_name}\n\n👆 Drag untuk mengubah urutan")  # Show full name + instruction
             item.setTextAlignment(Qt.AlignCenter)
             
             # Set font for item text
             font = QFont()
-            font.setPointSize(8)
+            font.setPointSize(9)
+            font.setWeight(QFont.Medium)
             item.setFont(font)
             
             self.file_list.addItem(item)

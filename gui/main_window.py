@@ -593,10 +593,10 @@ class MainWindow(QMainWindow):
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
         
-        # Main layout - compact spacing
+        # Main layout - professional spacing
         main_layout = QVBoxLayout(central_widget)
-        main_layout.setContentsMargins(16, 16, 16, 16)
-        main_layout.setSpacing(12)
+        main_layout.setContentsMargins(20, 20, 20, 16)
+        main_layout.setSpacing(16)
         
         # File selection area (simplified)
         file_group = self.create_file_selection_group()
@@ -618,6 +618,7 @@ class MainWindow(QMainWindow):
         export_btn.setObjectName("exportButton")
         export_btn.clicked.connect(self.export_results)
         export_btn.setEnabled(False)
+        export_btn.setMinimumHeight(44)
         self.export_button = export_btn
         main_layout.addWidget(export_btn)
         
@@ -634,14 +635,15 @@ class MainWindow(QMainWindow):
         
         # Top row: Browse button
         top_row = QHBoxLayout()
-        top_row.setSpacing(10)
+        top_row.setSpacing(12)
         
         # Browse button
         browse_btn = QPushButton(" Pilih File Gambar")
         browse_btn.setIcon(self._get_icon('fa5s.folder-open', color='#64748B'))
         browse_btn.setObjectName("browse_btn")
         browse_btn.clicked.connect(self.browse_file)
-        browse_btn.setMinimumWidth(140)
+        browse_btn.setMinimumWidth(160)
+        browse_btn.setMinimumHeight(40)
         top_row.addWidget(browse_btn)
         
         # Info label
@@ -681,7 +683,7 @@ class MainWindow(QMainWindow):
         
         # Bottom row: Action buttons
         bottom_row = QHBoxLayout()
-        bottom_row.setSpacing(10)
+        bottom_row.setSpacing(12)
         
         # Start OCR button
         self.start_btn = QPushButton(" Mulai OCR")
@@ -689,7 +691,8 @@ class MainWindow(QMainWindow):
         self.start_btn.setObjectName("start_btn")
         self.start_btn.clicked.connect(self.start_ocr)
         self.start_btn.setEnabled(False)  # Disabled until file selected
-        self.start_btn.setMinimumWidth(120)
+        self.start_btn.setMinimumWidth(130)
+        self.start_btn.setMinimumHeight(40)
         bottom_row.addWidget(self.start_btn)
         
         # Sort button
@@ -698,7 +701,8 @@ class MainWindow(QMainWindow):
         self.sort_btn.setObjectName("sort_btn")
         self.sort_btn.clicked.connect(self.sort_table)
         self.sort_btn.setEnabled(False)  # Disabled until OCR done
-        self.sort_btn.setMinimumWidth(120)
+        self.sort_btn.setMinimumWidth(130)
+        self.sort_btn.setMinimumHeight(40)
         self.sort_btn.setToolTip("Urutkan tabel berdasarkan Kode SLS (↑) dan Sub-SLS (↓)")
         bottom_row.addWidget(self.sort_btn)
         
@@ -708,8 +712,11 @@ class MainWindow(QMainWindow):
         self.reset_btn.setObjectName("reset_btn")
         self.reset_btn.clicked.connect(self.reset_all)
         self.reset_btn.setEnabled(False)  # Disabled initially
-        self.reset_btn.setMinimumWidth(120)
+        self.reset_btn.setMinimumWidth(130)
+        self.reset_btn.setMinimumHeight(40)
         bottom_row.addWidget(self.reset_btn)
+        
+        bottom_row.addStretch()  # Push buttons to the left
         
         layout.addLayout(bottom_row)
         
@@ -755,32 +762,42 @@ class MainWindow(QMainWindow):
         for i in range(10):
             self.table.setVerticalHeaderItem(i, QTableWidgetItem(str(i + 1)))
         
-        # Set vertical header (row numbers) width - VERY COMPACT
-        self.table.verticalHeader().setFixedWidth(35)
+        # Set vertical header (row numbers) width - COMPACT
+        self.table.verticalHeader().setFixedWidth(40)
         
-        # Adjust column widths - COMPACT for 1 page fit
+        # Configure horizontal header for responsive behavior
         header = self.table.horizontalHeader()
-        column_widths = [
-            80,   # Kode SLS/Non-SLS
-            70,   # Kode Sub-SLS
-            120,  # Nama SLS/Non-SLS
-            90,   # Perkiraan Jumlah Muatan KK
-            70,   # BTT
-            80,   # BTT Kosong
-            70,   # BKU
-            100,  # Bangunan Bukan Tempat Tinggal
-            80,   # Perkiraan Jumlah Muatan Usaha
-            70,   # Total Muatan
-            100,  # Nama Wilayah Konsentrasi
-            80,   # Jumlah Shift
-            80,   # Jam Operasional
-            100,  # Contact - Telepon/Email
-            80,   # Contact - Muatan Dominan
-            70    # Perubahan batas (reko)
+        
+        # Set resize mode: Stretch to fill window width proportionally
+        header.setSectionResizeMode(QHeaderView.Interactive)
+        header.setStretchLastSection(True)
+        
+        # Enable text wrapping in headers for long labels
+        header.setDefaultAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+        
+        # Set minimum column widths (responsive)
+        min_widths = [
+            70,   # Kode SLS/Non-SLS
+            65,   # Kode Sub-SLS
+            100,  # Nama SLS/Non-SLS
+            80,   # Perkiraan Jumlah Muatan KK
+            60,   # BTT
+            70,   # BTT Kosong
+            60,   # BKU
+            90,   # Bangunan Bukan Tempat Tinggal
+            75,   # Perkiraan Jumlah Muatan Usaha
+            65,   # Total Muatan
+            90,   # Nama Wilayah Konsentrasi
+            75,   # Jumlah Shift
+            75,   # Jam Operasional
+            90,   # Contact - Telepon/Email
+            75,   # Contact - Muatan Dominan
+            65    # Perubahan batas (reko)
         ]
         
-        for i, width in enumerate(column_widths):
-            header.resizeSection(i, width)
+        for i, min_width in enumerate(min_widths):
+            header.setMinimumSectionSize(min_width)
+            header.resizeSection(i, min_width)
         
         # Enable single-click editing
         self.table.setEditTriggers(

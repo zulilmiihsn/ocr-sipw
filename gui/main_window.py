@@ -582,7 +582,7 @@ class MainWindow(QMainWindow):
     
     def init_ui(self):
         """Initialize the user interface"""
-        self.setWindowTitle("Lab-untuk-OCR - Ekstraksi Tabel BLOK III")
+        self.setWindowTitle("OCR SiPW - Ekstraksi Tabel BLOK III")
         self.setMinimumSize(1280, 800)
         self.setWindowIcon(self._get_icon('fa5s.table', color='#2563EB'))
         

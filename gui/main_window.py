@@ -443,11 +443,74 @@ class CellDelegate(QStyledItemDelegate):
 
 
 class CustomTableWidget(QTableWidget):
-    """Custom table widget with enhanced navigation"""
+    """Custom table widget with enhanced navigation and floating row controls"""
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._moving_after_edit = False
+        self.hovered_row = -1
+        self.parent_window = None
+        
+        # Floating buttons (akan dibuat oleh parent window)
+        self.add_row_floating_btn = None
+        self.remove_row_floating_btn = None
+        
+        # Enable mouse tracking for vertical header
+        self.verticalHeader().setMouseTracking(True)
+        self.verticalHeader().viewport().setMouseTracking(True)
+        
+        # Install event filter on vertical header
+        self.verticalHeader().viewport().installEventFilter(self)
+    
+    def eventFilter(self, obj, event):
+        """Handle vertical header hover events"""
+        if obj == self.verticalHeader().viewport():
+            if event.type() == event.MouseMove:
+                # Get row from mouse position
+                pos = event.pos()
+                row = self.verticalHeader().logicalIndexAt(pos)
+                
+                if row >= 0 and row < self.rowCount():
+                    if self.hovered_row != row:
+                        self.hovered_row = row
+                        self.show_floating_buttons(row)
+                else:
+                    self.hide_floating_buttons()
+            
+            elif event.type() == event.Leave:
+                # Hide buttons when mouse leaves vertical header
+                self.hide_floating_buttons()
+        
+        return super().eventFilter(obj, event)
+    
+    def show_floating_buttons(self, row):
+        """Show floating buttons for the hovered row"""
+        if self.add_row_floating_btn and self.remove_row_floating_btn:
+            # Calculate button position
+            header_rect = self.verticalHeader().sectionViewportPosition(row)
+            header_height = self.verticalHeader().sectionSize(row)
+            
+            # Position buttons on the left side of vertical header
+            x = 2
+            y = header_rect + (header_height - 24) // 2
+            
+            # Show and position buttons
+            self.add_row_floating_btn.setParent(self.verticalHeader().viewport())
+            self.remove_row_floating_btn.setParent(self.verticalHeader().viewport())
+            
+            self.add_row_floating_btn.setGeometry(x, y, 12, 24)
+            self.remove_row_floating_btn.setGeometry(x + 12, y, 12, 24)
+            
+            self.add_row_floating_btn.show()
+            self.remove_row_floating_btn.show()
+    
+    def hide_floating_buttons(self):
+        """Hide floating buttons"""
+        self.hovered_row = -1
+        if self.add_row_floating_btn:
+            self.add_row_floating_btn.hide()
+        if self.remove_row_floating_btn:
+            self.remove_row_floating_btn.hide()
     
     def keyPressEvent(self, event):
         """Override key press for smart navigation"""
@@ -623,46 +686,9 @@ class MainWindow(QMainWindow):
         group = QGroupBox("Hasil Ekstraksi Tabel")
         layout = QVBoxLayout()
         
-        # Minimalist row controls (add/remove) - horizontal layout
-        row_controls = QHBoxLayout()
-        row_controls.setSpacing(5)
-        
-        # Add row button (minimalist)
-        self.add_row_btn = QPushButton()
-        self.add_row_btn.setIcon(self._get_icon('fa5s.plus', color='#10B981', scale_factor=0.8))
-        self.add_row_btn.setToolTip("Tambah baris baru di bawah")
-        self.add_row_btn.setFixedSize(28, 28)
-        self.add_row_btn.setObjectName("icon_btn")
-        self.add_row_btn.clicked.connect(self.add_row)
-        self.add_row_btn.setEnabled(False)
-        row_controls.addWidget(self.add_row_btn)
-        
-        # Remove row button (minimalist)
-        self.remove_row_btn = QPushButton()
-        self.remove_row_btn.setIcon(self._get_icon('fa5s.minus', color='#EF4444', scale_factor=0.8))
-        self.remove_row_btn.setToolTip("Hapus baris yang dipilih")
-        self.remove_row_btn.setFixedSize(28, 28)
-        self.remove_row_btn.setObjectName("icon_btn")
-        self.remove_row_btn.clicked.connect(self.remove_row)
-        self.remove_row_btn.setEnabled(False)
-        row_controls.addWidget(self.remove_row_btn)
-        
-        # Spacer to push buttons to the left
-        row_controls.addStretch()
-        
-        # Info label (subtle)
-        info_label = QLabel("Baris:")
-        info_label.setStyleSheet("color: #64748B; font-size: 11px;")
-        row_controls.addWidget(info_label)
-        
-        self.row_count_label = QLabel("0")
-        self.row_count_label.setStyleSheet("color: #1E293B; font-weight: bold; font-size: 11px;")
-        row_controls.addWidget(self.row_count_label)
-        
-        layout.addLayout(row_controls)
-        
-        # Create custom table widget with arrow key navigation
+        # Create custom table widget with arrow key navigation and floating controls
         self.table = CustomTableWidget()
+        self.table.parent_window = self
         self.table.setColumnCount(16)
         self.table.setRowCount(10)
         
@@ -732,10 +758,35 @@ class MainWindow(QMainWindow):
         
         # Navigation handled by CustomTableWidget.keyPressEvent
         
+        # Create floating buttons for row control (hidden by default)
+        self.create_floating_row_buttons()
+        
         layout.addWidget(self.table)
         
         group.setLayout(layout)
         return group
+    
+    def create_floating_row_buttons(self):
+        """Create floating add/remove buttons for table rows"""
+        # Add button (tiny, floating)
+        add_btn = QPushButton()
+        add_btn.setIcon(self._get_icon('fa5s.plus', color='#10B981', scale_factor=0.6))
+        add_btn.setToolTip("Tambah baris di bawah")
+        add_btn.setObjectName("floating_btn")
+        add_btn.clicked.connect(self.add_row_at_hover)
+        add_btn.hide()
+        
+        # Remove button (tiny, floating)
+        remove_btn = QPushButton()
+        remove_btn.setIcon(self._get_icon('fa5s.minus', color='#EF4444', scale_factor=0.6))
+        remove_btn.setToolTip("Hapus baris ini")
+        remove_btn.setObjectName("floating_btn")
+        remove_btn.clicked.connect(self.remove_row_at_hover)
+        remove_btn.hide()
+        
+        # Assign to table
+        self.table.add_row_floating_btn = add_btn
+        self.table.remove_row_floating_btn = remove_btn
     
     
     def browse_file(self):
@@ -808,11 +859,9 @@ class MainWindow(QMainWindow):
         # Populate table
         self.populate_table(results['table'])
         
-        # Re-enable Start button, Sort button, row controls, and export button
+        # Re-enable Start button, Sort button, and export button
         self.start_btn.setEnabled(True)
         self.sort_btn.setEnabled(True)
-        self.add_row_btn.setEnabled(True)
-        self.remove_row_btn.setEnabled(True)
         self.enable_export_buttons(True)
         
         # Update status
@@ -866,9 +915,6 @@ class MainWindow(QMainWindow):
         for i in range(num_rows):
             self.table.setVerticalHeaderItem(i, QTableWidgetItem(str(i + 1)))
         
-        # Update row count label
-        self.update_row_count()
-        
         # Populate cells
         for row_idx, row_data in enumerate(table_data):
             # Skip column 0 (No), start from column 1 (Kode SLS/Non-SLS)
@@ -913,62 +959,62 @@ class MainWindow(QMainWindow):
         # Update status
         self.update_status(f"Edited cell ({row+1}, {col+1}) | Total edits: {len(self.edited_cells)}")
     
-    def add_row(self):
-        """Add a new empty row at the end of the table"""
-        current_rows = self.table.rowCount()
-        self.table.insertRow(current_rows)
+    def add_row_at_hover(self):
+        """Add a new row below the hovered row"""
+        hovered_row = self.table.hovered_row
+        if hovered_row < 0:
+            return
         
-        # Set vertical header for new row
-        self.table.setVerticalHeaderItem(current_rows, QTableWidgetItem(str(current_rows + 1)))
+        # Insert row below hovered row
+        insert_pos = hovered_row + 1
+        self.table.insertRow(insert_pos)
         
         # Initialize empty cells with white background
         for col in range(self.table.columnCount()):
             item = QTableWidgetItem("")
             item.setBackground(QColor(255, 255, 255))
-            self.table.setItem(current_rows, col, item)
+            self.table.setItem(insert_pos, col, item)
         
-        # Update row count label
-        self.update_row_count()
+        # Update all vertical headers (row numbers)
+        for i in range(self.table.rowCount()):
+            self.table.setVerticalHeaderItem(i, QTableWidgetItem(str(i + 1)))
         
         # Update status
-        self.update_status(f"✓ Baris baru ditambahkan (Total: {self.table.rowCount()} baris)")
+        self.update_status(f"✓ Baris ditambahkan di posisi {insert_pos + 1} (Total: {self.table.rowCount()} baris)")
         
         # Scroll to new row
-        self.table.scrollToItem(self.table.item(current_rows, 0))
-    
-    def remove_row(self):
-        """Remove the currently selected row"""
-        current_row = self.table.currentRow()
+        self.table.scrollToItem(self.table.item(insert_pos, 0))
         
-        if current_row < 0:
-            QMessageBox.warning(self, "Peringatan", "Pilih baris yang ingin dihapus terlebih dahulu")
+        # Hide floating buttons after action
+        self.table.hide_floating_buttons()
+    
+    def remove_row_at_hover(self):
+        """Remove the hovered row"""
+        hovered_row = self.table.hovered_row
+        if hovered_row < 0:
             return
+        
+        # Hide buttons first
+        self.table.hide_floating_buttons()
         
         # Confirm deletion
         reply = QMessageBox.question(
             self,
             "Konfirmasi Hapus",
-            f"Hapus baris {current_row + 1}?",
+            f"Hapus baris {hovered_row + 1}?",
             QMessageBox.Yes | QMessageBox.No,
             QMessageBox.No
         )
         
         if reply == QMessageBox.Yes:
-            self.table.removeRow(current_row)
+            self.table.removeRow(hovered_row)
             
             # Update vertical headers (row numbers)
             for i in range(self.table.rowCount()):
                 self.table.setVerticalHeaderItem(i, QTableWidgetItem(str(i + 1)))
             
-            # Update row count label
-            self.update_row_count()
-            
             # Update status
-            self.update_status(f"✓ Baris dihapus (Total: {self.table.rowCount()} baris)")
-    
-    def update_row_count(self):
-        """Update row count label"""
-        self.row_count_label.setText(str(self.table.rowCount()))
+            self.update_status(f"✓ Baris {hovered_row + 1} dihapus (Total: {self.table.rowCount()} baris)")
     
     def sort_table(self):
         """Sort table by Kode SLS (ASC) and Sub-SLS (DESC)"""
@@ -1285,9 +1331,6 @@ class MainWindow(QMainWindow):
         for i in range(10):
             self.table.setVerticalHeaderItem(i, QTableWidgetItem(str(i + 1)))
         
-        # Update row count label
-        self.update_row_count()
-        
         # Hide progress bar
         self.progress_bar.setVisible(False)
         self.progress_bar.setValue(0)
@@ -1295,8 +1338,6 @@ class MainWindow(QMainWindow):
         # Disable buttons
         self.start_btn.setEnabled(False)
         self.sort_btn.setEnabled(False)
-        self.add_row_btn.setEnabled(False)
-        self.remove_row_btn.setEnabled(False)
         self.reset_btn.setEnabled(False)
         self.enable_export_buttons(False)
         

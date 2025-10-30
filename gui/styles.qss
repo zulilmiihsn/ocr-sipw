@@ -97,6 +97,27 @@ QPushButton#icon_btn:disabled {
     opacity: 0.5;
 }
 
+/* Floating Button Style - Ultra Minimalist */
+QPushButton#floating_btn {
+    background-color: rgba(255, 255, 255, 0.9);
+    border: none;
+    border-radius: 2px;
+    padding: 2px;
+    min-height: 12px;
+    min-width: 12px;
+    max-height: 12px;
+    max-width: 12px;
+}
+
+QPushButton#floating_btn:hover {
+    background-color: rgba(255, 255, 255, 1.0);
+    border: 1px solid #CBD5E1;
+}
+
+QPushButton#floating_btn:pressed {
+    background-color: #F1F5F9;
+}
+
 /* ============================================================================
    GROUP BOX - Minimal Clean
    ============================================================================ */

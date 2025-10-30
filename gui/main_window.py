@@ -12,10 +12,11 @@ from PyQt5.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
     QFileDialog, QTableWidget, QTableWidgetItem, QLabel, QProgressBar,
     QStatusBar, QMessageBox, QHeaderView, QApplication, QGroupBox,
-    QStyledItemDelegate, QLineEdit, QListWidget, QListWidgetItem, QAbstractItemView
+    QStyledItemDelegate, QLineEdit, QListWidget, QListWidgetItem, QAbstractItemView,
+    QStyle
 )
-from PyQt5.QtCore import Qt, QThread, pyqtSignal, QTimer, QEvent
-from PyQt5.QtGui import QColor, QFont, QIcon
+from PyQt5.QtCore import Qt, QThread, pyqtSignal, QTimer, QEvent, QRect, QSize
+from PyQt5.QtGui import QColor, QFont, QIcon, QPainter, QFontMetrics
 
 # Import QtAwesome for professional icons
 import qtawesome as qta
@@ -409,6 +410,66 @@ class OCRWorker(QThread):
         self.is_cancelled = True
 
 
+class HeaderDelegate(QStyledItemDelegate):
+    """Custom delegate for table headers with word wrap support"""
+    
+    def paint(self, painter, option, index):
+        """Paint header with word wrapping"""
+        painter.save()
+        
+        # Get text
+        text = index.data(Qt.DisplayRole)
+        if not text:
+            text = ""
+        
+        # Setup font
+        font = QFont()
+        font.setPointSize(8)
+        font.setBold(True)
+        painter.setFont(font)
+        
+        # Draw background
+        if option.state & QStyle.State_MouseOver:
+            painter.fillRect(option.rect, QColor("#F1F5F9"))
+        else:
+            painter.fillRect(option.rect, QColor("#F8FAFC"))
+        
+        # Draw border
+        painter.setPen(QColor("#E2E8F0"))
+        painter.drawLine(option.rect.topRight(), option.rect.bottomRight())
+        painter.drawLine(option.rect.bottomLeft(), option.rect.bottomRight())
+        
+        # Draw text with word wrap
+        painter.setPen(QColor("#475569"))
+        text_rect = option.rect.adjusted(8, 4, -8, -4)
+        painter.drawText(
+            text_rect,
+            Qt.AlignLeft | Qt.AlignVCenter | Qt.TextWordWrap,
+            text
+        )
+        
+        painter.restore()
+    
+    def sizeHint(self, option, index):
+        """Calculate size hint for wrapped text"""
+        text = index.data(Qt.DisplayRole)
+        if not text:
+            return QSize(100, 50)
+        
+        font = QFont()
+        font.setPointSize(8)
+        font.setBold(True)
+        
+        fm = QFontMetrics(font)
+        text_rect = fm.boundingRect(
+            QRect(0, 0, option.rect.width() - 16, 1000),
+            Qt.AlignLeft | Qt.AlignVCenter | Qt.TextWordWrap,
+            text
+        )
+        
+        return QSize(option.rect.width(), max(50, text_rect.height() + 8))
+
+
 class CellDelegate(QStyledItemDelegate):
     """Custom delegate for table cells - handles Enter key and sizing"""
     
@@ -758,8 +819,9 @@ class MainWindow(QMainWindow):
         ]
         self.table.setHorizontalHeaderLabels(headers)
         
-        # Enable word wrap for headers (multi-line text support)
-        self.table.horizontalHeader().setWordWrap(True)
+        # Apply custom header delegate for word wrapping
+        header_delegate = HeaderDelegate(self.table)
+        self.table.horizontalHeader().setItemDelegate(header_delegate)
         
         # Set vertical headers (row numbers 1-10) - auto-generated
         for i in range(10):

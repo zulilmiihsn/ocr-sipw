@@ -9,13 +9,13 @@
    ============================================================================ */
 
 QMainWindow {
-    background-color: #FFFFFF;
+    background-color: #F8FAFC;
 }
 
 QWidget {
     font-family: "Segoe UI", "Inter", -apple-system, sans-serif;
     font-size: 9pt;
-    color: #334155;
+    color: #1E293B;
 }
 
 /* ============================================================================
@@ -26,19 +26,21 @@ QPushButton {
     background-color: #2563EB;
     color: white;
     border: none;
-    border-radius: 4px;
-    padding: 10px 20px;
-    font-weight: 500;
+    border-radius: 6px;
+    padding: 12px 24px;
+    font-weight: 600;
     font-size: 9pt;
-    min-height: 36px;
+    min-height: 40px;
 }
 
 QPushButton:hover {
     background-color: #1D4ED8;
+    transform: translateY(-1px);
 }
 
 QPushButton:pressed {
     background-color: #1E40AF;
+    transform: translateY(0px);
 }
 
 QPushButton:disabled {
@@ -51,25 +53,49 @@ QPushButton#browse_btn,
 QPushButton#reset_btn {
     background-color: #FFFFFF;
     color: #475569;
-    border: 1px solid #E2E8F0;
+    border: 2px solid #E2E8F0;
 }
 
 QPushButton#browse_btn:hover,
 QPushButton#reset_btn:hover {
     background-color: #F8FAFC;
-    border: 1px solid #CBD5E1;
+    border: 2px solid #2563EB;
+    color: #2563EB;
 }
 
 QPushButton#browse_btn:pressed,
 QPushButton#reset_btn:pressed {
-    background-color: #F1F5F9;
+    background-color: #EFF6FF;
 }
 
 QPushButton#browse_btn:disabled,
 QPushButton#reset_btn:disabled {
+    background-color: #F8FAFC;
+    color: #CBD5E1;
+    border: 2px solid #F1F5F9;
+}
+
+/* Sort Button Style */
+QPushButton#sort_btn {
     background-color: #FFFFFF;
-    color: #E2E8F0;
-    border: 1px solid #F1F5F9;
+    color: #2563EB;
+    border: 2px solid #2563EB;
+}
+
+QPushButton#sort_btn:hover {
+    background-color: #EFF6FF;
+    border: 2px solid #1D4ED8;
+    color: #1D4ED8;
+}
+
+QPushButton#sort_btn:pressed {
+    background-color: #DBEAFE;
+}
+
+QPushButton#sort_btn:disabled {
+    background-color: #F8FAFC;
+    color: #CBD5E1;
+    border: 2px solid #F1F5F9;
 }
 
 /* Icon Button Style - Minimalist */
@@ -125,9 +151,9 @@ QPushButton#floating_btn:pressed {
 QGroupBox {
     background-color: #FFFFFF;
     border: 1px solid #E2E8F0;
-    border-radius: 6px;
-    padding: 20px 16px 16px 16px;
-    margin-top: 12px;
+    border-radius: 8px;
+    padding: 24px 20px 20px 20px;
+    margin-top: 14px;
     font-weight: 500;
     font-size: 9pt;
     color: #475569;
@@ -136,14 +162,16 @@ QGroupBox {
 QGroupBox::title {
     subcontrol-origin: margin;
     subcontrol-position: top left;
-    padding: 4px 10px;
-    margin-left: 8px;
-    background-color: #FFFFFF;
-    color: #64748B;
+    padding: 6px 12px;
+    margin-left: 10px;
+    background-color: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    border-radius: 4px;
+    color: #475569;
     font-weight: 600;
-    font-size: 8pt;
+    font-size: 8.5pt;
     text-transform: uppercase;
-    letter-spacing: 0.8px;
+    letter-spacing: 1px;
 }
 
 /* ============================================================================
@@ -225,19 +253,20 @@ QHeaderView::section:vertical {
    ============================================================================ */
 
 QProgressBar {
-    background-color: #F8FAFC;
-    border: 1px solid #E2E8F0;
-    border-radius: 2px;
+    background-color: #F1F5F9;
+    border: none;
+    border-radius: 8px;
     text-align: center;
-    height: 24px;
-    font-size: 8pt;
-    font-weight: 500;
-    color: #64748B;
+    height: 32px;
+    font-size: 8.5pt;
+    font-weight: 600;
+    color: #2563EB;
 }
 
 QProgressBar::chunk {
-    background-color: #2563EB;
-    border-radius: 2px;
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                                stop:0 #3B82F6, stop:1 #2563EB);
+    border-radius: 8px;
 }
 
 /* ============================================================================
@@ -245,12 +274,13 @@ QProgressBar::chunk {
    ============================================================================ */
 
 QStatusBar {
-    background-color: #F8FAFC;
+    background-color: #FFFFFF;
     color: #64748B;
     border-top: 1px solid #E2E8F0;
-    font-size: 8pt;
-    font-weight: 400;
-    padding: 6px 12px;
+    font-size: 8.5pt;
+    font-weight: 500;
+    padding: 10px 16px;
+    min-height: 32px;
 }
 
 /* ============================================================================

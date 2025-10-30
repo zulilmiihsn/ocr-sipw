@@ -439,22 +439,22 @@ class HeaderDelegate(QStyledItemDelegate):
         painter.drawLine(option.rect.topRight(), option.rect.bottomRight())
         painter.drawLine(option.rect.bottomLeft(), option.rect.bottomRight())
         
-        # Draw text with word wrap (CENTER ALIGNED)
+        # Draw text with word wrap
         painter.setPen(QColor("#475569"))
         text_rect = option.rect.adjusted(8, 4, -8, -4)
         painter.drawText(
             text_rect,
-            Qt.AlignCenter | Qt.TextWordWrap,
+            Qt.AlignLeft | Qt.AlignVCenter | Qt.TextWordWrap,
             text
         )
         
         painter.restore()
     
     def sizeHint(self, option, index):
-        """Calculate size hint for wrapped text (centered)"""
+        """Calculate size hint for wrapped text"""
         text = index.data(Qt.DisplayRole)
         if not text:
-            return QSize(100, 60)
+            return QSize(100, 50)
         
         font = QFont()
         font.setPointSize(8)
@@ -463,11 +463,11 @@ class HeaderDelegate(QStyledItemDelegate):
         fm = QFontMetrics(font)
         text_rect = fm.boundingRect(
             QRect(0, 0, option.rect.width() - 16, 1000),
-            Qt.AlignCenter | Qt.TextWordWrap,
+            Qt.AlignLeft | Qt.AlignVCenter | Qt.TextWordWrap,
             text
         )
         
-        return QSize(option.rect.width(), max(60, text_rect.height() + 12))
+        return QSize(option.rect.width(), max(50, text_rect.height() + 8))
 
 
 class CellDelegate(QStyledItemDelegate):
@@ -654,10 +654,10 @@ class MainWindow(QMainWindow):
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
         
-        # Main layout - professional spacing
+        # Main layout - professional spacing with breathing room
         main_layout = QVBoxLayout(central_widget)
-        main_layout.setContentsMargins(20, 20, 20, 16)
-        main_layout.setSpacing(16)
+        main_layout.setContentsMargins(24, 24, 24, 20)
+        main_layout.setSpacing(20)
         
         # File selection area (simplified)
         file_group = self.create_file_selection_group()
@@ -679,7 +679,7 @@ class MainWindow(QMainWindow):
         export_btn.setObjectName("exportButton")
         export_btn.clicked.connect(self.export_results)
         export_btn.setEnabled(False)
-        export_btn.setMinimumHeight(44)
+        export_btn.setMinimumHeight(48)
         self.export_button = export_btn
         main_layout.addWidget(export_btn)
         
@@ -696,15 +696,15 @@ class MainWindow(QMainWindow):
         
         # Top row: Browse button
         top_row = QHBoxLayout()
-        top_row.setSpacing(12)
+        top_row.setSpacing(16)
         
         # Browse button
         browse_btn = QPushButton(" Pilih File Gambar")
         browse_btn.setIcon(self._get_icon('fa5s.folder-open', color='#64748B'))
         browse_btn.setObjectName("browse_btn")
         browse_btn.clicked.connect(self.browse_file)
-        browse_btn.setMinimumWidth(160)
-        browse_btn.setMinimumHeight(40)
+        browse_btn.setMinimumWidth(170)
+        browse_btn.setMinimumHeight(44)
         top_row.addWidget(browse_btn)
         
         # Info label
@@ -714,46 +714,29 @@ class MainWindow(QMainWindow):
         
         layout.addLayout(top_row)
         
-        # Interactive file list (drag & drop enabled) - HORIZONTAL LAYOUT
+        # Interactive file list (drag & drop enabled)
         self.file_list = QListWidget()
-        self.file_list.setFlow(QListWidget.LeftToRight)  # Horizontal flow
-        self.file_list.setWrapping(True)  # Wrap to next line if needed
-        self.file_list.setResizeMode(QListWidget.Adjust)
-        self.file_list.setSpacing(16)
-        self.file_list.setViewMode(QListWidget.IconMode)  # Icon mode for large icons
-        self.file_list.setIconSize(QSize(80, 80))  # Larger icons
-        self.file_list.setGridSize(QSize(160, 140))  # Bigger grid cell size
-        self.file_list.setMinimumHeight(180)
-        self.file_list.setMaximumHeight(360)
+        self.file_list.setMaximumHeight(120)
         self.file_list.setDragDropMode(QAbstractItemView.InternalMove)
         self.file_list.setSelectionMode(QAbstractItemView.ExtendedSelection)
-        self.file_list.setMovement(QListWidget.Static)  # Static for grid-based reordering
-        self.file_list.setUniformItemSizes(True)  # Better performance
         self.file_list.setStyleSheet("""
             QListWidget {
-                background-color: #FFFFFF;
-                border: 3px dashed #94A3B8;
-                border-radius: 12px;
-                padding: 24px;
-                outline: none;
+                background-color: #F8FAFC;
+                border: 1px solid #E2E8F0;
+                border-radius: 4px;
+                padding: 4px;
             }
             QListWidget::item {
-                background-color: #FAFAFA;
-                border: 2px solid #E2E8F0;
-                border-radius: 12px;
-                padding: 16px 8px;
-                margin: 4px;
+                padding: 6px 8px;
+                border-radius: 3px;
+                margin: 2px 0px;
             }
             QListWidget::item:hover {
                 background-color: #EFF6FF;
-                border: 2px solid #60A5FA;
-                transform: translateY(-2px);
             }
             QListWidget::item:selected {
                 background-color: #DBEAFE;
-                border: 3px solid #2563EB;
                 color: #1E293B;
-                font-weight: 600;
             }
         """)
         self.file_list.setVisible(False)  # Hidden until files selected
@@ -761,7 +744,7 @@ class MainWindow(QMainWindow):
         
         # Bottom row: Action buttons
         bottom_row = QHBoxLayout()
-        bottom_row.setSpacing(12)
+        bottom_row.setSpacing(16)
         
         # Start OCR button
         self.start_btn = QPushButton(" Mulai OCR")
@@ -769,18 +752,18 @@ class MainWindow(QMainWindow):
         self.start_btn.setObjectName("start_btn")
         self.start_btn.clicked.connect(self.start_ocr)
         self.start_btn.setEnabled(False)  # Disabled until file selected
-        self.start_btn.setMinimumWidth(130)
-        self.start_btn.setMinimumHeight(40)
+        self.start_btn.setMinimumWidth(140)
+        self.start_btn.setMinimumHeight(44)
         bottom_row.addWidget(self.start_btn)
         
         # Sort button
         self.sort_btn = QPushButton(" Urutkan")
-        self.sort_btn.setIcon(self._get_icon('fa5s.sort-amount-down', color='#3B82F6'))
+        self.sort_btn.setIcon(self._get_icon('fa5s.sort-amount-down', color='#2563EB'))
         self.sort_btn.setObjectName("sort_btn")
         self.sort_btn.clicked.connect(self.sort_table)
         self.sort_btn.setEnabled(False)  # Disabled until OCR done
-        self.sort_btn.setMinimumWidth(130)
-        self.sort_btn.setMinimumHeight(40)
+        self.sort_btn.setMinimumWidth(140)
+        self.sort_btn.setMinimumHeight(44)
         self.sort_btn.setToolTip("Urutkan tabel berdasarkan Kode SLS (↑) dan Sub-SLS (↓)")
         bottom_row.addWidget(self.sort_btn)
         
@@ -790,8 +773,8 @@ class MainWindow(QMainWindow):
         self.reset_btn.setObjectName("reset_btn")
         self.reset_btn.clicked.connect(self.reset_all)
         self.reset_btn.setEnabled(False)  # Disabled initially
-        self.reset_btn.setMinimumWidth(130)
-        self.reset_btn.setMinimumHeight(40)
+        self.reset_btn.setMinimumWidth(140)
+        self.reset_btn.setMinimumHeight(44)
         bottom_row.addWidget(self.reset_btn)
         
         bottom_row.addStretch()  # Push buttons to the left
@@ -952,42 +935,26 @@ class MainWindow(QMainWindow):
             self.reset_btn.setEnabled(True)
     
     def populate_file_list(self, file_paths):
-        """Populate file list with large icons and names (horizontal layout)"""
+        """Populate file list with icons and names"""
         self.file_list.clear()
         
         for file_path in file_paths:
             file_name = Path(file_path).name
             item = QListWidgetItem()
             
-            # Set large icon based on file extension
+            # Set icon based on file extension
             ext = Path(file_path).suffix.lower()
             if ext in ['.png']:
-                icon = self._get_icon('fa5s.file-image', color='#8B5CF6', scale_factor=4.0)  # Extra Large Purple for PNG
+                icon = self._get_icon('fa5s.file-image', color='#8B5CF6')  # Purple for PNG
             elif ext in ['.jpg', '.jpeg']:
-                icon = self._get_icon('fa5s.file-image', color='#3B82F6', scale_factor=4.0)  # Extra Large Blue for JPG
+                icon = self._get_icon('fa5s.file-image', color='#3B82F6')  # Blue for JPG
             else:
-                icon = self._get_icon('fa5s.file', color='#64748B', scale_factor=4.0)  # Extra Large Gray for others
+                icon = self._get_icon('fa5s.file', color='#64748B')  # Gray for others
             
             item.setIcon(icon)
-            
-            # Shorten filename if too long (show first 18 chars + extension)
-            if len(file_name) > 22:
-                name_part = file_name[:18]
-                ext_part = Path(file_name).suffix
-                display_name = f"{name_part}...{ext_part}"
-            else:
-                display_name = file_name
-            
-            item.setText(display_name)
+            item.setText(file_name)
             item.setData(Qt.UserRole, file_path)  # Store full path in data
-            item.setToolTip(f"📄 {file_name}\n\n👆 Drag untuk mengubah urutan")  # Show full name + instruction
-            item.setTextAlignment(Qt.AlignCenter)
-            
-            # Set font for item text
-            font = QFont()
-            font.setPointSize(9)
-            font.setWeight(QFont.Medium)
-            item.setFont(font)
+            item.setToolTip(file_path)  # Show full path on hover
             
             self.file_list.addItem(item)
     

@@ -439,12 +439,12 @@ class HeaderDelegate(QStyledItemDelegate):
         painter.drawLine(option.rect.topRight(), option.rect.bottomRight())
         painter.drawLine(option.rect.bottomLeft(), option.rect.bottomRight())
         
-        # Draw text with word wrap
+        # Draw text with word wrap (CENTER ALIGNED)
         painter.setPen(QColor("#475569"))
         text_rect = option.rect.adjusted(8, 4, -8, -4)
         painter.drawText(
             text_rect,
-            Qt.AlignLeft | Qt.AlignVCenter | Qt.TextWordWrap,
+            Qt.AlignCenter | Qt.TextWordWrap,
             text
         )
         
@@ -714,28 +714,41 @@ class MainWindow(QMainWindow):
         
         layout.addLayout(top_row)
         
-        # Interactive file list (drag & drop enabled)
+        # Interactive file list (drag & drop enabled) - HORIZONTAL LAYOUT
         self.file_list = QListWidget()
-        self.file_list.setMaximumHeight(120)
+        self.file_list.setFlow(QListWidget.LeftToRight)  # Horizontal flow
+        self.file_list.setWrapping(True)  # Wrap to next line if needed
+        self.file_list.setResizeMode(QListWidget.Adjust)
+        self.file_list.setSpacing(12)
+        self.file_list.setViewMode(QListWidget.IconMode)  # Icon mode for large icons
+        self.file_list.setIconSize(QSize(64, 64))  # Large icons
+        self.file_list.setGridSize(QSize(140, 120))  # Grid cell size
+        self.file_list.setMinimumHeight(140)
+        self.file_list.setMaximumHeight(280)
         self.file_list.setDragDropMode(QAbstractItemView.InternalMove)
         self.file_list.setSelectionMode(QAbstractItemView.ExtendedSelection)
+        self.file_list.setMovement(QListWidget.Free)  # Free movement for reordering
         self.file_list.setStyleSheet("""
             QListWidget {
                 background-color: #F8FAFC;
-                border: 1px solid #E2E8F0;
-                border-radius: 4px;
-                padding: 4px;
+                border: 2px dashed #CBD5E1;
+                border-radius: 8px;
+                padding: 16px;
             }
             QListWidget::item {
-                padding: 6px 8px;
-                border-radius: 3px;
-                margin: 2px 0px;
+                background-color: #FFFFFF;
+                border: 2px solid #E2E8F0;
+                border-radius: 8px;
+                padding: 12px;
+                text-align: center;
             }
             QListWidget::item:hover {
                 background-color: #EFF6FF;
+                border: 2px solid #3B82F6;
             }
             QListWidget::item:selected {
                 background-color: #DBEAFE;
+                border: 2px solid #2563EB;
                 color: #1E293B;
             }
         """)
@@ -935,26 +948,41 @@ class MainWindow(QMainWindow):
             self.reset_btn.setEnabled(True)
     
     def populate_file_list(self, file_paths):
-        """Populate file list with icons and names"""
+        """Populate file list with large icons and names (horizontal layout)"""
         self.file_list.clear()
         
         for file_path in file_paths:
             file_name = Path(file_path).name
             item = QListWidgetItem()
             
-            # Set icon based on file extension
+            # Set large icon based on file extension
             ext = Path(file_path).suffix.lower()
             if ext in ['.png']:
-                icon = self._get_icon('fa5s.file-image', color='#8B5CF6')  # Purple for PNG
+                icon = self._get_icon('fa5s.file-image', color='#8B5CF6', scale_factor=3.0)  # Large Purple for PNG
             elif ext in ['.jpg', '.jpeg']:
-                icon = self._get_icon('fa5s.file-image', color='#3B82F6')  # Blue for JPG
+                icon = self._get_icon('fa5s.file-image', color='#3B82F6', scale_factor=3.0)  # Large Blue for JPG
             else:
-                icon = self._get_icon('fa5s.file', color='#64748B')  # Gray for others
+                icon = self._get_icon('fa5s.file', color='#64748B', scale_factor=3.0)  # Large Gray for others
             
             item.setIcon(icon)
-            item.setText(file_name)
+            
+            # Shorten filename if too long (show first 15 chars + extension)
+            if len(file_name) > 18:
+                name_part = file_name[:15]
+                ext_part = Path(file_name).suffix
+                display_name = f"{name_part}...{ext_part}"
+            else:
+                display_name = file_name
+            
+            item.setText(display_name)
             item.setData(Qt.UserRole, file_path)  # Store full path in data
-            item.setToolTip(file_path)  # Show full path on hover
+            item.setToolTip(f"{file_name}\n\nDrag to reorder")  # Show full name + instruction on hover
+            item.setTextAlignment(Qt.AlignCenter)
+            
+            # Set font for item text
+            font = QFont()
+            font.setPointSize(8)
+            item.setFont(font)
             
             self.file_list.addItem(item)
     

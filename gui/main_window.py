@@ -92,14 +92,10 @@ class OCRWorker(QThread):
                     # Append to aggregated results
                     all_results.extend(page_results)
             
-            # All files/pages processed - now sort and emit
+            # All files/pages processed - emit results (no auto-sort)
             if not all_results:
                 self.error.emit("No data extracted from any file")
                 return
-            
-            # SORTING: 2-level sort (Col1 ASC, Col2 DESC)
-            self.progress.emit(95, "Sorting results...")
-            all_results = self._sort_results(all_results)
             
             # Calculate total time
             total_time = time.time() - start_time
@@ -408,25 +404,6 @@ class OCRWorker(QThread):
             print(f"Error processing image: {str(e)}")
             return []  # Return empty list on error
     
-    def _sort_results(self, results):
-        """Sort results with 2-level sorting: Col1 ASC, Col2 DESC"""
-        def get_sort_key(row):
-            """Extract sort key from row"""
-            cells = row.get('cells', {})
-            
-            # Col 1 (Kode SLS) - index 1 (0 is row number, skipped)
-            col1_text = cells.get(1, {}).get('text_final', '0000')
-            col1_val = int(''.join(c for c in col1_text if c.isdigit()) or '0')
-            
-            # Col 2 (Kode Sub-SLS) - index 2
-            col2_text = cells.get(2, {}).get('text_final', '00')
-            col2_val = int(''.join(c for c in col2_text if c.isdigit()) or '0')
-            
-            # Sort: Col1 ascending, Col2 descending (negative for DESC)
-            return (col1_val, -col2_val)
-        
-        return sorted(results, key=get_sort_key)
-    
     def cancel(self):
         """Cancel the operation"""
         self.is_cancelled = True
@@ -619,13 +596,23 @@ class MainWindow(QMainWindow):
         self.start_btn.setMinimumWidth(120)
         layout.addWidget(self.start_btn)
         
+        # Sort button
+        self.sort_btn = QPushButton(" Urutkan")
+        self.sort_btn.setIcon(self._get_icon('fa5s.sort-amount-down', color='#3B82F6'))
+        self.sort_btn.setObjectName("sort_btn")
+        self.sort_btn.clicked.connect(self.sort_table)
+        self.sort_btn.setEnabled(False)  # Disabled until OCR done
+        self.sort_btn.setMinimumWidth(120)
+        self.sort_btn.setToolTip("Urutkan tabel berdasarkan Kode SLS (↑) dan Sub-SLS (↓)")
+        layout.addWidget(self.sort_btn)
+        
         # Reset button
         self.reset_btn = QPushButton(" Reset")
         self.reset_btn.setIcon(self._get_icon('fa5s.redo', color='#64748B'))
         self.reset_btn.setObjectName("reset_btn")
         self.reset_btn.clicked.connect(self.reset_all)
         self.reset_btn.setEnabled(False)  # Disabled initially
-        self.reset_btn.setMinimumWidth(140)
+        self.reset_btn.setMinimumWidth(120)
         layout.addWidget(self.reset_btn)
         
         group.setLayout(layout)
@@ -783,8 +770,9 @@ class MainWindow(QMainWindow):
         # Populate table
         self.populate_table(results['table'])
         
-        # Re-enable Start button and export button
+        # Re-enable Start button, Sort button, and export button
         self.start_btn.setEnabled(True)
+        self.sort_btn.setEnabled(True)
         self.enable_export_buttons(True)
         
         # Update status
@@ -871,7 +859,7 @@ class MainWindow(QMainWindow):
         self.table.blockSignals(False)
     
     def on_cell_edited(self, item: QTableWidgetItem):
-        """Track edited cells and auto-sort table"""
+        """Track edited cells"""
         row = item.row()
         col = item.column()
         self.edited_cells[(row, col)] = item.text()
@@ -881,13 +869,9 @@ class MainWindow(QMainWindow):
         
         # Update status
         self.update_status(f"Edited cell ({row+1}, {col+1}) | Total edits: {len(self.edited_cells)}")
-        
-        # Auto-sort if Kode SLS or Sub-SLS was edited (column 0 or 1)
-        if col in (0, 1):  # Col 0 = Kode SLS, Col 1 = Kode Sub-SLS
-            self.auto_sort_table()
     
-    def auto_sort_table(self):
-        """Auto-sort table by Kode SLS (ASC) and Sub-SLS (DESC)"""
+    def sort_table(self):
+        """Sort table by Kode SLS (ASC) and Sub-SLS (DESC)"""
         # Block signals to prevent triggering itemChanged during sorting
         self.table.blockSignals(True)
         
@@ -1204,6 +1188,7 @@ class MainWindow(QMainWindow):
         
         # Disable buttons
         self.start_btn.setEnabled(False)
+        self.sort_btn.setEnabled(False)
         self.reset_btn.setEnabled(False)
         self.enable_export_buttons(False)
         

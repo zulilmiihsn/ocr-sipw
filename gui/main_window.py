@@ -6,17 +6,16 @@ import sys
 import json
 import time
 from pathlib import Path
-from typing import Optional, Dict, List
 
 from PyQt5.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
     QFileDialog, QTableWidget, QTableWidgetItem, QLabel, QProgressBar,
-    QStatusBar, QMessageBox, QHeaderView, QApplication, QGroupBox,
+    QStatusBar, QMessageBox, QHeaderView, QGroupBox,
     QStyledItemDelegate, QLineEdit, QListWidget, QListWidgetItem, QAbstractItemView,
     QStyle
 )
-from PyQt5.QtCore import Qt, QThread, pyqtSignal, QTimer, QEvent, QRect, QSize
-from PyQt5.QtGui import QColor, QFont, QIcon, QPainter, QFontMetrics
+from PyQt5.QtCore import Qt, QThread, pyqtSignal, QEvent, QRect, QSize
+from PyQt5.QtGui import QColor, QFont, QPainter, QFontMetrics
 
 # Import QtAwesome for professional icons
 import qtawesome as qta

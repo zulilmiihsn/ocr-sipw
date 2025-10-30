@@ -17,20 +17,14 @@ Version: 2.0 (Final)
 Date: October 2025
 """
 
-import sys
-import os
 import warnings
-import time
-from pathlib import Path
 import cv2
 import numpy as np
-import json
 import re
 from collections import defaultdict
 
 # Suppress warnings for clean output
 warnings.filterwarnings('ignore')
-os.environ['PYTHONWARNINGS'] = 'ignore'
 
 
 # ============================================================================
@@ -441,34 +435,6 @@ def validate_and_correct_by_template(text, column_index):
     return text.strip()
 
 
-def post_process_text(text, column_name):
-    """
-    LEGACY: Basic text cleaning (kept for backward compatibility)
-    Note: validate_and_correct_by_template is now preferred for BLOK III
-    """
-    if not text:
-        return ''
-    
-    # Remove leading brackets
-    text = re.sub(r'^\[+', '', text)
-    
-    # Clean whitespace
-    text = text.strip()
-    text = re.sub(r'\s+', ' ', text)
-    
-    # Column-specific cleaning
-    if any(kw in column_name for kw in ['Jumlah', 'BTT', 'BKU', 'BBTT', 'Total', 'Shift', 'Muatan']):
-        text = re.sub(r'[^\d\s]', '', text).strip()
-    
-    if 'Operasional' in column_name or 'Jam' in column_name:
-        text = re.sub(r'[^\d.\-:]', '', text)
-    
-    if 'Contact' in column_name:
-        text = re.sub(r'[^\d\w@./\-]', '', text)
-    
-    return text
-
-
 # ============================================================================
 # MAIN PIPELINE
 # ============================================================================
@@ -485,6 +451,7 @@ def process_table(image_path, output_path=None, verbose=True):
     Returns:
         dict: Results with metadata, columns, and rows
     """
+    import time
     start_time = time.time()
     
     if verbose:
@@ -568,6 +535,7 @@ def process_table(image_path, output_path=None, verbose=True):
     
     # Save if requested
     if output_path:
+        import json
         with open(output_path, 'w', encoding='utf-8') as f:
             json.dump(results, f, indent=2, ensure_ascii=False)
         if verbose:

@@ -1,4 +1,4 @@
-# Lab-untuk-OCR - Complete Dependencies
+# Lab-untuk-OCR - Production Dependencies
 # Install: pip install -r requirements.txt
 
 # ============================================================================
@@ -8,14 +8,10 @@
 # Image Processing
 opencv-python==4.8.1.78
 numpy==1.24.3
-Pillow==10.1.0
 
 # ============================================================================
-# OCR ENGINES
+# OCR ENGINE
 # ============================================================================
-
-# Tesseract OCR
-pytesseract==0.3.10
 
 # PaddleOCR (AI-based OCR)
 paddlepaddle==3.2.0
@@ -39,16 +35,5 @@ QtAwesome==1.2.3
 
 # Excel Export
 openpyxl==3.1.2
-XlsxWriter==3.1.9
 
 # CSV/JSON (built-in Python modules)
-
-# ============================================================================
-# UTILITIES
-# ============================================================================
-
-# Progress bars
-tqdm==4.66.1
-
-# Data manipulation (for potential future use)
-pandas>=2.0.0

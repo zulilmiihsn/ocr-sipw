@@ -11,21 +11,17 @@ from typing import Optional, Dict, List
 from PyQt5.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
     QFileDialog, QTableWidget, QTableWidgetItem, QLabel, QProgressBar,
-    QStatusBar, QMessageBox, QHeaderView, QApplication, QFrame,
-    QSplitter, QGroupBox, QAction, QMenuBar
+    QStatusBar, QMessageBox, QHeaderView, QApplication, QGroupBox
 )
 from PyQt5.QtCore import Qt, QThread, pyqtSignal, QTimer
-from PyQt5.QtGui import QPixmap, QColor, QFont, QIcon
+from PyQt5.QtGui import QColor, QFont
 
-# Import QtAwesome for professional icons (REQUIRED)
+# Import QtAwesome for professional icons
 import qtawesome as qta
 
-# Import OCR pipeline
-import sys
-from pathlib import Path
+# Add parent directory to path for pipeline imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from pipeline.lib.image_utils import load_image, save_image
 from pipeline.lib.table_detector import detect_table_region, crop_table
 from pipeline.ocr_engine import (
     run_full_document_ocr, detect_vertical_lines, detect_horizontal_lines,

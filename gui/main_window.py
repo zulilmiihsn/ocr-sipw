@@ -871,7 +871,7 @@ class MainWindow(QMainWindow):
         self.table.blockSignals(False)
     
     def on_cell_edited(self, item: QTableWidgetItem):
-        """Track edited cells"""
+        """Track edited cells and auto-sort table"""
         row = item.row()
         col = item.column()
         self.edited_cells[(row, col)] = item.text()
@@ -881,6 +881,62 @@ class MainWindow(QMainWindow):
         
         # Update status
         self.update_status(f"Edited cell ({row+1}, {col+1}) | Total edits: {len(self.edited_cells)}")
+        
+        # Auto-sort if Kode SLS or Sub-SLS was edited (column 0 or 1)
+        if col in (0, 1):  # Col 0 = Kode SLS, Col 1 = Kode Sub-SLS
+            self.auto_sort_table()
+    
+    def auto_sort_table(self):
+        """Auto-sort table by Kode SLS (ASC) and Sub-SLS (DESC)"""
+        # Block signals to prevent triggering itemChanged during sorting
+        self.table.blockSignals(True)
+        
+        # Extract all rows data
+        rows_data = []
+        num_rows = self.table.rowCount()
+        num_cols = self.table.columnCount()
+        
+        for row in range(num_rows):
+            row_data = []
+            for col in range(num_cols):
+                item = self.table.item(row, col)
+                row_data.append({
+                    'text': item.text() if item else '',
+                    'background': item.background() if item else QColor(255, 255, 255),
+                    'tooltip': item.toolTip() if item else ''
+                })
+            rows_data.append(row_data)
+        
+        # Sort rows by Kode SLS (col 0) ASC, then Sub-SLS (col 1) DESC
+        def sort_key(row):
+            # Column 0: Kode SLS (ascending)
+            col0_text = row[0]['text']
+            col0_val = int(''.join(c for c in col0_text if c.isdigit()) or '0')
+            
+            # Column 1: Kode Sub-SLS (descending - negative for DESC)
+            col1_text = row[1]['text']
+            col1_val = int(''.join(c for c in col1_text if c.isdigit()) or '0')
+            
+            return (col0_val, -col1_val)  # ASC, DESC
+        
+        rows_data.sort(key=sort_key)
+        
+        # Repopulate table with sorted data
+        for row_idx, row_data in enumerate(rows_data):
+            # Update row number in vertical header
+            self.table.setVerticalHeaderItem(row_idx, QTableWidgetItem(str(row_idx + 1)))
+            
+            for col_idx, cell_data in enumerate(row_data):
+                item = QTableWidgetItem(cell_data['text'])
+                item.setBackground(cell_data['background'])
+                item.setToolTip(cell_data['tooltip'])
+                self.table.setItem(row_idx, col_idx, item)
+        
+        # Re-enable signals
+        self.table.blockSignals(False)
+        
+        # Update status
+        self.update_status("✓ Tabel diurutkan otomatis (Kode SLS ↑, Sub-SLS ↓)")
     
     def enable_export_buttons(self, enabled: bool):
         """Enable or disable export button"""

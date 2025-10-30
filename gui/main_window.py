@@ -147,18 +147,29 @@ class OCRWorker(QThread):
             # ADAPTIVE TOLERANCE: Scale with image size for robustness
             adaptive_tolerance = max(10, int(image_height * 0.015))  # 1.5% of image height, min 10px
             
-            # Find header end by detecting header keywords
-            header_y_max = 0
-            for det in ocr_results:
-                y_center = (det['y_min'] + det['y_max']) / 2
-                if y_center < image_height * 0.25:  # Header region
-                    header_y_max = max(header_y_max, det['y_max'])
+            # FIXED: Use H-lines (horizontal lines) for header detection (more reliable!)
+            # Problem: OCR-based header detection was too low (229px), causing row 1 data to be skipped
+            # Solution: Use actual table structure (H-lines) - use LAST line in header region
+            lines = sorted(all_h_lines)
             
-            # If no header detected, use horizontal lines
-            if header_y_max == 0:
-                lines = sorted(all_h_lines)
-                header_candidates = [y for y in lines if y < image_height * 0.25]
-                header_y_max = max(header_candidates) if header_candidates else (lines[0] if lines else 0)
+            # Find header separator: LAST H-line in upper region (this separates header from data)
+            # H-lines in top 30%: [10, 25, 43, 189, 204] → We want 204 (last one = header separator)
+            header_candidates = [y for y in lines if y < image_height * 0.30]  # Search in top 30%
+            
+            if len(header_candidates) >= 1:
+                # Use the LAST line in header region (this is the header separator)
+                header_y_max = header_candidates[-1]  # LAST one, not [1]!
+            else:
+                # Fallback: use OCR-based detection
+                header_y_max = 0
+                for det in ocr_results:
+                    y_center = (det['y_min'] + det['y_max']) / 2
+                    if y_center < image_height * 0.25:
+                        header_y_max = max(header_y_max, det['y_max'])
+                
+                # Add safety margin to avoid cutting data rows
+                if header_y_max > 0:
+                    header_y_max += 20  # 20px safety buffer
             
             # Collect Y-centers of data detections (below header)
             data_y_centers = []
@@ -277,7 +288,7 @@ class OCRWorker(QThread):
                 det_box = (det['x_min'], det['y_min'], det['x_max'], det['y_max'])
                 cell_x_min, cell_y_min, cell_x_max, cell_y_max = cell_box
                 
-                # 1. Center position match (40%)
+                # 1. Center position match (30% - REDUCED from 50%)
                 det_center_x = (det['x_min'] + det['x_max']) / 2
                 det_center_y = (det['y_min'] + det['y_max']) / 2
                 
@@ -285,10 +296,10 @@ class OCRWorker(QThread):
                 in_y = cell_y_min <= det_center_y < cell_y_max
                 center_score = 1.0 if (in_x and in_y) else 0.0
                 
-                # 2. IoU overlap (30%)
+                # 2. IoU overlap (40% - INCREASED from 25%)
                 iou = calculate_iou(det_box, cell_box)
                 
-                # 3. Distance to cell center (20%)
+                # 3. Distance to cell center (20% - INCREASED from 15%)
                 cell_center_x = (cell_x_min + cell_x_max) / 2
                 cell_center_y = (cell_y_min + cell_y_max) / 2
                 
@@ -302,11 +313,13 @@ class OCRWorker(QThread):
                 # 4. Confidence weight (10%)
                 conf_score = confidence
                 
-                # Weighted combination (STRICTER: More weight on center position)
+                # OPTIMIZED: Weighted combination (More flexible for narrow columns)
+                # Reduced center_score weight to handle cases where detection center
+                # is slightly outside cell boundary (common in narrow columns like Col 0)
                 total_score = (
-                    center_score * 0.50 +    # Increased from 40% to 50%
-                    iou * 0.25 +             # Decreased from 30% to 25%
-                    distance_score * 0.15 +  # Decreased from 20% to 15%
+                    center_score * 0.30 +    # REDUCED from 50% to 30%
+                    iou * 0.40 +             # INCREASED from 25% to 40%
+                    distance_score * 0.20 +  # INCREASED from 15% to 20%
                     conf_score * 0.10        # Kept at 10%
                 )
                 
@@ -319,40 +332,56 @@ class OCRWorker(QThread):
             else:
                 adaptive_row_tolerance = 10
             
-            # Map detections to cells using advanced scoring
+            # OPTIMIZATION: Spatial Indexing for Cell Mapping (99.4% fewer checks!)
+            # Build spatial index for fast row/column lookup
+            row_ranges = [(h_lines[i], h_lines[i+1], i) for i in range(len(h_lines)-1)]
+            col_ranges = [(col['x_left'], col['x_right'], idx) for idx, col in enumerate(column_structure)]
+            
+            # Map detections to cells using OPTIMIZED spatial indexing
             for det in ocr_results:
                 y_center = (det['y_min'] + det['y_max']) / 2
+                x_center = (det['x_min'] + det['x_max']) / 2
                 
                 # Skip headers
                 if y_center <= header_y_max:
                     continue
                 
-                # Find best matching cell using fuzzy scoring
+                # OPTIMIZATION: Pre-filter candidate rows (instead of checking all rows)
+                candidate_rows = []
+                for y_min, y_max, idx in row_ranges:
+                    if y_min - adaptive_row_tolerance <= y_center <= y_max + adaptive_row_tolerance:
+                        candidate_rows.append(idx)
+                
+                # OPTIMIZATION: Pre-filter candidate columns (instead of checking all columns)
+                candidate_cols = []
+                for x_min, x_max, idx in col_ranges:
+                    # Check if detection overlaps with column
+                    if not (det['x_max'] < x_min or det['x_min'] > x_max):
+                        candidate_cols.append(idx)
+                
+                # Find best matching cell among CANDIDATES ONLY (typically 1-2 cells instead of 170!)
                 best_score = 0.0
                 best_row = -1
                 best_col = -1
                 
-                for i in range(len(h_lines) - 1):
-                    row_y_min = h_lines[i]
-                    row_y_max = h_lines[i + 1]
+                for row_idx in candidate_rows:
+                    row_y_min = h_lines[row_idx]
+                    row_y_max = h_lines[row_idx + 1]
                     
-                    # Skip if detection is far from this row (ADAPTIVE tolerance)
-                    if y_center < row_y_min - adaptive_row_tolerance or y_center > row_y_max + adaptive_row_tolerance:
-                        continue
-                    
-                    for j in range(len(column_structure)):
-                        col_x_min = column_structure[j]['x_left']
-                        col_x_max = column_structure[j]['x_right']
+                    for col_idx in candidate_cols:
+                        col_x_min = column_structure[col_idx]['x_left']
+                        col_x_max = column_structure[col_idx]['x_right']
                         
                         cell_box = (col_x_min, row_y_min, col_x_max, row_y_max)
                         
                         # Calculate fuzzy score
                         score = fuzzy_score(det, cell_box, det['confidence'])
                         
-                        if score > best_score and score > 0.4:  # STRICTER: 40% minimum threshold
+                        # LOWERED threshold from 0.4 to 0.12 for narrow columns
+                        if score > best_score and score > 0.12:
                             best_score = score
-                            best_row = i
-                            best_col = j
+                            best_row = row_idx
+                            best_col = col_idx
                 
                 if best_row >= 0 and best_col >= 0:
                     cells[(best_row, best_col)]['detections'].append(det)
@@ -1056,7 +1085,7 @@ class MainWindow(QMainWindow):
             f"Terjadi kesalahan saat memproses OCR:\n\n{error_msg}"
         )
     
-    def populate_table(self, table_data: List[Dict]):
+    def populate_table(self, table_data):
         """Populate table with OCR results (supports multi-page, dynamic row count)"""
         # Block signals to avoid triggering itemChanged
         self.table.blockSignals(True)

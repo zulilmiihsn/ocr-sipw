@@ -1,0 +1,26 @@
+{
+  "test_type": "synthetic",
+  "tests": {
+    "resolution_scaling": {
+      "total": 4,
+      "passed": 4,
+      "success_rate": 100.0
+    },
+    "adaptive_clahe": {
+      "total": 3,
+      "passed": 3,
+      "success_rate": 100.0
+    },
+    "spatial_indexing": {
+      "baseline_checks": 17000,
+      "optimized_checks": 200,
+      "efficiency_percent": 98.82352941176471,
+      "speedup_factor": 85.0
+    },
+    "regex_precompilation": {
+      "baseline_ms": 1.5723705291748047,
+      "optimized_ms": 0.52642822265625,
+      "speedup_factor": 2.9868659420289854
+    }
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "image_path": "D:\\Project\\lab-untuk-ocr\\contoh gambar\\1.png",
+  "original_size": "1650×1275",
+  "original_pixels": 2103750,
+  "tests": {
+    "resolution_scaling": {
+      "info": "No scaling needed",
+      "time": 1.7404556274414062e-05,
+      "size_before": "1650×856",
+      "size_after": "1650×856"
+    },
+    "adaptive_clahe": {
+      "info": "CLAHE (light, contrast=76353.9)",
+      "time": 0.03879404067993164
+    },
+    "ocr_performance": {
+      "baseline_time": 103.28776741027832,
+      "baseline_detections": 231,
+      "optimized_time": 50.29599738121033,
+      "optimized_detections": 231,
+      "speedup_percent": 51.30498156531429
+    },
+    "spatial_indexing": {
+      "total_checks": 43197,
+      "optimized_checks": 246,
+      "efficiency_percent": 99.43051600805612,
+      "time": 0.006277561187744141,
+      "cells_mapped": 109
+    }
+  }
+}

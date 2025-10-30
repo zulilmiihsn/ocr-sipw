@@ -1,0 +1,94 @@
+================================================================================
+CELL MAPPING ISSUES REPORT
+================================================================================
+
+SUMMARY:
+  Successfully mapped: 133
+  No row match: 0
+  No column match: 0
+  Low score (<0.4): 9
+  Multiple candidates: 61
+
+================================================================================
+ISSUE 3: LOW SCORE (<0.4) (9 detections)
+================================================================================
+
+These detections found candidates but all scores were too low.
+Possible causes: Detection overlaps multiple cells, poor alignment
+
+  Detection #84: '02'
+    Best score: 0.000
+    Candidates checked: 1
+    Top candidate scores:
+      Row 5, Col 0: total=0.113 (center=0.00, iou=0.05, dist=0.18, conf=0.73)
+
+  Detection #100: '3'
+    Best score: 0.000
+    Candidates checked: 1
+    Top candidate scores:
+      Row 6, Col 0: total=0.138 (center=0.00, iou=0.05, dist=0.20, conf=0.96)
+
+  Detection #115: '04'
+    Best score: 0.000
+    Candidates checked: 1
+    Top candidate scores:
+      Row 7, Col 0: total=0.142 (center=0.00, iou=0.06, dist=0.19, conf=0.98)
+
+  Detection #131: '05'
+    Best score: 0.000
+    Candidates checked: 1
+    Top candidate scores:
+      Row 8, Col 0: total=0.162 (center=0.00, iou=0.09, dist=0.27, conf=1.00)
+
+  Detection #146: '06'
+    Best score: 0.000
+    Candidates checked: 1
+    Top candidate scores:
+      Row 9, Col 0: total=0.142 (center=0.00, iou=0.09, dist=0.23, conf=0.85)
+
+================================================================================
+INFO: MULTIPLE CANDIDATES (61 detections)
+================================================================================
+
+These detections had multiple cell candidates (successfully mapped to best one).
+
+  Detection #71: 'RT 011 RW 001'
+    Mapped to: Row 4, Col 3
+    Best score: 0.782
+    Num candidates: 2
+    Top 3 scores:
+      Row 4, Col 3: 0.782
+      Row 4, Col 2: 0.103
+
+  Detection #85: '0012'
+    Mapped to: Row 5, Col 1
+    Best score: 0.741
+    Num candidates: 2
+    Top 3 scores:
+      Row 5, Col 1: 0.741
+      Row 5, Col 0: 0.135
+
+  Detection #86: '00'
+    Mapped to: Row 5, Col 2
+    Best score: 0.746
+    Num candidates: 2
+    Top 3 scores:
+      Row 5, Col 2: 0.746
+      Row 5, Col 1: 0.101
+
+  Detection #87: 'RT 012 RW 002'
+    Mapped to: Row 5, Col 3
+    Best score: 0.789
+    Num candidates: 2
+    Top 3 scores:
+      Row 5, Col 3: 0.789
+      Row 5, Col 2: 0.109
+
+  Detection #89: '23'
+    Mapped to: Row 5, Col 5
+    Best score: 0.737
+    Num candidates: 2
+    Top 3 scores:
+      Row 5, Col 5: 0.737
+      Row 5, Col 4: 0.100
+

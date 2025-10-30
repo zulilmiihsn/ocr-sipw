@@ -34,8 +34,9 @@ os.environ['PADDLEX_VERBOSITY'] = 'ERROR'
 project_root = Path(__file__).parent
 sys.path.insert(0, str(project_root))
 
-from PyQt5.QtWidgets import QApplication
+from PyQt5.QtWidgets import QApplication, QMessageBox
 from PyQt5.QtCore import Qt
+from gui.loading_screen import LoadingScreen
 from gui.main_window import MainWindow
 
 
@@ -47,9 +48,34 @@ def main():
     
     # Create application
     app = QApplication(sys.argv)
-    app.setApplicationName("Lab-untuk-OCR")
-    app.setApplicationVersion("3.1.0")
+    app.setApplicationName("OCR SiPW")
+    app.setApplicationVersion("6.2")
     app.setOrganizationName("Lab OCR Team")
+    
+    # Show loading screen while initializing PaddleOCR models
+    splash = LoadingScreen()
+    splash.show()
+    app.processEvents()  # Ensure splash is shown
+    
+    # Start loading models in background
+    splash.start_loading()
+    
+    # Wait for loading to complete (with event processing)
+    while not splash.is_finished:
+        app.processEvents()
+    
+    # Check if loading failed
+    if splash.error_msg:
+        splash.close()
+        QMessageBox.critical(
+            None,
+            "Initialization Error",
+            f"Failed to load PaddleOCR models:\n\n{splash.error_msg}\n\nApplication will exit."
+        )
+        sys.exit(1)
+    
+    # Close splash and show main window
+    splash.finish(None)
     
     # Create and show main window
     window = MainWindow()

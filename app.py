@@ -30,21 +30,33 @@ os.environ['PADDLEX_VERBOSITY'] = 'ERROR'
 project_root = Path(__file__).parent
 sys.path.insert(0, str(project_root))
 
+# Setup logging before importing other modules
+import logging
+from utils.logging_config import setup_logging
+setup_logging(level=logging.INFO, log_to_console=True)
+
+logger = logging.getLogger(__name__)
+
 from PyQt5.QtWidgets import QApplication, QMessageBox
 from PyQt5.QtCore import Qt
 from gui.loading_screen import LoadingScreen
 from gui.main_window import MainWindow
+from config.settings import app_settings
 
 
 def main():
-    # entry point aplikasi
+    """Entry point aplikasi."""
+    logger.info("Starting OCR SiPW application")
+    
     QApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True)
     QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps, True)
     
     app = QApplication(sys.argv)
-    app.setApplicationName("OCR SiPW")
-    app.setApplicationVersion("6.2")
-    app.setOrganizationName("Lab OCR Team")
+    app.setApplicationName(app_settings.app_name)
+    app.setApplicationVersion(app_settings.app_version)
+    app.setOrganizationName(app_settings.organization_name)
+    
+    logger.info(f"Application: {app_settings.app_name} v{app_settings.app_version}")
     
     splash = LoadingScreen()
     splash.show()
@@ -56,6 +68,7 @@ def main():
         app.processEvents()
     
     if splash.error_msg:
+        logger.error(f"Initialization failed: {splash.error_msg}")
         splash.close()
         QMessageBox.critical(
             None,
@@ -67,6 +80,8 @@ def main():
     splash.finish(None)
     window = MainWindow()
     window.show()
+    
+    logger.info("Application started successfully")
     
     sys.exit(app.exec_())
 

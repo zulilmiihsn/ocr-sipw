@@ -4,6 +4,11 @@ from PyQt5.QtWidgets import QSplashScreen
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from PyQt5.QtGui import QPixmap, QPainter, QColor, QFont
 
+from utils.logging_config import get_logger
+from utils.exceptions import OCRProcessingError
+
+logger = get_logger(__name__)
+
 
 class ModelLoaderWorker(QThread):
     # worker untuk load model paddleocr di background
@@ -13,8 +18,9 @@ class ModelLoaderWorker(QThread):
     error = pyqtSignal(str)
     
     def run(self):
-        # load model paddleocr
+        """Load PaddleOCR model in background."""
         try:
+            logger.info("Loading PaddleOCR model...")
             self.progress.emit(10, "Menginisialisasi mesin PaddleOCR...")
             from pipeline.ocr_engine import PaddleOCREngine
             
@@ -24,11 +30,14 @@ class ModelLoaderWorker(QThread):
             self.progress.emit(90, "Memuat model pengenalan PP-OCRv5...")
             
             ocr = PaddleOCREngine.get_instance()
+            logger.info("PaddleOCR model loaded successfully")
             self.progress.emit(100, "Model berhasil dimuat!")
             self.finished.emit()
             
         except Exception as e:
-            self.error.emit(str(e))
+            error_msg = f"Failed to load PaddleOCR model: {str(e)}"
+            logger.error(error_msg, exc_info=True)
+            self.error.emit(error_msg)
 
 
 class LoadingScreen(QSplashScreen):

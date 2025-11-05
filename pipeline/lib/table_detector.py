@@ -6,6 +6,10 @@ import os
 from typing import Tuple, Optional
 from concurrent.futures import ThreadPoolExecutor
 
+from utils.logging_config import get_logger
+
+logger = get_logger(__name__)
+
 # Control verbosity (set to False for production)
 VERBOSE = os.getenv('OCR_VERBOSE', 'false').lower() == 'true'
 
@@ -174,8 +178,7 @@ def _fallback_ratio_detection(image: np.ndarray, height: int, width: int) -> Opt
     # Returns:
     #     Tuple of (x, y, width, height) or None if invalid
     if VERBOSE:
-        print(f"  📐 RATIO-BASED DETECTION:")
-        print(f"    Document size: {width}x{height}px")
+        logger.debug(f"RATIO-BASED DETECTION: Document size: {width}x{height}px")
     
     # BLOK III typically located at 19%-90% of document height
     # These ratios are measured from actual BPS form samples with ±3% safety margin
@@ -196,14 +199,15 @@ def _fallback_ratio_detection(image: np.ndarray, height: int, width: int) -> Opt
     min_height = int(height * 0.2)
     if blok3_height < min_height:
         if VERBOSE:
-            print(f"  ✗ FALLBACK FAILED: Height too small ({blok3_height}px < {min_height}px)")
+            logger.warning(f"FALLBACK FAILED: Height too small ({blok3_height}px < {min_height}px)")
         return None
     
     if VERBOSE:
-        print(f"    Top ratio: {TOP_RATIO*100:.0f}% → y={blok3_y_start}")
-        print(f"    Bottom ratio: {BOTTOM_RATIO*100:.0f}% → y={blok3_y_end}")
-        print(f"    BLOK III height: {blok3_height}px ({blok3_height/height*100:.1f}% of document)")
-        print(f"  ✓ FALLBACK SUCCESS: Using ratio-based boundaries")
+        logger.debug(
+            f"FALLBACK SUCCESS: Top ratio: {TOP_RATIO*100:.0f}% → y={blok3_y_start}, "
+            f"Bottom ratio: {BOTTOM_RATIO*100:.0f}% → y={blok3_y_end}, "
+            f"Height: {blok3_height}px ({blok3_height/height*100:.1f}% of document)"
+        )
     
     return (0, blok3_y_start, width, blok3_height)
 
@@ -235,9 +239,11 @@ def detect_table_region(image: np.ndarray) -> Optional[Tuple[int, int, int, int]
     search_region_bottom = image[height - search_height_bottom:, :]
     
     if VERBOSE:
-        print(f"🔍 PARALLEL Dual-direction OCR scan:")
-        print(f"  ⚡ Scanning TOP 30% ({search_height_top}px) for 'Rekapitulasi' [PARALLEL]")
-        print(f"  ⚡ Scanning BOTTOM 30% ({search_height_bottom}px) for 'Keterangan' [PARALLEL]")
+        logger.debug(
+            f"PARALLEL Dual-direction OCR scan: "
+            f"TOP 30% ({search_height_top}px) for 'Rekapitulasi', "
+            f"BOTTOM 30% ({search_height_bottom}px) for 'Keterangan'"
+        )
     
     start_total = time.time()
     
@@ -261,27 +267,34 @@ def detect_table_region(image: np.ndarray) -> Optional[Tuple[int, int, int, int]
         # Process results with FALLBACK
         if result_top is None:
             if VERBOSE:
-                print(f"  ✗ 'Rekapitulasi' not found in top 30%")
-                print(f"  🔄 FALLBACK: Using ratio-based detection...")
+                logger.warning("'Rekapitulasi' not found in top 30%, using fallback")
             return _fallback_ratio_detection(image, height, width)
         
         best_top = result_top['best']
         blok3_y_start = result_top['y_start']
         
         if VERBOSE:
-            print(f"  ✓ TOP: Found '{best_top['text']}' at y={best_top['y']} (score={best_top['score']}, conf={best_top['conf']}%) in {elapsed_top:.2f}s")
-            print(f"    → Upper boundary: y={blok3_y_start}")
+            logger.debug(
+                f"TOP: Found '{best_top['text']}' at y={best_top['y']} "
+                f"(score={best_top['score']}, conf={best_top['conf']}%) in {elapsed_top:.2f}s, "
+                f"Upper boundary: y={blok3_y_start}"
+            )
         
         best_bottom = result_bottom['best']
         blok3_y_end = result_bottom['y_end']
         
         if VERBOSE:
             if best_bottom:
-                print(f"  ✓ BOTTOM: Found '{best_bottom['text']}' at y={best_bottom['y']} (score={best_bottom['score']}, conf={best_bottom['conf']}%) in {elapsed_bottom:.2f}s")
-                print(f"    → Lower boundary: y={blok3_y_end}")
+                logger.debug(
+                    f"BOTTOM: Found '{best_bottom['text']}' at y={best_bottom['y']} "
+                    f"(score={best_bottom['score']}, conf={best_bottom['conf']}%) in {elapsed_bottom:.2f}s, "
+                    f"Lower boundary: y={blok3_y_end}"
+                )
             else:
-                print(f"  ⚠ BOTTOM: 'Keterangan' not found, using image bottom in {elapsed_bottom:.2f}s")
-                print(f"    → Lower boundary: y={blok3_y_end} (image bottom)")
+                logger.debug(
+                    f"BOTTOM: 'Keterangan' not found, using image bottom in {elapsed_bottom:.2f}s, "
+                    f"Lower boundary: y={blok3_y_end}"
+                )
         
         blok3_height = blok3_y_end - blok3_y_start
         
@@ -290,18 +303,16 @@ def detect_table_region(image: np.ndarray) -> Optional[Tuple[int, int, int, int]
             sequential_time = elapsed_top + elapsed_bottom
             speedup = sequential_time / elapsed_total if elapsed_total > 0 else 1.0
             
-            print(f"\n  ⚡ PARALLEL PERFORMANCE:")
-            print(f"    Sequential time: {sequential_time:.2f}s")
-            print(f"    Parallel time:   {elapsed_total:.2f}s")
-            print(f"    Speedup:         {speedup:.2f}x faster!")
-            
-            print(f"\n  ✓ BLOK III region: y={blok3_y_start} to y={blok3_y_end} (height={blok3_height}px)")
+            logger.debug(
+                f"PARALLEL PERFORMANCE: Sequential={sequential_time:.2f}s, "
+                f"Parallel={elapsed_total:.2f}s, Speedup={speedup:.2f}x, "
+                f"BLOK III region: y={blok3_y_start} to y={blok3_y_end} (height={blok3_height}px)"
+            )
         
         return (0, blok3_y_start, width, blok3_height)
         
     except Exception as e:
-        if VERBOSE:
-            print(f"  ✗ OCR scan failed: {e}")
+        logger.error(f"OCR scan failed: {e}", exc_info=True)
         return None
 
 

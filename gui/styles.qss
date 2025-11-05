@@ -148,28 +148,25 @@ QPushButton#floating_btn:pressed {
 
 QGroupBox {
     background-color: #FFFFFF;
-    border: 1px solid #E2E8F0;
-    border-radius: 8px;
+    border: 2px solid #E2E8F0;
+    border-radius: 12px;
     padding: 24px 20px 20px 20px;
-    margin-top: 14px;
-    font-weight: 500;
-    font-size: 9pt;
-    color: #475569;
+    margin-top: 12px;
+    font-weight: 600;
+    font-size: 11pt;
+    color: #1E293B;
 }
 
 QGroupBox::title {
     subcontrol-origin: margin;
     subcontrol-position: top left;
-    padding: 6px 12px;
-    margin-left: 10px;
-    background-color: #F8FAFC;
-    border: 1px solid #E2E8F0;
-    border-radius: 4px;
-    color: #475569;
+    padding: 0 8px;
+    margin-left: 16px;
+    background-color: #FFFFFF;
+    color: #1E293B;
     font-weight: 600;
-    font-size: 8.5pt;
-    text-transform: uppercase;
-    letter-spacing: 1px;
+    font-size: 11pt;
+    letter-spacing: 0.3px;
 }
 
 /* ============================================================================

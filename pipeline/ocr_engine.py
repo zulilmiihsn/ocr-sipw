@@ -43,6 +43,8 @@ class PaddleOCREngine:
     @classmethod
     def get_instance(cls):
         if cls._instance is None:
+            # pastikan environment variable sudah di-set di app.py
+            # tidak perlu override lagi di sini untuk performa optimal
             from paddleocr import PaddleOCR
             import paddle
             

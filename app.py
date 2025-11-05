@@ -12,11 +12,14 @@ warnings.filterwarnings('ignore')
 os.environ['PYTHONWARNINGS'] = 'ignore'
 
 # setup environment untuk suppress log dan optimize performance
+# optimasi thread untuk performa lebih baik (menggunakan semua core CPU)
 try:
     import multiprocessing as _mp
-    _cpu = str(max(1, _mp.cpu_count()))
+    _cpu_count = _mp.cpu_count()
+    # gunakan minimal 8 thread untuk performa optimal, atau semua core jika lebih dari 8
+    _cpu = str(max(8, _cpu_count))  # minimal 8 thread untuk performa lebih baik
 except Exception:
-    _cpu = '4'
+    _cpu = '8'  # default 8 thread jika error
 
 os.environ.setdefault('OMP_NUM_THREADS', _cpu)
 os.environ.setdefault('MKL_NUM_THREADS', _cpu)

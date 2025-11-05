@@ -225,6 +225,8 @@ class MainWindow(QMainWindow):
         self.ocr_results = None
         self.ocr_worker = None
         self.edited_cells = {}
+        # data existing untuk append mode (menyimpan data yang sudah ada sebelum scan baru)
+        self.existing_table_data = []
         
         self.init_ui()
     
@@ -240,9 +242,9 @@ class MainWindow(QMainWindow):
                 self.setStyleSheet(f.read())
     
     def init_ui(self):
-        # setup tampilan ui
+        # setup tampilan ui dengan design modern dan clean
         self.setWindowTitle("OCR Sistem Informasi Pencatat Wilayah")
-        self.setMinimumSize(1280, 800)
+        self.setMinimumSize(1400, 900)  # lebih lebar untuk memanfaatkan layar
         self.setWindowIcon(self._get_icon('fa5s.table', color='#2563EB'))
         
         # muat stylesheet QSS
@@ -252,10 +254,10 @@ class MainWindow(QMainWindow):
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
         
-        # Main layout - professional spacing with breathing room
+        # Main layout - professional spacing dengan margin lebih lebar
         main_layout = QVBoxLayout(central_widget)
-        main_layout.setContentsMargins(24, 24, 24, 20)
-        main_layout.setSpacing(20)
+        main_layout.setContentsMargins(32, 28, 32, 24)  # margin lebih lebar untuk breathing room
+        main_layout.setSpacing(24)  # spacing lebih besar untuk visual hierarchy
         
         # File selection area (simplified)
         file_group = self.create_file_selection_group()
@@ -265,19 +267,33 @@ class MainWindow(QMainWindow):
         table_group = self.create_table_group()
         main_layout.addWidget(table_group)
         
-        # Progress bar
+        # Progress bar - lebih modern
         self.progress_bar = QProgressBar()
         self.progress_bar.setVisible(False)
         self.progress_bar.setTextVisible(True)
+        self.progress_bar.setMinimumHeight(40)
+        self.progress_bar.setStyleSheet("""
+            QProgressBar {
+                border-radius: 10px;
+                font-size: 9.5pt;
+                font-weight: 600;
+            }
+        """)
         main_layout.addWidget(self.progress_bar)
         
-        # tombol ekspor
+        # tombol ekspor - lebih besar dan menonjol
         export_btn = QPushButton(" Ekspor Hasil")
         export_btn.setIcon(self._get_icon('fa5s.file-export', color='white'))
         export_btn.setObjectName("exportButton")
         export_btn.clicked.connect(self.export_results)
         export_btn.setEnabled(False)
-        export_btn.setMinimumHeight(48)
+        export_btn.setMinimumHeight(52)
+        export_btn.setStyleSheet("""
+            QPushButton {
+                font-size: 10.5pt;
+                font-weight: 600;
+            }
+        """)
         self.export_button = export_btn
         main_layout.addWidget(export_btn)
         
@@ -288,70 +304,113 @@ class MainWindow(QMainWindow):
     
     
     def create_file_selection_group(self):
-        # buat grup UI pilihan file dengan daftar file interaktif
+        # buat grup UI pilihan file dengan design modern dan clean
         group = QGroupBox("Pilih File & Proses")
+        group.setStyleSheet("""
+            QGroupBox {
+                font-weight: 600;
+                font-size: 11pt;
+                color: #1E293B;
+                border: 2px solid #E2E8F0;
+                border-radius: 12px;
+                margin-top: 12px;
+                padding-top: 20px;
+                background-color: #FFFFFF;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                left: 16px;
+                padding: 0 8px;
+                background-color: #FFFFFF;
+            }
+        """)
         layout = QVBoxLayout()
+        layout.setSpacing(16)
+        layout.setContentsMargins(20, 20, 20, 20)
         
-        # Top row: Browse button
+        # Top row: Browse button dengan layout yang lebih lebar
         top_row = QHBoxLayout()
-        top_row.setSpacing(16)
+        top_row.setSpacing(20)
         
-        # Browse button
+        # Browse button - lebih besar dan modern
         browse_btn = QPushButton(" Pilih File Gambar")
         browse_btn.setIcon(self._get_icon('fa5s.folder-open', color='#64748B'))
         browse_btn.setObjectName("browse_btn")
         browse_btn.clicked.connect(self.browse_file)
-        browse_btn.setMinimumWidth(170)
-        browse_btn.setMinimumHeight(44)
+        browse_btn.setMinimumWidth(200)
+        browse_btn.setMinimumHeight(48)
+        browse_btn.setStyleSheet("""
+            QPushButton {
+                font-size: 10pt;
+                font-weight: 600;
+            }
+        """)
         top_row.addWidget(browse_btn)
         
-        # Info label
-        info_label = QLabel("Drag & drop untuk mengubah urutan")
-        info_label.setStyleSheet("font-size: 8pt; color: #94A3B8; font-style: italic;")
+        # Info label - lebih jelas
+        info_label = QLabel("💡 Drag & drop untuk mengubah urutan file")
+        info_label.setStyleSheet("""
+            font-size: 9pt; 
+            color: #64748B; 
+            font-style: italic;
+            padding: 8px 0px;
+        """)
         top_row.addWidget(info_label, 1)
         
         layout.addLayout(top_row)
         
-        # Interactive file list (drag & drop enabled)
+        # Interactive file list (drag & drop enabled) - lebih modern
         self.file_list = QListWidget()
-        self.file_list.setMaximumHeight(120)
+        self.file_list.setMaximumHeight(140)  # sedikit lebih tinggi
         self.file_list.setDragDropMode(QAbstractItemView.InternalMove)
         self.file_list.setSelectionMode(QAbstractItemView.ExtendedSelection)
         self.file_list.setStyleSheet("""
             QListWidget {
                 background-color: #F8FAFC;
-                border: 1px solid #E2E8F0;
-                border-radius: 4px;
-                padding: 4px;
+                border: 2px solid #E2E8F0;
+                border-radius: 8px;
+                padding: 8px;
+                font-size: 9pt;
             }
             QListWidget::item {
-                padding: 6px 8px;
-                border-radius: 3px;
-                margin: 2px 0px;
+                padding: 10px 12px;
+                border-radius: 6px;
+                margin: 3px 0px;
+                background-color: #FFFFFF;
+                border: 1px solid transparent;
             }
             QListWidget::item:hover {
                 background-color: #EFF6FF;
+                border: 1px solid #DBEAFE;
             }
             QListWidget::item:selected {
                 background-color: #DBEAFE;
                 color: #1E293B;
+                border: 1px solid #2563EB;
+                font-weight: 500;
             }
         """)
         self.file_list.setVisible(False)  # disembunyikan sampai file dipilih
         layout.addWidget(self.file_list)
         
-        # Bottom row: Action buttons
+        # Bottom row: Action buttons dengan spacing yang lebih baik
         bottom_row = QHBoxLayout()
-        bottom_row.setSpacing(16)
+        bottom_row.setSpacing(12)
         
-        # tombol mulai ocr
+        # tombol mulai ocr - lebih besar dan menonjol
         self.start_btn = QPushButton(" Mulai OCR")
         self.start_btn.setIcon(self._get_icon('fa5s.play', color='white'))
         self.start_btn.setObjectName("start_btn")
         self.start_btn.clicked.connect(self.start_ocr)
         self.start_btn.setEnabled(False)  # dinonaktifkan sampai file dipilih
-        self.start_btn.setMinimumWidth(140)
-        self.start_btn.setMinimumHeight(44)
+        self.start_btn.setMinimumWidth(160)
+        self.start_btn.setMinimumHeight(48)
+        self.start_btn.setStyleSheet("""
+            QPushButton {
+                font-size: 10pt;
+                font-weight: 600;
+            }
+        """)
         bottom_row.addWidget(self.start_btn)
         
         # sort button
@@ -361,7 +420,7 @@ class MainWindow(QMainWindow):
         self.sort_btn.clicked.connect(self.sort_table)
         self.sort_btn.setEnabled(False)  # dinonaktifkan sampai OCR selesai
         self.sort_btn.setMinimumWidth(140)
-        self.sort_btn.setMinimumHeight(44)
+        self.sort_btn.setMinimumHeight(48)
         self.sort_btn.setToolTip("Urutkan tabel berdasarkan Kode SLS (↑) dan Sub-SLS (↓)")
         bottom_row.addWidget(self.sort_btn)
         
@@ -372,7 +431,7 @@ class MainWindow(QMainWindow):
         self.reset_btn.clicked.connect(self.reset_all)
         self.reset_btn.setEnabled(False)  # dinonaktifkan awalnya
         self.reset_btn.setMinimumWidth(140)
-        self.reset_btn.setMinimumHeight(44)
+        self.reset_btn.setMinimumHeight(48)
         bottom_row.addWidget(self.reset_btn)
         
         bottom_row.addStretch()  # push buttons ke kiri
@@ -383,9 +442,29 @@ class MainWindow(QMainWindow):
         return group
     
     def create_table_group(self):
-        # buat grup UI tabel
+        # buat grup UI tabel dengan design modern
         group = QGroupBox("Hasil Ekstraksi Tabel")
+        group.setStyleSheet("""
+            QGroupBox {
+                font-weight: 600;
+                font-size: 11pt;
+                color: #1E293B;
+                border: 2px solid #E2E8F0;
+                border-radius: 12px;
+                margin-top: 12px;
+                padding-top: 20px;
+                background-color: #FFFFFF;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                left: 16px;
+                padding: 0 8px;
+                background-color: #FFFFFF;
+            }
+        """)
         layout = QVBoxLayout()
+        layout.setContentsMargins(16, 20, 16, 16)
+        layout.setSpacing(12)
         
         # bikin widget tabel kustom dengan navigasi tombol panah dan kontrol mengambang
         self.table = CustomTableWidget()
@@ -548,7 +627,7 @@ class MainWindow(QMainWindow):
     
     
     def start_ocr(self):
-        # mulai proses OCR (support multi-file/multi-page)
+        # mulai proses OCR (support multi-file/multi-page dan append mode)
         if not hasattr(self, 'current_files') or not self.current_files:
             return
         
@@ -564,9 +643,8 @@ class MainWindow(QMainWindow):
         self.progress_bar.setValue(0)
         self.progress_bar.setFormat("Menginisialisasi...")
         
-        # Clear table
-        self.table.clearContents()
-        self.edited_cells.clear()
+        # simpan data existing sebelum scan baru (untuk append mode)
+        self._save_existing_table_data()
         
         # Start worker thread with ordered list of files (after drag & drop)
         self.ocr_worker = OCRWorker(ordered_files)
@@ -584,13 +662,48 @@ class MainWindow(QMainWindow):
         self.update_status(stage)
     
     def on_ocr_finished(self, results: dict):
-        # handle penyelesaian OCR
+        # handle penyelesaian OCR dengan append mode
+        new_table_data = results['table']
+        
+        # gabungkan data baru dengan data existing (append mode)
+        if self.existing_table_data:
+            # gabungkan data existing dengan data baru
+            combined_data = self.existing_table_data + new_table_data
+            
+            # update metadata untuk tracking total
+            new_rows = len(new_table_data)
+            existing_rows = len(self.existing_table_data)
+            total_rows = len(combined_data)
+            
+            # update metadata dengan info gabungan
+            results['metadata']['new_rows'] = new_rows
+            results['metadata']['existing_rows'] = existing_rows
+            results['metadata']['total_rows'] = total_rows
+            results['metadata']['num_rows'] = total_rows  # untuk backward compatibility
+            
+            # simpan data gabungan sebagai data existing untuk scan berikutnya
+            self.existing_table_data = combined_data
+            results['table'] = combined_data
+            
+            status_msg = (
+                f"✓ Ditambahkan {new_rows} baris baru! "
+                f"Total: {total_rows} baris (existing: {existing_rows} + baru: {new_rows}) | Siap ekspor"
+            )
+        else:
+            # scan pertama kali, simpan sebagai data existing
+            self.existing_table_data = new_table_data
+            status_msg = (
+                f"✓ Selesai! {results['metadata']['num_rows']} baris diekstrak dalam "
+                f"{results['metadata']['total_time']:.1f} detik | Siap ekspor"
+            )
+        
+        # simpan hasil ke ocr_results
         self.ocr_results = results
         
         # Hide progress bar
         self.progress_bar.setVisible(False)
         
-        # Populate table
+        # Populate table dengan data gabungan (atau data baru kalau first scan)
         self.populate_table(results['table'])
         
         # Re-enable Start button, Sort button, and export button
@@ -599,27 +712,37 @@ class MainWindow(QMainWindow):
         self.enable_export_buttons(True)
         
         # Update status
-        metadata = results['metadata']
-        status_msg = (
-            f"✓ Selesai! {metadata['num_rows']} baris diekstrak dalam "
-            f"{metadata['total_time']:.1f} detik | Siap ekspor"
-        )
         self.update_status(status_msg)
         
         # Show success message
-        num_files = metadata.get('num_files', 1)
+        num_files = results['metadata'].get('num_files', 1)
         file_text = f"{num_files} berkas" if num_files > 1 else "1 berkas"
         
-        QMessageBox.information(
-            self,
-            "OCR Selesai",
-            f"Berhasil mengekstrak {metadata['num_rows']} baris dari {file_text}!\n\n"
-            f"Waktu proses: {metadata['total_time']:.1f} detik\n\n"
-            "Data sudah diurutkan otomatis:\n"
-            "• Kode SLS (naik)\n"
-            "• Kode Sub-SLS (turun)\n\n"
-            "Anda dapat mengedit tabel dan mengekspor hasil."
-        )
+        if self.existing_table_data and len(self.existing_table_data) > len(new_table_data):
+            # append mode
+            QMessageBox.information(
+                self,
+                "OCR Selesai",
+                f"Berhasil menambahkan {len(new_table_data)} baris baru dari {file_text}!\n\n"
+                f"Total data sekarang: {len(self.existing_table_data)} baris\n"
+                f"Waktu proses: {results['metadata']['total_time']:.1f} detik\n\n"
+                "Data sudah diurutkan otomatis:\n"
+                "• Kode SLS (naik)\n"
+                "• Kode Sub-SLS (turun)\n\n"
+                "Anda dapat menambahkan gambar lagi atau mengekspor hasil."
+            )
+        else:
+            # first scan
+            QMessageBox.information(
+                self,
+                "OCR Selesai",
+                f"Berhasil mengekstrak {results['metadata']['num_rows']} baris dari {file_text}!\n\n"
+                f"Waktu proses: {results['metadata']['total_time']:.1f} detik\n\n"
+                "Data sudah diurutkan otomatis:\n"
+                "• Kode SLS (naik)\n"
+                "• Kode Sub-SLS (turun)\n\n"
+                "Anda dapat mengedit tabel, menambahkan gambar lagi, atau mengekspor hasil."
+            )
     
     def on_ocr_error(self, error_msg: str):
         # handle error OCR
@@ -636,21 +759,53 @@ class MainWindow(QMainWindow):
             f"Terjadi kesalahan saat memproses OCR:\n\n{error_msg}"
         )
     
-    def populate_table(self, table_data):
-        # isi tabel dengan hasil OCR (support multi-page, jumlah baris dinamis)
+    def populate_table(self, table_data, append_mode=False):
+        # isi tabel dengan hasil OCR (support multi-page, jumlah baris dinamis, dan append mode)
+        # param:
+        #   table_data: data tabel yang akan diisi
+        #   append_mode: True untuk append (tambah di akhir), False untuk replace semua
         # Block signals to avoid triggering itemChanged
         self.table.blockSignals(True)
         
-        # Update table row count dynamically
-        num_rows = len(table_data)
-        self.table.setRowCount(num_rows)
+        if append_mode:
+            # append mode: tambah baris di akhir
+            # hitung baris yang punya data (skip baris kosong)
+            current_row_count = 0
+            for row_idx in range(self.table.rowCount()):
+                has_data = False
+                for col_idx in range(16):
+                    item = self.table.item(row_idx, col_idx)
+                    if item and item.text().strip():
+                        has_data = True
+                        break
+                if has_data:
+                    current_row_count += 1
+            
+            num_new_rows = len(table_data)
+            total_rows = current_row_count + num_new_rows
+            
+            # expand table untuk baris baru
+            self.table.setRowCount(total_rows)
+            
+            # populate baris baru mulai dari akhir data existing (baris yang punya data)
+            start_row = current_row_count
+        else:
+            # replace mode: ganti semua data, mulai dari baris 0
+            # clear semua data dulu
+            self.table.clearContents()
+            num_rows = len(table_data)
+            self.table.setRowCount(num_rows)
+            start_row = 0
         
         # Update vertical headers (row numbers 1, 2, 3, ...)
-        for i in range(num_rows):
+        total_rows = self.table.rowCount()
+        for i in range(total_rows):
             self.table.setVerticalHeaderItem(i, QTableWidgetItem(str(i + 1)))
         
-        # Populate cells
-        for row_idx, row_data in enumerate(table_data):
+        # Populate cells (hanya untuk data baru kalau append mode)
+        for data_idx, row_data in enumerate(table_data):
+            row_idx = start_row + data_idx
+            
             # Skip column 0 (No), start from column 1 (Kode SLS/Non-SLS)
             for ocr_col_idx in range(1, 17):  # OCR columns 1-16
                 gui_col_idx = ocr_col_idx - 1  # GUI columns 0-15 (shifted left)
@@ -680,6 +835,61 @@ class MainWindow(QMainWindow):
         
         # Re-enable signals
         self.table.blockSignals(False)
+        
+        # scroll ke baris terakhir kalau append mode
+        if append_mode and table_data:
+            self.table.scrollToItem(self.table.item(total_rows - 1, 0))
+    
+    def _save_existing_table_data(self):
+        # simpan data tabel yang sudah ada ke format yang bisa di-append
+        # ini dipanggil sebelum scan baru untuk menyimpan data existing
+        # hanya simpan baris yang punya data (skip baris kosong)
+        if self.table.rowCount() == 0:
+            self.existing_table_data = []
+            return
+        
+        # extract data dari tabel yang ada, hanya baris yang punya data
+        existing_data = []
+        num_rows = self.table.rowCount()
+        
+        for row_idx in range(num_rows):
+            # cek apakah baris ini punya data (setidaknya satu cell tidak kosong)
+            has_data = False
+            row_data = {
+                'row_index': len(existing_data),  # index baru untuk data yang valid
+                'cells': {}
+            }
+            
+            # extract setiap cell (kolom 0-15 di GUI = kolom 1-16 di OCR)
+            for gui_col_idx in range(16):
+                ocr_col_idx = gui_col_idx + 1  # GUI col 0 = OCR col 1
+                item = self.table.item(row_idx, gui_col_idx)
+                
+                if item:
+                    text = item.text().strip()
+                    if text:  # hanya simpan cell yang punya text
+                        has_data = True
+                        # extract confidence dari tooltip kalau ada
+                        tooltip = item.toolTip()
+                        confidence = 0.0
+                        if 'Confidence:' in tooltip:
+                            try:
+                                conf_text = tooltip.split('Confidence:')[1].split('%')[0].strip()
+                                confidence = float(conf_text) / 100.0
+                            except:
+                                pass
+                        
+                        row_data['cells'][ocr_col_idx] = {
+                            'text': text,
+                            'text_final': text,
+                            'confidence': confidence
+                        }
+            
+            # hanya tambahkan baris yang punya data
+            if has_data:
+                existing_data.append(row_data)
+        
+        self.existing_table_data = existing_data
     
     def on_cell_edited(self, item: QTableWidgetItem):
         # track cell yang sudah diedit
@@ -1050,6 +1260,7 @@ class MainWindow(QMainWindow):
         # bersihkan hasil OCR
         self.ocr_results = None
         self.edited_cells.clear()
+        self.existing_table_data = []  # clear data existing untuk append mode
         
         # bersihkan tabel dan reset ke default 10 baris
         self.table.clearContents()

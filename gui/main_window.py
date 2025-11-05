@@ -5,13 +5,13 @@ import json
 from pathlib import Path
 
 from PyQt5.QtWidgets import (
-    QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
+    QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QPushButton,
     QFileDialog, QTableWidget, QTableWidgetItem, QLabel, QProgressBar,
     QStatusBar, QMessageBox, QHeaderView, QGroupBox,
     QStyledItemDelegate, QLineEdit, QListWidget, QListWidgetItem, QAbstractItemView,
-    QStyle
+    QStyle, QSizePolicy
 )
-from PyQt5.QtCore import Qt, QEvent, QRect, QSize
+from PyQt5.QtCore import Qt, QEvent, QRect, QSize, QTimer
 from PyQt5.QtGui import QColor, QFont, QPainter, QFontMetrics
 
 import qtawesome as qta
@@ -124,6 +124,9 @@ class CustomTableWidget(QTableWidget):
         self.add_row_floating_btn = None
         self.remove_row_floating_btn = None
         
+        # Set focus policy agar table bisa menerima keyboard input
+        self.setFocusPolicy(Qt.StrongFocus)
+        
         # aktifkan tracking mouse untuk header vertikal
         self.verticalHeader().setMouseTracking(True)
         self.verticalHeader().viewport().setMouseTracking(True)
@@ -176,44 +179,190 @@ class CustomTableWidget(QTableWidget):
         if self.remove_row_floating_btn:
             self.remove_row_floating_btn.hide()
     
+    def resizeEvent(self, event):
+        """Handle resize event untuk auto-resize kolom agar mengisi lebar tabel"""
+        super().resizeEvent(event)
+        
+        # Auto-resize kolom agar mengisi lebar yang tersedia
+        if self.parent_window and hasattr(self.parent_window, '_table_header'):
+            header = self.parent_window._table_header
+            total_width = self.viewport().width()
+            
+            if total_width > 0 and header:
+                # Hitung total minimum width
+                from config.constants import DEFAULT_MIN_COLUMN_WIDTHS
+                total_min_width = sum(DEFAULT_MIN_COLUMN_WIDTHS)
+                
+                # Jika total width lebih besar dari minimum, distribusikan ke kolom
+                if total_width > total_min_width:
+                    excess_width = total_width - total_min_width
+                    # Distribusikan excess width secara proporsional
+                    for i in range(self.columnCount()):
+                        if i < len(DEFAULT_MIN_COLUMN_WIDTHS):
+                            min_width = DEFAULT_MIN_COLUMN_WIDTHS[i]
+                            # Proporsi berdasarkan minimum width
+                            proportion = min_width / total_min_width
+                            new_width = min_width + (excess_width * proportion)
+                            header.resizeSection(i, int(new_width))
+    
     def keyPressEvent(self, event):
-        # handle keyboard untuk navigasi cell
+        # handle keyboard untuk navigasi cell dengan arrow keys
+        key = event.key()
         current_row = self.currentRow()
         current_col = self.currentColumn()
         is_editing = self.state() == QTableWidget.EditingState
         
-        if event.key() in (Qt.Key_Return, Qt.Key_Enter):
-            if is_editing:
-                self.closeEditor(self.itemDelegate().createEditor(self, None, self.model().index(current_row, current_col)), QStyledItemDelegate.NoHint)
+        # Jika sedang edit mode
+        if is_editing:
+            # Escape: cancel edit
+            if key == Qt.Key_Escape:
+                # setCurrentCell akan otomatis cancel edit
+                self.setCurrentCell(current_row, current_col)
+                event.accept()
+                return
             
+            # Arrow Up/Down: commit edit dan pindah cell (tidak untuk navigasi text)
+            if key == Qt.Key_Up:
+                # setCurrentCell akan otomatis commit edit jika sedang edit
+                if current_row > 0:
+                    self.setCurrentCell(current_row - 1, current_col)
+                    self._ensure_cell_visible(current_row - 1, current_col)
+                event.accept()
+                return
+            
+            elif key == Qt.Key_Down:
+                # setCurrentCell akan otomatis commit edit jika sedang edit
+                total_rows = self.rowCount()
+                if current_row < total_rows - 1:
+                    self.setCurrentCell(current_row + 1, current_col)
+                    self._ensure_cell_visible(current_row + 1, current_col)
+                event.accept()
+                return
+            
+            # Arrow Left/Right: biarkan untuk navigasi text dalam editor (default behavior)
+            # Enter: commit edit dan pindah ke cell berikutnya
+            elif key in (Qt.Key_Return, Qt.Key_Enter):
+                # setCurrentCell akan otomatis commit edit
+                total_cols = self.columnCount()
+                total_rows = self.rowCount()
+                if current_col < total_cols - 1:
+                    self.setCurrentCell(current_row, current_col + 1)
+                    self._ensure_cell_visible(current_row, current_col + 1)
+                elif current_row < total_rows - 1:
+                    self.setCurrentCell(current_row + 1, 0)
+                    self._ensure_cell_visible(current_row + 1, 0)
+                event.accept()
+                return
+            
+            # Tab saat edit: commit dan pindah
+            elif key == Qt.Key_Tab:
+                # setCurrentCell akan otomatis commit edit
+                total_cols = self.columnCount()
+                total_rows = self.rowCount()
+                if event.modifiers() & Qt.ShiftModifier:
+                    if current_col > 0:
+                        self.setCurrentCell(current_row, current_col - 1)
+                    elif current_row > 0:
+                        self.setCurrentCell(current_row - 1, total_cols - 1)
+                else:
+                    if current_col < total_cols - 1:
+                        self.setCurrentCell(current_row, current_col + 1)
+                    elif current_row < total_rows - 1:
+                        self.setCurrentCell(current_row + 1, 0)
+                event.accept()
+                return
+            
+            # Arrow Left/Right dan key lainnya: biarkan default behavior untuk editing text
+            super().keyPressEvent(event)
+            return
+        
+        # Jika TIDAK sedang edit mode - navigasi normal
+        if key == Qt.Key_Up:
+            if current_row > 0:
+                self.setCurrentCell(current_row - 1, current_col)
+                self._ensure_cell_visible(current_row - 1, current_col)
+            event.accept()
+            return
+        
+        elif key == Qt.Key_Down:
+            total_rows = self.rowCount()
+            if current_row < total_rows - 1:
+                self.setCurrentCell(current_row + 1, current_col)
+                self._ensure_cell_visible(current_row + 1, current_col)
+            event.accept()
+            return
+        
+        elif key == Qt.Key_Left:
+            if current_col > 0:
+                self.setCurrentCell(current_row, current_col - 1)
+                self._ensure_cell_visible(current_row, current_col - 1)
+            event.accept()
+            return
+        
+        elif key == Qt.Key_Right:
+            total_cols = self.columnCount()
+            if current_col < total_cols - 1:
+                self.setCurrentCell(current_row, current_col + 1)
+                self._ensure_cell_visible(current_row, current_col + 1)
+            event.accept()
+            return
+        
+        elif key == Qt.Key_Return:  # Enter (bukan numpad Enter)
+            # Enter untuk edit cell
+            if current_row >= 0 and current_col >= 0:
+                if not self.item(current_row, current_col):
+                    item = QTableWidgetItem("")
+                    self.setItem(current_row, current_col, item)
+                self.editItem(self.item(current_row, current_col))
+            event.accept()
+            return
+        
+        elif key == Qt.Key_Tab:
+            # Tab untuk pindah ke cell berikutnya
             total_cols = self.columnCount()
             total_rows = self.rowCount()
             
-            if current_col < total_cols - 1:
-                self.setCurrentCell(current_row, current_col + 1)
-            elif current_row < total_rows - 1:
-                self.setCurrentCell(current_row + 1, 0)
+            if event.modifiers() & Qt.ShiftModifier:
+                # Shift+Tab: pindah ke cell sebelumnya
+                if current_col > 0:
+                    self.setCurrentCell(current_row, current_col - 1)
+                elif current_row > 0:
+                    self.setCurrentCell(current_row - 1, total_cols - 1)
             else:
-                self.setCurrentCell(0, 0)
+                # Tab: pindah ke cell berikutnya
+                if current_col < total_cols - 1:
+                    self.setCurrentCell(current_row, current_col + 1)
+                elif current_row < total_rows - 1:
+                    self.setCurrentCell(current_row + 1, 0)
             
             event.accept()
             return
         
-        elif event.key() == Qt.Key_Up and not is_editing:
-            total_rows = self.rowCount()
-            new_row = current_row - 1 if current_row > 0 else total_rows - 1
-            self.setCurrentCell(new_row, current_col)
-            event.accept()
-            return
-        
-        elif event.key() == Qt.Key_Down and not is_editing:
-            total_rows = self.rowCount()
-            new_row = current_row + 1 if current_row < total_rows - 1 else 0
-            self.setCurrentCell(new_row, current_col)
-            event.accept()
-            return
-        
+        # Biarkan AnyKeyPressed trigger handle semua key lainnya
+        # termasuk angka (keyboard biasa dan numpad), huruf, dll
+        # AnyKeyPressed akan otomatis trigger edit mode dan memasukkan karakter
         super().keyPressEvent(event)
+    
+    def _ensure_cell_visible(self, row, col):
+        """Helper method untuk memastikan cell terlihat dengan scrolling"""
+        try:
+            index = self.model().index(row, col)
+            if index.isValid():
+                self.scrollTo(index, QAbstractItemView.EnsureVisible)
+        except Exception:
+            pass
+    
+    def mousePressEvent(self, event):
+        """Override mouse press untuk memastikan table mendapatkan focus"""
+        super().mousePressEvent(event)
+        # Set focus agar keyboard navigation selalu bekerja
+        if not self.hasFocus():
+            self.setFocus()
+    
+    def sizeHint(self):
+        # Untuk scrollable table, return size yang reasonable
+        # Tabel akan expand sesuai parent container
+        return super().sizeHint()
 
 
 class MainWindow(QMainWindow):
@@ -254,10 +403,10 @@ class MainWindow(QMainWindow):
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
         
-        # Main layout - professional spacing dengan margin lebih lebar
+        # Main layout - minimalis compact spacing
         main_layout = QVBoxLayout(central_widget)
-        main_layout.setContentsMargins(32, 28, 32, 24)  # margin lebih lebar untuk breathing room
-        main_layout.setSpacing(24)  # spacing lebih besar untuk visual hierarchy
+        main_layout.setContentsMargins(18, 16, 18, 14)  # margin minimalis
+        main_layout.setSpacing(12)  # spacing minimalis untuk efisiensi ruang
         
         # File selection area (simplified)
         file_group = self.create_file_selection_group()
@@ -267,35 +416,20 @@ class MainWindow(QMainWindow):
         table_group = self.create_table_group()
         main_layout.addWidget(table_group)
         
-        # Progress bar - lebih modern
+        # Progress bar - compact dan professional
         self.progress_bar = QProgressBar()
         self.progress_bar.setVisible(False)
         self.progress_bar.setTextVisible(True)
-        self.progress_bar.setMinimumHeight(40)
+        self.progress_bar.setMinimumHeight(28)
+        self.progress_bar.setMaximumHeight(28)
         self.progress_bar.setStyleSheet("""
             QProgressBar {
-                border-radius: 10px;
-                font-size: 9.5pt;
+                border-radius: 6px;
+                font-size: 8.5pt;
                 font-weight: 600;
             }
         """)
         main_layout.addWidget(self.progress_bar)
-        
-        # tombol ekspor - lebih besar dan menonjol
-        export_btn = QPushButton(" Ekspor Hasil")
-        export_btn.setIcon(self._get_icon('fa5s.file-export', color='white'))
-        export_btn.setObjectName("exportButton")
-        export_btn.clicked.connect(self.export_results)
-        export_btn.setEnabled(False)
-        export_btn.setMinimumHeight(52)
-        export_btn.setStyleSheet("""
-            QPushButton {
-                font-size: 10.5pt;
-                font-weight: 600;
-            }
-        """)
-        self.export_button = export_btn
-        main_layout.addWidget(export_btn)
         
         # Status bar
         self.status_bar = QStatusBar()
@@ -304,17 +438,18 @@ class MainWindow(QMainWindow):
     
     
     def create_file_selection_group(self):
-        # buat grup UI pilihan file dengan design modern dan clean
-        group = QGroupBox("Pilih File & Proses")
+        # buat grup UI pilihan file dengan layout 3 kolom: kiri (button), tengah (file list), kanan (fitur)
+        group = QGroupBox("Opsi")
         group.setStyleSheet("""
             QGroupBox {
                 font-weight: 600;
                 font-size: 11pt;
                 color: #1E293B;
                 border: 2px solid #E2E8F0;
-                border-radius: 12px;
+                border-radius: 10px;
                 margin-top: 12px;
-                padding-top: 20px;
+                padding-top: 16px;
+                padding-bottom: 12px;
                 background-color: #FFFFFF;
             }
             QGroupBox::title {
@@ -324,60 +459,69 @@ class MainWindow(QMainWindow):
                 background-color: #FFFFFF;
             }
         """)
-        layout = QVBoxLayout()
-        layout.setSpacing(16)
-        layout.setContentsMargins(20, 20, 20, 20)
+        # Layout 3 kolom - professional, clean, rapi - sesuai UI/UX guidelines
+        main_layout = QHBoxLayout()
+        main_layout.setSpacing(16)
+        main_layout.setContentsMargins(18, 12, 18, 12)
+        main_layout.setAlignment(Qt.AlignTop)
         
-        # Top row: Browse button dengan layout yang lebih lebar
-        top_row = QHBoxLayout()
-        top_row.setSpacing(20)
+        # ============================================================
+        # KOLOM 1: KIRI - Button Pilih File - Professional
+        # ============================================================
+        left_column = QVBoxLayout()
+        left_column.setSpacing(0)
+        left_column.setContentsMargins(0, 0, 0, 0)
+        left_column.setAlignment(Qt.AlignTop)
         
-        # Browse button - lebih besar dan modern
+        # Browse button - memenuhi seluruh tinggi kolom
         browse_btn = QPushButton(" Pilih File Gambar")
         browse_btn.setIcon(self._get_icon('fa5s.folder-open', color='#64748B'))
         browse_btn.setObjectName("browse_btn")
         browse_btn.clicked.connect(self.browse_file)
         browse_btn.setMinimumWidth(200)
-        browse_btn.setMinimumHeight(48)
+        browse_btn.setMinimumHeight(110)
+        browse_btn.setMaximumWidth(200)
+        browse_btn.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)  # Expand untuk memenuhi tinggi
         browse_btn.setStyleSheet("""
             QPushButton {
-                font-size: 10pt;
+                font-size: 9pt;
                 font-weight: 600;
+                padding: 0px 12px;
             }
         """)
-        top_row.addWidget(browse_btn)
+        left_column.addWidget(browse_btn, stretch=1)  # Stretch untuk memenuhi space
         
-        # Info label - lebih jelas
-        info_label = QLabel("💡 Drag & drop untuk mengubah urutan file")
-        info_label.setStyleSheet("""
-            font-size: 9pt; 
-            color: #64748B; 
-            font-style: italic;
-            padding: 8px 0px;
-        """)
-        top_row.addWidget(info_label, 1)
+        # Widget container untuk kolom kiri - fixed width dan height
+        left_widget = QWidget()
+        left_widget.setLayout(left_column)
+        left_widget.setFixedWidth(200)
+        left_widget.setFixedHeight(110)  # Ditambah dari 90 menjadi 110
+        left_widget.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        main_layout.addWidget(left_widget)
         
-        layout.addLayout(top_row)
-        
-        # Interactive file list (drag & drop enabled) - lebih modern
+        # ============================================================
+        # KOLOM 2: TENGAH - File List (Drag & Drop Area) - Professional
+        # ============================================================
         self.file_list = QListWidget()
-        self.file_list.setMaximumHeight(140)  # sedikit lebih tinggi
+        self.file_list.setMinimumHeight(110)
+        self.file_list.setMaximumHeight(110)
         self.file_list.setDragDropMode(QAbstractItemView.InternalMove)
         self.file_list.setSelectionMode(QAbstractItemView.ExtendedSelection)
+        self.file_list.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.file_list.setStyleSheet("""
             QListWidget {
-                background-color: #F8FAFC;
-                border: 2px solid #E2E8F0;
+                background-color: #FFFFFF;
+                border: 2px dashed #CBD5E1;
                 border-radius: 8px;
                 padding: 8px;
                 font-size: 9pt;
             }
             QListWidget::item {
-                padding: 10px 12px;
-                border-radius: 6px;
+                padding: 8px 12px;
+                border-radius: 5px;
                 margin: 3px 0px;
-                background-color: #FFFFFF;
-                border: 1px solid transparent;
+                background-color: #F8FAFC;
+                border: 1px solid #E2E8F0;
             }
             QListWidget::item:hover {
                 background-color: #EFF6FF;
@@ -386,64 +530,136 @@ class MainWindow(QMainWindow):
             QListWidget::item:selected {
                 background-color: #DBEAFE;
                 color: #1E293B;
-                border: 1px solid #2563EB;
+                border: 2px solid #2563EB;
                 font-weight: 500;
             }
         """)
-        self.file_list.setVisible(False)  # disembunyikan sampai file dipilih
-        layout.addWidget(self.file_list)
+        self.file_list.setVisible(False)
+        # Placeholder label - professional dengan fixed height
+        placeholder_label = QLabel("📁 Pilih file gambar\nGunakan drag & drop untuk mengubah urutan")
+        placeholder_label.setAlignment(Qt.AlignCenter)
+        placeholder_label.setStyleSheet("""
+            font-size: 8.5pt;
+            color: #64748B;
+            padding: 20px 16px;
+            background-color: #FAFBFC;
+            border: 2px dashed #CBD5E1;
+            border-radius: 8px;
+            line-height: 1.5;
+        """)
+        placeholder_label.setWordWrap(True)
+        placeholder_label.setMinimumHeight(110)
+        placeholder_label.setMaximumHeight(110)
+        placeholder_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        placeholder_label.setVisible(True)
+        self.file_list_placeholder = placeholder_label
+        # Stack placeholder dan file list - fixed height sesuai kolom kiri
+        file_area_container = QWidget()
+        file_area_layout = QVBoxLayout(file_area_container)
+        file_area_layout.setContentsMargins(0, 0, 0, 0)
+        file_area_layout.setSpacing(0)
+        file_area_layout.setAlignment(Qt.AlignTop)
+        file_area_layout.addWidget(placeholder_label)
+        file_area_layout.addWidget(self.file_list)
+        file_area_container.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        file_area_container.setFixedHeight(110)  # Ditambah dari 90 menjadi 110
+        self.file_list.setParent(file_area_container)
+        placeholder_label.setParent(file_area_container)
+        main_layout.addWidget(file_area_container, stretch=1)
         
-        # Bottom row: Action buttons dengan spacing yang lebih baik
-        bottom_row = QHBoxLayout()
-        bottom_row.setSpacing(12)
+        # ============================================================
+        # KOLOM 3: KANAN - Button Fitur - Grid 2x2 Layout Professional
+        # ============================================================
+        right_grid = QGridLayout()
+        right_grid.setSpacing(8)
+        right_grid.setContentsMargins(0, 0, 0, 0)
         
-        # tombol mulai ocr - lebih besar dan menonjol
+        # Row 1, Col 1: Mulai OCR
         self.start_btn = QPushButton(" Mulai OCR")
         self.start_btn.setIcon(self._get_icon('fa5s.play', color='white'))
         self.start_btn.setObjectName("start_btn")
         self.start_btn.clicked.connect(self.start_ocr)
-        self.start_btn.setEnabled(False)  # dinonaktifkan sampai file dipilih
-        self.start_btn.setMinimumWidth(160)
-        self.start_btn.setMinimumHeight(48)
+        self.start_btn.setEnabled(False)
+        self.start_btn.setMinimumHeight(41)
+        self.start_btn.setMaximumHeight(41)
         self.start_btn.setStyleSheet("""
             QPushButton {
-                font-size: 10pt;
+                font-size: 9pt;
                 font-weight: 600;
+                padding: 0px 12px;
             }
         """)
-        bottom_row.addWidget(self.start_btn)
+        right_grid.addWidget(self.start_btn, 0, 0)
         
-        # sort button
+        # Row 1, Col 2: Urutkan
         self.sort_btn = QPushButton(" Urutkan")
         self.sort_btn.setIcon(self._get_icon('fa5s.sort-amount-down', color='#2563EB'))
         self.sort_btn.setObjectName("sort_btn")
         self.sort_btn.clicked.connect(self.sort_table)
-        self.sort_btn.setEnabled(False)  # dinonaktifkan sampai OCR selesai
-        self.sort_btn.setMinimumWidth(140)
-        self.sort_btn.setMinimumHeight(48)
+        self.sort_btn.setEnabled(False)
+        self.sort_btn.setMinimumHeight(41)
+        self.sort_btn.setMaximumHeight(41)
         self.sort_btn.setToolTip("Urutkan tabel berdasarkan Kode SLS (↑) dan Sub-SLS (↓)")
-        bottom_row.addWidget(self.sort_btn)
+        self.sort_btn.setStyleSheet("""
+            QPushButton {
+                font-size: 9pt;
+                font-weight: 600;
+                padding: 0px 12px;
+            }
+        """)
+        right_grid.addWidget(self.sort_btn, 0, 1)
         
-        # reset button
+        # Row 2, Col 1: Reset
         self.reset_btn = QPushButton(" Reset")
         self.reset_btn.setIcon(self._get_icon('fa5s.redo', color='#64748B'))
         self.reset_btn.setObjectName("reset_btn")
         self.reset_btn.clicked.connect(self.reset_all)
-        self.reset_btn.setEnabled(False)  # dinonaktifkan awalnya
-        self.reset_btn.setMinimumWidth(140)
-        self.reset_btn.setMinimumHeight(48)
-        bottom_row.addWidget(self.reset_btn)
+        self.reset_btn.setEnabled(False)
+        self.reset_btn.setMinimumHeight(41)
+        self.reset_btn.setMaximumHeight(41)
+        self.reset_btn.setStyleSheet("""
+            QPushButton {
+                font-size: 9pt;
+                font-weight: 600;
+                padding: 0px 12px;
+            }
+        """)
+        right_grid.addWidget(self.reset_btn, 1, 0)
         
-        bottom_row.addStretch()  # push buttons ke kiri
+        # Row 2, Col 2: Ekspor
+        export_btn = QPushButton(" Ekspor")
+        export_btn.setIcon(self._get_icon('fa5s.file-export', color='white'))
+        export_btn.setObjectName("exportButton")
+        export_btn.clicked.connect(self.export_results)
+        export_btn.setEnabled(False)
+        export_btn.setMinimumHeight(41)
+        export_btn.setMaximumHeight(41)
+        export_btn.setStyleSheet("""
+            QPushButton {
+                font-size: 9pt;
+                font-weight: 600;
+                padding: 0px 12px;
+            }
+        """)
+        self.export_button = export_btn
+        right_grid.addWidget(export_btn, 1, 1)
         
-        layout.addLayout(bottom_row)
+        # Widget container untuk kolom kanan - grid 2x2
+        right_widget = QWidget()
+        right_widget.setLayout(right_grid)
+        right_widget.setFixedWidth(250)  # Cukup untuk 2 kolom button
+        right_widget.setFixedHeight(110)  # Ditambah dari 90 menjadi 110 untuk konsistensi
+        right_widget.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        main_layout.addWidget(right_widget)
         
-        group.setLayout(layout)
+        group.setLayout(main_layout)
+        # Set size policy untuk group box agar tinggi sesuai konten
+        group.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         return group
     
     def create_table_group(self):
         # buat grup UI tabel dengan design modern
-        group = QGroupBox("Hasil Ekstraksi Tabel")
+        group = QGroupBox("Tabel")
         group.setStyleSheet("""
             QGroupBox {
                 font-weight: 600;
@@ -463,14 +679,42 @@ class MainWindow(QMainWindow):
             }
         """)
         layout = QVBoxLayout()
-        layout.setContentsMargins(16, 20, 16, 16)
-        layout.setSpacing(12)
+        layout.setContentsMargins(16, 18, 16, 14)
+        layout.setSpacing(10)
         
         # bikin widget tabel kustom dengan navigasi tombol panah dan kontrol mengambang
         self.table = CustomTableWidget()
         self.table.parent_window = self
         self.table.setColumnCount(16)
         self.table.setRowCount(10)
+        
+        # aktifkan scroll bar untuk scrollable x dan y
+        self.table.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        self.table.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        
+        # Set size policy: Expanding untuk width, Fixed untuk height (cukup 10 baris)
+        self.table.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        
+        # Set minimum size untuk memastikan tabel terlihat (lebih fleksibel)
+        self.table.setMinimumWidth(600)
+        
+        # Set row height untuk visibility yang lebih baik (responsive)
+        row_height = 35
+        self.table.verticalHeader().setDefaultSectionSize(row_height)
+        self.table.verticalHeader().setMinimumSectionSize(30)  # Minimum row height
+        self.table.setAlternatingRowColors(True)  # Untuk readability yang lebih baik
+        
+        # Store reference untuk row height dan border height
+        self._table_row_height = row_height
+        self._table_border_height = 4
+        
+        def calculate_table_height():
+            """Hitung tinggi tabel setelah header di-set - initial setup"""
+            # Update tinggi tabel berdasarkan jumlah baris saat ini
+            self.update_table_height()
+        
+        # Panggil setelah header di-set dan layout selesai
+        QTimer.singleShot(50, calculate_table_height)
         
         # set delegate kustom buat editing cell yang lebih baik
         self.table.setItemDelegate(CellDelegate())
@@ -510,28 +754,81 @@ class MainWindow(QMainWindow):
         # Configure horizontal header for responsive behavior
         header = self.table.horizontalHeader()
         
-        # set mode resize: rentangkan biar mengisi lebar window secara proporsional
-        header.setSectionResizeMode(QHeaderView.Interactive)
-        header.setStretchLastSection(True)
-        
         # Enable text wrapping in headers for long labels
         header.setDefaultAlignment(Qt.AlignLeft | Qt.AlignVCenter)
         
-        # set lebar kolom minimum (responsif) - menggunakan constants
+        # Set minimum width untuk semua kolom menggunakan constants
         for i, min_width in enumerate(DEFAULT_MIN_COLUMN_WIDTHS):
             header.setMinimumSectionSize(min_width)
-            header.resizeSection(i, min_width)
         
-        # Enable single-click editing
+        # Setup responsive column sizing: Stretch untuk mengisi ruang yang tersedia
+        # Gunakan Stretch mode agar kolom mengisi seluruh lebar tabel
+        # Tapi tetap bisa di-resize manual jika diperlukan
+        header.setSectionResizeMode(QHeaderView.Interactive)
+        
+        # Set stretch last section untuk membuat kolom terakhir mengisi sisa ruang
+        # Ini memastikan tabel selalu memenuhi lebar container
+        header.setStretchLastSection(True)
+        
+        # Set initial column widths berdasarkan minimum width
+        # Kemudian akan otomatis stretch untuk mengisi ruang
+        for i in range(16):
+            if i < len(DEFAULT_MIN_COLUMN_WIDTHS):
+                header.resizeSection(i, DEFAULT_MIN_COLUMN_WIDTHS[i])
+            else:
+                header.resizeSection(i, 120)  # Default width untuk kolom yang tidak ada di constants
+        
+        # Store reference untuk resize handler
+        self._table_header = header
+        
+        # Panggil resize handler setelah layout selesai untuk initial sizing
+        def initial_resize():
+            """Initial resize kolom setelah layout selesai"""
+            total_width = self.table.viewport().width()
+            if total_width > 0:
+                total_min_width = sum(DEFAULT_MIN_COLUMN_WIDTHS)
+                if total_width > total_min_width:
+                    excess_width = total_width - total_min_width
+                    for i in range(16):
+                        if i < len(DEFAULT_MIN_COLUMN_WIDTHS):
+                            min_width = DEFAULT_MIN_COLUMN_WIDTHS[i]
+                            proportion = min_width / total_min_width
+                            new_width = min_width + (excess_width * proportion)
+                            header.resizeSection(i, int(new_width))
+        
+        QTimer.singleShot(100, initial_resize)
+        
+        # Enable word wrap untuk cells agar text tidak terpotong
+        self.table.setWordWrap(True)
+        
+        # Set selection behavior untuk single cell selection
+        self.table.setSelectionBehavior(QAbstractItemView.SelectItems)
+        self.table.setSelectionMode(QAbstractItemView.SingleSelection)
+        
+        # Set corner button untuk select all
+        self.table.setCornerButtonEnabled(True)
+        
+        # Pastikan table mendapatkan focus saat di-click
+        self.table.setFocusPolicy(Qt.StrongFocus)
+        
+        # Set initial cell selection agar arrow keys bisa bekerja
+        if self.table.rowCount() > 0 and self.table.columnCount() > 0:
+            self.table.setCurrentCell(0, 0)
+            self.table.setFocus()
+        
+        # Enable editing - bisa edit dengan click, F2, atau typing langsung
+        # AnyKeyPressed memungkinkan typing langsung (termasuk numpad)
+        # Arrow keys sudah di-handle di keyPressEvent untuk navigasi
         self.table.setEditTriggers(
-            QTableWidget.CurrentChanged |  # Single-click to edit
-            QTableWidget.SelectedClicked |  # Click on selected cell
-            QTableWidget.EditKeyPressed |   # Any key press
-            QTableWidget.AnyKeyPressed      # mulai ketik langsung
+            QTableWidget.SelectedClicked |  # Click pada selected cell untuk edit
+            QTableWidget.EditKeyPressed |   # F2 untuk edit
+            QTableWidget.DoubleClicked |    # Double-click untuk edit
+            QTableWidget.AnyKeyPressed      # Typing langsung (termasuk numpad) untuk edit
         )
         self.table.itemChanged.connect(self.on_cell_edited)
         
         # Navigation handled by CustomTableWidget.keyPressEvent
+        # Mouse press event sudah di-handle di CustomTableWidget class
         
         # bikin tombol mengambang buat kontrol baris (disembunyikan secara default)
         self.create_floating_row_buttons()
@@ -579,8 +876,9 @@ class MainWindow(QMainWindow):
             # Populate interactive file list
             self.populate_file_list(file_paths)
             
-            # Show file list
+            # Show file list and hide placeholder
             self.file_list.setVisible(True)
+            self.file_list_placeholder.setVisible(False)
             
             # Update status
             if len(file_paths) == 1:
@@ -802,6 +1100,9 @@ class MainWindow(QMainWindow):
         for i in range(total_rows):
             self.table.setVerticalHeaderItem(i, QTableWidgetItem(str(i + 1)))
         
+        # Update tinggi tabel berdasarkan jumlah baris
+        self.update_table_height()
+        
         # Populate cells (hanya untuk data baru kalau append mode)
         for data_idx, row_data in enumerate(table_data):
             row_idx = start_row + data_idx
@@ -836,9 +1137,61 @@ class MainWindow(QMainWindow):
         # Re-enable signals
         self.table.blockSignals(False)
         
-        # scroll ke baris terakhir kalau append mode
-        if append_mode and table_data:
-            self.table.scrollToItem(self.table.item(total_rows - 1, 0))
+        # update size hint agar section tabel mengikuti tinggi tabel
+        self.table.updateGeometry()
+        
+        # scroll ke baris terakhir kalau append mode (tapi karena scroll off, ini tidak akan bekerja)
+        # biarkan page yang scroll untuk melihat semua data
+    
+    def update_table_height(self):
+        """Update tinggi tabel berdasarkan jumlah baris: fixed untuk <= 10 baris, expanding untuk > 10 baris"""
+        row_height = getattr(self, '_table_row_height', 35)
+        border_height = getattr(self, '_table_border_height', 4)
+        
+        # Dapatkan jumlah baris saat ini
+        total_rows = self.table.rowCount()
+        
+        # Dapatkan header height
+        header_height = self.table.horizontalHeader().height()
+        if header_height == 0:
+            # Fallback jika header belum di-render
+            header_height = 60
+        
+        if total_rows <= 10:
+            # Jika <= 10 baris: fixed height untuk 10 baris (tampilkan semua baris)
+            display_rows = 10
+            calculated_height = header_height + (display_rows * row_height) + border_height
+            
+            # Set size policy: Fixed untuk height
+            self.table.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+            
+            # Set fixed height
+            self.table.setFixedHeight(calculated_height)
+            self.table.setMinimumHeight(calculated_height)
+            self.table.setMaximumHeight(calculated_height)
+        else:
+            # Jika > 10 baris: expanding untuk mengisi section
+            # PENTING: Hapus fixed height constraint terlebih dahulu
+            # Kita perlu reset size constraints sebelum mengubah size policy
+            # Gunakan resize dengan current width untuk menghapus fixed height
+            current_width = self.table.width()
+            if current_width > 0:
+                # Resize dengan current width akan menghapus fixed height constraint
+                self.table.resize(current_width, self.table.height())
+            
+            # Set size policy: Expanding untuk height
+            self.table.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+            
+            # Set minimum height untuk 10 baris
+            min_height = header_height + (10 * row_height) + border_height
+            self.table.setMinimumHeight(min_height)
+            
+            # Set maximum height yang sangat besar (tidak terbatas secara praktis)
+            # Ini memungkinkan tabel expand untuk mengisi section
+            self.table.setMaximumHeight(16777215)  # QWIDGETSIZE_MAX
+            
+            # Update geometry untuk memaksa refresh layout
+            self.table.updateGeometry()
     
     def _save_existing_table_data(self):
         # simpan data tabel yang sudah ada ke format yang bisa di-append
@@ -923,6 +1276,9 @@ class MainWindow(QMainWindow):
         for i in range(self.table.rowCount()):
             self.table.setVerticalHeaderItem(i, QTableWidgetItem(str(i + 1)))
         
+        # Update tinggi tabel berdasarkan jumlah baris baru
+        self.update_table_height()
+        
         # Update status
         self.update_status(f"✓ Baris ditambahkan di posisi {insert_pos + 1} (Total: {self.table.rowCount()} baris)")
         
@@ -947,6 +1303,9 @@ class MainWindow(QMainWindow):
         # Update vertical headers (row numbers)
         for i in range(self.table.rowCount()):
             self.table.setVerticalHeaderItem(i, QTableWidgetItem(str(i + 1)))
+        
+        # Update tinggi tabel berdasarkan jumlah baris baru
+        self.update_table_height()
         
         # Update status
         self.update_status(f"✓ Baris {hovered_row + 1} dihapus (Total: {self.table.rowCount()} baris)")
@@ -1256,6 +1615,7 @@ class MainWindow(QMainWindow):
         self.current_files = []
         self.file_list.clear()
         self.file_list.setVisible(False)
+        self.file_list_placeholder.setVisible(True)  # Tampilkan placeholder kembali
         
         # bersihkan hasil OCR
         self.ocr_results = None
@@ -1267,6 +1627,9 @@ class MainWindow(QMainWindow):
         self.table.setRowCount(10)
         for i in range(10):
             self.table.setVerticalHeaderItem(i, QTableWidgetItem(str(i + 1)))
+        
+        # Update tinggi tabel kembali ke fixed untuk 10 baris
+        self.update_table_height()
         
         # Hide progress bar
         self.progress_bar.setVisible(False)

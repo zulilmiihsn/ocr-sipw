@@ -201,7 +201,7 @@ def analyze_specific_detection(det, h_lines, column_structure, adaptive_toleranc
 def main():
     """Main debug function"""
     
-    test_image = "contoh gambar/2.png"
+    test_image = "examples/2.png"
     
     if not Path(test_image).exists():
         print(f"❌ Image not found: {test_image}")

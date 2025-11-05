@@ -1,4 +1,4 @@
-"""Worker threads for background processing."""
+# worker thread untuk proses background
 
 from .ocr_worker import OCRWorker
 

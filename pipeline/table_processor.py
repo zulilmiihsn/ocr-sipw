@@ -1,7 +1,5 @@
-"""
-Table processing module for OCR cell mapping and validation.
-Extracted from main_window.py for better separation of concerns.
-"""
+# module untuk pemrosesan tabel: mapping cell ocr dan validasi
+# dipisahkan dari main_window.py untuk separation of concerns yang lebih baik
 
 import re
 from collections import defaultdict
@@ -18,17 +16,18 @@ from config.constants import (
 )
 from config.settings import mapping_settings
 from pipeline.ocr_engine import validate_and_correct_by_template
+from pipeline.utils import calculate_adaptive_tolerance
 from utils.exceptions import OCRProcessingError
 from utils.logging_config import get_logger
 
 logger = get_logger(__name__)
 
-# Pre-compile regex patterns
+# regex pattern yang sudah dikompilasi (lebih cepat)
 PHONE_PATTERN = re.compile(r'(08\d{8,11}|\+62\d{9,12})')
 
 
 class TableProcessor:
-    """Processes OCR results and maps them to table cells."""
+    # proses hasil ocr dan mapping ke cell tabel
     
     def __init__(self):
         self.settings = mapping_settings
@@ -42,27 +41,24 @@ class TableProcessor:
         column_structure: List[Dict[str, Any]],
         image_height: int
     ) -> List[Dict[str, Any]]:
-        """
-        Main processing pipeline to map OCR detections to table cells.
-        
-        Args:
-            ocr_results: List of OCR detection dictionaries
-            h_lines: Horizontal line positions
-            vertical_lines: Vertical line positions
-            header_y_max: Maximum Y position of header
-            column_structure: Column structure from header learning
-            image_height: Height of cropped image
-            
-        Returns:
-            List of row data dictionaries
-        """
+        # pipeline utama untuk mapping deteksi ocr ke cell tabel
+        # param:
+        #   ocr_results: list dictionary hasil deteksi ocr
+        #   h_lines: posisi garis horizontal
+        #   vertical_lines: posisi garis vertikal
+        #   header_y_max: posisi Y maksimum dari header
+        #   column_structure: struktur kolom dari pembelajaran header
+        #   image_height: tinggi gambar yang sudah di-crop
+        # return:
+        #   list dictionary data baris
         try:
-            # Calculate adaptive tolerance
-            adaptive_tolerance = self._calculate_adaptive_tolerance(
-                image_height, h_lines
+            # hitung tolerance adaptif pakai utility function
+            adaptive_tolerance = calculate_adaptive_tolerance(
+                image_height=image_height,
+                h_lines=h_lines
             )
             
-            # Map detections to cells
+            # mapping deteksi ke cell
             cells = self._map_detections_to_cells(
                 ocr_results,
                 h_lines,
@@ -71,7 +67,7 @@ class TableProcessor:
                 adaptive_tolerance
             )
             
-            # Fill mandatory columns
+            # isi kolom yang wajib
             self._fill_mandatory_columns(
                 cells,
                 ocr_results,
@@ -81,7 +77,7 @@ class TableProcessor:
                 adaptive_tolerance
             )
             
-            # Validate and correct rows
+            # validasi dan perbaiki baris
             self._validate_and_correct_rows(
                 cells,
                 h_lines,
@@ -89,7 +85,7 @@ class TableProcessor:
                 header_y_max
             )
             
-            # Build final table structure
+            # bikin struktur tabel akhir
             table_data = self._build_table_data(
                 cells,
                 h_lines,
@@ -103,22 +99,6 @@ class TableProcessor:
             logger.error(f"Error processing table: {e}", exc_info=True)
             raise OCRProcessingError(f"Failed to process table: {str(e)}") from e
     
-    def _calculate_adaptive_tolerance(
-        self,
-        image_height: int,
-        h_lines: List[int]
-    ) -> int:
-        """Calculate adaptive tolerance based on image size and row height."""
-        if len(h_lines) > 1:
-            avg_row_height = (h_lines[-1] - h_lines[0]) / max(len(h_lines) - 1, 1)
-            adaptive_row_tolerance = max(
-                8, int(avg_row_height * 0.25)
-            )
-        else:
-            adaptive_row_tolerance = 10
-        
-        return adaptive_row_tolerance
-    
     def _map_detections_to_cells(
         self,
         ocr_results: List[Dict[str, Any]],
@@ -127,35 +107,35 @@ class TableProcessor:
         header_y_max: int,
         adaptive_tolerance: int
     ) -> Dict[Tuple[int, int], Dict[str, Any]]:
-        """Map OCR detections to table cells using fuzzy matching."""
+        # mapping deteksi ocr ke cell tabel pakai fuzzy matching
         cells = defaultdict(lambda: {'detections': []})
         
-        # Build spatial index
+        # bikin spatial index untuk akses cepat
         row_ranges = [(h_lines[i], h_lines[i+1], i) for i in range(len(h_lines)-1)]
         col_ranges = [
             (col['x_left'], col['x_right'], idx)
             for idx, col in enumerate(column_structure)
         ]
         
-        # Map each detection
+        # mapping setiap deteksi
         for det in ocr_results:
             det_center_x = (det['x_min'] + det['x_max']) / 2
             det_center_y = (det['y_min'] + det['y_max']) / 2
             
-            # Skip header
+            # skip header
             if det_center_y <= header_y_max:
                 continue
             
-            # Find candidate rows
+            # cari baris kandidat
             candidate_rows = self._find_candidate_rows(
                 det_center_y, row_ranges, adaptive_tolerance
             )
             
-            # Try strict X matching first
+            # coba strict X matching dulu
             matched_col = self._find_strict_x_match(det_center_x, column_structure)
             
             if matched_col >= 0:
-                # Found exact column match, find best row
+                # ketemu kolom yang pas, cari baris terbaik
                 best_row = self._find_best_row_for_column(
                     det,
                     matched_col,
@@ -169,7 +149,7 @@ class TableProcessor:
                     cells[(best_row, matched_col)]['detections'].append(det)
                     continue
             
-            # Fallback: fuzzy matching
+            # fallback: pakai fuzzy matching
             self._fuzzy_match_detection(
                 det,
                 candidate_rows,
@@ -180,7 +160,7 @@ class TableProcessor:
                 adaptive_tolerance
             )
         
-        # Merge detections in same cell
+        # gabungkan deteksi di cell yang sama
         self._merge_cell_detections(cells)
         
         return cells
@@ -191,7 +171,7 @@ class TableProcessor:
         row_ranges: List[Tuple[int, int, int]],
         tolerance: int
     ) -> List[int]:
-        """Find candidate rows for a detection."""
+        # cari baris kandidat untuk sebuah deteksi
         candidates = []
         for y_min, y_max, idx in row_ranges:
             if y_min - tolerance <= det_center_y <= y_max + tolerance:
@@ -203,7 +183,7 @@ class TableProcessor:
         det_center_x: float,
         column_structure: List[Dict[str, Any]]
     ) -> int:
-        """Find exact column match by X position."""
+        # cari kolom yang pas berdasarkan posisi X
         for col_idx, col in enumerate(column_structure):
             if col['x_left'] <= det_center_x < col['x_right']:
                 return col_idx
@@ -218,7 +198,7 @@ class TableProcessor:
         column_structure: List[Dict[str, Any]],
         tolerance: int
     ) -> int:
-        """Find best row for a detection with known column."""
+        # cari baris terbaik untuk deteksi dengan kolom yang sudah diketahui
         best_row = -1
         best_score = 0.0
         
@@ -253,8 +233,8 @@ class TableProcessor:
         cells: Dict[Tuple[int, int], Dict[str, Any]],
         tolerance: int
     ) -> None:
-        """Perform fuzzy matching for ambiguous detections."""
-        # Find candidate columns (overlapping)
+        # lakukan fuzzy matching untuk deteksi yang ambigu
+        # cari kolom kandidat (yang overlap)
         candidate_cols = []
         for x_min, x_max, idx in col_ranges:
             if not (det['x_max'] < x_min or det['x_min'] > x_max):
@@ -292,7 +272,7 @@ class TableProcessor:
         confidence: float,
         column_index: int
     ) -> float:
-        """Calculate fuzzy matching score for cell assignment."""
+        # hitung skor fuzzy matching untuk assignment cell
         det_box = (det['x_min'], det['y_min'], det['x_max'], det['y_max'])
         cell_x_min, cell_y_min, cell_x_max, cell_y_max = cell_box
         
@@ -304,7 +284,7 @@ class TableProcessor:
         cell_center_x = (cell_x_min + cell_x_max) / 2
         cell_center_y = (cell_y_min + cell_y_max) / 2
         
-        # Center position score
+        # skor posisi center
         in_x = cell_x_min <= det_center_x < cell_x_max
         in_y = cell_y_min <= det_center_y < cell_y_max
         
@@ -327,10 +307,10 @@ class TableProcessor:
             center_score = 1.0 if (in_x and in_y) else 0.0
             center_weight = self.settings.center_weight_normal
         
-        # IoU score
+        # skor IoU (Intersection over Union)
         iou = self._calculate_iou(det_box, cell_box)
         
-        # Distance score
+        # skor jarak
         distance = ((det_center_x - cell_center_x)**2 + 
                    (det_center_y - cell_center_y)**2)**0.5
         max_distance = ((cell_width/2)**2 + (cell_height/2)**2)**0.5
@@ -339,7 +319,7 @@ class TableProcessor:
             if max_distance > 0 else 0.0
         )
         
-        # Combined score
+        # gabungkan skor
         if is_important_col:
             total_score = (
                 center_score * center_weight +
@@ -355,7 +335,7 @@ class TableProcessor:
                 confidence * self.settings.confidence_weight
             )
         
-        # Add rule prior
+        # tambahkan rule prior
         rule_prior = self._compute_rule_prior(
             det.get('text', ''), column_index
         )
@@ -368,7 +348,7 @@ class TableProcessor:
         box1: Tuple[int, int, int, int],
         box2: Tuple[int, int, int, int]
     ) -> float:
-        """Calculate Intersection over Union (IoU) of two boxes."""
+        # hitung Intersection over Union (IoU) dari dua box
         x1_min, y1_min, x1_max, y1_max = box1
         x2_min, y2_min, x2_max, y2_max = box2
         
@@ -389,7 +369,7 @@ class TableProcessor:
         return inter_area / union_area if union_area > 0 else 0.0
     
     def _compute_rule_prior(self, text_value: str, column_index: int) -> float:
-        """Compute rule-based prior for column content matching."""
+        # hitung rule-based prior untuk matching konten kolom
         if not text_value:
             return 0.0
         
@@ -398,7 +378,7 @@ class TableProcessor:
         t_upper = t.upper()
         is_digits = t_clean.isdigit()
         
-        # Column 15 (Contact Person)
+        # kolom 15 (Contact Person)
         if column_index == COL_CONTACT_PERSON:
             phone_match = PHONE_PATTERN.match(t_clean)
             has_email = '@' in t or t.startswith('/')
@@ -408,15 +388,15 @@ class TableProcessor:
                 return 0.20
             return 0.0
         
-        # Column 16 (Muatan Dominan)
+        # kolom 16 (Muatan Dominan)
         if column_index == COL_MUATAN_DOMINAN:
             if len(t_clean) == 1 and t_clean.isdigit() and t_clean in '123456789':
                 return 0.30
             if is_digits and len(t_clean) >= 10:
-                return -0.20  # Penalty
+                return -0.20  # penalty
             return 0.0
         
-        # Column 3 (RT/RW)
+        # kolom 3 (RT/RW)
         if column_index == COL_RT_RW:
             has_rt = 'RT' in t_upper
             has_rw = 'RW' in t_upper
@@ -426,25 +406,25 @@ class TableProcessor:
                 return 0.10
             return 0.0
         
-        # Numeric columns
+        # kolom numerik
         if column_index in NUMERIC_COLS:
             return 0.12 if is_digits else 0.0
         
-        # Column 11 (Nama Wilayah)
+        # kolom 11 (Nama Wilayah)
         if column_index == COL_NAMA_WILAYAH:
             return 0.08 if not is_digits else 0.0
         
         return 0.0
     
     def _clean_text(self, text: str) -> str:
-        """Clean text by removing spaces and common separators."""
+        # bersihkan text dengan hapus spasi dan separator umum
         return text.replace(' ', '').replace('-', '').replace('(', '').replace(')', '')
     
     def _merge_cell_detections(
         self,
         cells: Dict[Tuple[int, int], Dict[str, Any]]
     ) -> None:
-        """Merge multiple detections in the same cell."""
+        # gabungkan beberapa deteksi di cell yang sama
         for (row, col), cell in cells.items():
             dets = cell['detections']
             if len(dets) == 1:
@@ -464,7 +444,7 @@ class TableProcessor:
         header_y_max: int,
         adaptive_tolerance: int
     ) -> None:
-        """Fill empty mandatory numeric columns using overlap detection."""
+        # isi kolom numerik wajib yang kosong pakai deteksi overlap
         for row_idx in range(len(h_lines) - 1):
             y_center = (h_lines[row_idx] + h_lines[row_idx + 1]) / 2
             if y_center <= header_y_max:
@@ -539,10 +519,10 @@ class TableProcessor:
         column_structure: List[Dict[str, Any]],
         header_y_max: int
     ) -> None:
-        """Validate and correct row patterns (swap adjacent columns if needed)."""
-        # This is a simplified version - full implementation would be very long
-        # For now, we'll keep the core validation logic in the worker
-        # This can be refactored further if needed
+        # validasi dan perbaiki pola baris (swap kolom yang berdekatan kalau perlu)
+        # ini versi sederhana - implementasi lengkapnya bakal panjang banget
+        # untuk sekarang, keep logic validasi utama di worker
+        # bisa di-refactor nanti kalau perlu
         pass
     
     def _build_table_data(
@@ -552,7 +532,7 @@ class TableProcessor:
         column_structure: List[Dict[str, Any]],
         header_y_max: int
     ) -> List[Dict[str, Any]]:
-        """Build final table data structure."""
+        # bikin struktur data tabel akhir
         table_data = []
         
         for row_idx in range(len(h_lines) - 1):

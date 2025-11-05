@@ -1,7 +1,5 @@
-"""
-OCR Worker thread for background processing.
-Handles multi-file OCR processing with progress reporting.
-"""
+# worker thread untuk proses ocr di background
+# handle multiple file ocr dengan progress reporting
 
 import time
 from pathlib import Path
@@ -20,6 +18,7 @@ from pipeline.ocr_engine import (
     validate_and_correct_by_template
 )
 from pipeline.table_processor import TableProcessor
+from pipeline.utils import calculate_header_y_max, calculate_adaptive_tolerance
 from config.settings import gui_settings, mapping_settings
 from config.constants import EXPECTED_ROWS
 from utils.exceptions import ImageLoadError, TableDetectionError, OCRProcessingError
@@ -29,29 +28,24 @@ logger = get_logger(__name__)
 
 
 class OCRWorker(QThread):
-    """
-    Worker thread for OCR processing in background.
-    Can handle multiple files and reports progress via signals.
-    """
+    # worker thread untuk proses ocr di background
+    # bisa handle banyak file dan laporkan progress lewat signals
     
     progress = pyqtSignal(int, str)
     finished = pyqtSignal(dict)
     error = pyqtSignal(str)
     
     def __init__(self, file_paths: List[str]):
-        """
-        Initialize OCR worker.
-        
-        Args:
-            file_paths: List of image file paths to process
-        """
+        # inisialisasi ocr worker
+        # param:
+        #   file_paths: list path file gambar yang mau diproses
         super().__init__()
         self.file_paths = file_paths if isinstance(file_paths, list) else [file_paths]
         self.is_cancelled = False
         self.processor = TableProcessor()
     
     def run(self) -> None:
-        """Execute OCR processing for all files."""
+        # jalankan proses ocr untuk semua file
         try:
             start_time = time.time()
             all_results = []
@@ -147,21 +141,17 @@ class OCRWorker(QThread):
         file_idx: int,
         total_files: int
     ) -> List[Dict[str, Any]]:
-        """
-        Process a single image and return table data.
-        
-        Args:
-            image: Input image as numpy array
-            file_idx: Current file index
-            total_files: Total number of files
-            
-        Returns:
-            List of row data dictionaries
-        """
+        # proses satu gambar dan return data tabel
+        # param:
+        #   image: gambar input sebagai numpy array
+        #   file_idx: index file saat ini
+        #   total_files: total jumlah file
+        # return:
+        #   list dictionary data baris
         try:
             progress_base = 20 + (file_idx / total_files) * 60
             
-            # Stage 1: Detect table region
+            # tahap 1: deteksi region tabel
             self.progress.emit(
                 int(progress_base),
                 "Mendeteksi region BLOK III..."
@@ -176,7 +166,7 @@ class OCRWorker(QThread):
             cropped = crop_table(image, bbox)
             image_height = cropped.shape[0]
             
-            # Stage 2: Run OCR
+            # tahap 2: jalankan ocr
             self.progress.emit(
                 gui_settings.progress_ocr_start,
                 "Melakukan pemindaian OCR..."
@@ -187,7 +177,7 @@ class OCRWorker(QThread):
             ocr_results = run_full_document_ocr(cropped)
             logger.debug(f"OCR detected {len(ocr_results)} text regions")
             
-            # Stage 3: Detect table structure
+            # tahap 3: deteksi struktur tabel
             self.progress.emit(
                 gui_settings.progress_structure_start,
                 "Mendeteksi struktur tabel..."
@@ -197,34 +187,34 @@ class OCRWorker(QThread):
             
             all_h_lines, vertical_lines = detect_all_lines(cropped)
             
-            # Stage 4: Detect header and calculate row positions
+            # tahap 4: deteksi header dan hitung posisi baris
             h_lines = self._detect_rows(
                 ocr_results,
                 all_h_lines,
                 image_height
             )
             
-            # Stage 5: Learn column structure
+            # tahap 5: pelajari struktur kolom
             self.progress.emit(
                 gui_settings.progress_column_start,
-                "Learning column structure..."
+                "Mempelajari struktur kolom..."
             )
             if self.is_cancelled:
                 return []
             
             header_groups = detect_header_rows(ocr_results)
             column_structure = learn_column_structure(header_groups, vertical_lines)
-            header_y_max = self._calculate_header_y_max(
-                header_groups,
-                all_h_lines,
-                ocr_results,
-                image_height
+            header_y_max = calculate_header_y_max(
+                header_groups=header_groups,
+                sorted_h_lines=all_h_lines,
+                ocr_results=ocr_results,
+                image_height=image_height
             )
             
-            # Stage 6: Map detections to cells
+            # tahap 6: mapping deteksi ke cell
             self.progress.emit(
                 gui_settings.progress_build_start,
-                "Building table..."
+                "Membangun tabel..."
             )
             if self.is_cancelled:
                 return []
@@ -238,8 +228,8 @@ class OCRWorker(QThread):
                 image_height=image_height
             )
             
-            # Additional validation passes (keep existing logic for now)
-            # This can be refactored later to use TableProcessor
+            # validasi tambahan (keep logic yang ada untuk sekarang)
+            # ini bisa di-refactor nanti kalau perlu
             
             return table_data
             
@@ -259,31 +249,30 @@ class OCRWorker(QThread):
         all_h_lines: List[int],
         image_height: int
     ) -> List[int]:
-        """
-        Detect row positions from OCR results and horizontal lines.
-        
-        Args:
-            ocr_results: OCR detection results
-            all_h_lines: Detected horizontal lines
-            image_height: Height of cropped image
-            
-        Returns:
-            List of horizontal line Y positions for rows
-        """
+        # deteksi posisi baris dari hasil ocr dan garis horizontal
+        # param:
+        #   ocr_results: hasil deteksi ocr
+        #   all_h_lines: garis horizontal yang terdeteksi
+        #   image_height: tinggi gambar yang sudah di-crop
+        # return:
+        #   list posisi Y dari garis horizontal untuk baris
         sorted_h_lines = sorted(all_h_lines)
         
-        # Calculate adaptive tolerance
-        adaptive_tolerance = max(
-            mapping_settings.adaptive_tolerance_min,
-            int(image_height * mapping_settings.adaptive_tolerance_ratio)
+        # hitung tolerance adaptif pakai utility function
+        adaptive_tolerance = calculate_adaptive_tolerance(
+            image_height=image_height,
+            h_lines=sorted_h_lines
         )
         
-        # Detect header boundary
-        header_y_max = self._calculate_header_y_max(
-            None, sorted_h_lines, ocr_results, image_height
+        # deteksi batas header pakai utility function
+        header_y_max = calculate_header_y_max(
+            header_groups=None,
+            sorted_h_lines=sorted_h_lines,
+            ocr_results=ocr_results,
+            image_height=image_height
         )
         
-        # Collect data Y centers (below header)
+        # kumpulkan center Y dari data (di bawah header)
         data_y_centers = []
         for det in ocr_results:
             y_center = (det['y_min'] + det['y_max']) / 2
@@ -291,7 +280,7 @@ class OCRWorker(QThread):
                 data_y_centers.append(y_center)
         
         if len(data_y_centers) > 0:
-            # Group nearby detections into rows
+            # kelompokkan deteksi yang berdekatan jadi baris
             data_y_centers = sorted(data_y_centers)
             row_groups = []
             current_group = [data_y_centers[0]]
@@ -304,10 +293,10 @@ class OCRWorker(QThread):
                     current_group = [y]
             row_groups.append(current_group)
             
-            # Calculate average Y for each row group
+            # hitung rata-rata Y untuk setiap grup baris
             row_y_positions = [sum(group) / len(group) for group in row_groups]
             
-            # Force exactly EXPECTED_ROWS rows
+            # paksa jadi tepat EXPECTED_ROWS baris
             if len(row_y_positions) > EXPECTED_ROWS:
                 row_y_positions = row_y_positions[:EXPECTED_ROWS]
             elif len(row_y_positions) < EXPECTED_ROWS:
@@ -319,26 +308,26 @@ class OCRWorker(QThread):
                         start_y + i * step for i in range(EXPECTED_ROWS)
                     ]
             
-            # Build horizontal lines
+            # bikin garis horizontal
             h_lines = [int(header_y_max + 10)]
             for y in row_y_positions:
                 h_lines.append(int(y))
             
-            # Add bottom line
+            # tambahkan garis bawah
             bottom_line = max(sorted_h_lines) if sorted_h_lines else image_height
             h_lines.append(int(bottom_line))
             
-            # Remove duplicates and sort
+            # hapus duplikat dan urutkan
             h_lines = sorted(list(set(h_lines)))
             
-            # Ensure exactly EXPECTED_ROWS + 1 lines
+            # pastikan tepat EXPECTED_ROWS + 1 garis
             if len(h_lines) > EXPECTED_ROWS + 1:
                 start = h_lines[0]
                 end = h_lines[-1]
                 step = (end - start) / EXPECTED_ROWS
                 h_lines = [int(start + i * step) for i in range(EXPECTED_ROWS + 1)]
         else:
-            # Fallback: divide evenly
+            # fallback: bagi rata
             data_region_start = header_y_max + 10
             data_region_end = (
                 max(sorted_h_lines) if sorted_h_lines else image_height
@@ -353,50 +342,8 @@ class OCRWorker(QThread):
         
         return h_lines
     
-    def _calculate_header_y_max(
-        self,
-        header_groups: Optional[List[Dict[str, Any]]],
-        sorted_h_lines: List[int],
-        ocr_results: List[Dict[str, Any]],
-        image_height: int
-    ) -> int:
-        """
-        Calculate maximum Y position of header region.
-        
-        Args:
-            header_groups: Header detection groups (optional)
-            sorted_h_lines: Sorted horizontal line positions
-            ocr_results: OCR detection results
-            image_height: Height of cropped image
-            
-        Returns:
-            Maximum Y position of header
-        """
-        # Use H-lines in top 30% of image
-        header_candidates = [
-            y for y in sorted_h_lines
-            if y < image_height * mapping_settings.header_search_ratio
-        ]
-        
-        if len(header_candidates) >= 1:
-            # Use last line in header area (separator)
-            header_y_max = header_candidates[-1]
-        else:
-            # Fallback: use OCR-based detection
-            header_y_max = 0
-            for det in ocr_results:
-                y_center = (det['y_min'] + det['y_max']) / 2
-                if y_center < image_height * 0.25:
-                    header_y_max = max(header_y_max, det['y_max'])
-            
-            # Add safety margin
-            if header_y_max > 0:
-                header_y_max += mapping_settings.header_margin_px
-        
-        return header_y_max
-    
     def cancel(self) -> None:
-        """Cancel OCR processing."""
+        # batalkan proses ocr
         logger.info("Cancelling OCR processing")
         self.is_cancelled = True
 

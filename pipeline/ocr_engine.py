@@ -1,13 +1,12 @@
 # adaptive ocr pipeline (production ready)
 # ========================================
-# full document ocr + self-learning table mapping
-# features:
-# - 94.1% accuracy (48/51 cells)
-# - no fallback required (pure paddleocr pp-ocrv5)
-# - self-learning column structure from document headers
-# - vertical line detection for accurate cell boundaries
-# - post-processing for bracket removal and text cleaning
-# - processing time: ~78 seconds
+# pipeline ocr untuk ekstraksi tabel BLOK III dengan self-learning
+# fitur:
+# - tidak perlu fallback (pure paddleocr pp-ocrv5)
+# - belajar struktur kolom otomatis dari header dokumen
+# - deteksi garis vertikal untuk batas cell yang akurat
+# - post-processing untuk pembersihan karakter dan validasi template
+# - waktu pemrosesan: ~78 detik
 # author: lab ocr team
 # version: 2.0 (final)
 # date: october 2025
@@ -23,10 +22,11 @@ from typing import List, Dict, Any, Optional
 
 warnings.filterwarnings('ignore')
 
-# Import config and logging
+# import config dan logging
 from config.settings import ocr_settings, table_settings, app_settings
 from utils.logging_config import get_logger
 from utils.exceptions import OCRProcessingError
+from pipeline.utils import calculate_header_y_max
 
 logger = get_logger(__name__)
 
@@ -64,7 +64,7 @@ class PaddleOCREngine:
 
 import hashlib
 
-# simple in-memory cache for ocr results (keyed by image hash)
+# cache sederhana di memory untuk hasil ocr (key-nya hash dari gambar)
 _OCR_CACHE: Dict[str, Any] = {}
 _OCR_CACHE_MAX = app_settings.ocr_cache_max
 
@@ -144,11 +144,11 @@ def run_full_document_ocr(image: np.ndarray, use_cache: bool = True) -> List[Dic
                 'height': y_max - y_min
             })
     
-    # store into cache (bounded)
+    # simpan ke cache (dibatasi ukurannya)
     if use_cache and cache_key and detections is not None:
         try:
             if len(_OCR_CACHE) >= _OCR_CACHE_MAX:
-                # remove oldest arbitrary item
+                # hapus item paling lama kalau cache penuh
                 _OCR_CACHE.pop(next(iter(_OCR_CACHE)))
             _OCR_CACHE[cache_key] = detections
         except Exception:
@@ -157,11 +157,11 @@ def run_full_document_ocr(image: np.ndarray, use_cache: bool = True) -> List[Dic
 
 
 # ============================================================================
-# STEP 2: Table Structure Detection
+# TAHAP 2: Deteksi Struktur Tabel
 # ============================================================================
 
 def detect_horizontal_lines(image: np.ndarray) -> List[int]:
-    """Detect horizontal lines on table."""
+    # deteksi garis horizontal pada tabel
     min_length = image.shape[1] // table_settings.min_horizontal_line_ratio
     
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -183,7 +183,7 @@ def detect_horizontal_lines(image: np.ndarray) -> List[int]:
 
 
 def detect_vertical_lines(image: np.ndarray) -> List[int]:
-    """Detect vertical lines on table."""
+    # deteksi garis vertikal pada tabel
     min_length = image.shape[0] // table_settings.min_vertical_line_ratio
     
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -205,10 +205,8 @@ def detect_vertical_lines(image: np.ndarray) -> List[int]:
 
 
 def detect_all_lines(image: np.ndarray) -> tuple[List[int], List[int]]:
-    """
-    Detect horizontal and vertical lines simultaneously, more efficient.
-    Saves time by creating binary image once for both detections.
-    """
+    # deteksi garis horizontal dan vertikal sekaligus, lebih efisien
+    # lebih cepat karena bikin binary image sekali untuk kedua deteksi
     if len(image.shape) == 3:
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     else:
@@ -216,7 +214,7 @@ def detect_all_lines(image: np.ndarray) -> tuple[List[int], List[int]]:
     binary = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
                                    cv2.THRESH_BINARY_INV, 15, 2)
     
-    # use pre-computed binary for both detections
+    # pakai binary image yang sudah dihitung untuk kedua deteksi
     min_h_length = image.shape[1] // table_settings.min_horizontal_line_ratio
     min_v_length = image.shape[0] // table_settings.min_vertical_line_ratio
     
@@ -242,11 +240,11 @@ def detect_all_lines(image: np.ndarray) -> tuple[List[int], List[int]]:
 
 
 # ============================================================================
-# STEP 3: Header Detection & Column Learning
+# TAHAP 3: Deteksi Header & Pembelajaran Kolom
 # ============================================================================
 
 def detect_header_rows(detections: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    """Find header rows based on keywords."""
+    # cari baris header berdasarkan keyword
     header_detections = []
     
     for det in detections:
@@ -288,7 +286,7 @@ def learn_column_structure(
         x_left = v_lines[i]
         x_right = v_lines[i + 1]
         
-        # find headers in this column
+        # cari header di kolom ini
         col_headers = [det['text'] for det in all_headers 
                       if x_left <= det['x'] < x_right]
         
@@ -306,7 +304,7 @@ def learn_column_structure(
 
 
 # ============================================================================
-# STEP 4: Post-Processing with Template Validation
+# TAHAP 4: Post-Processing dengan Validasi Template
 # ============================================================================
 
 
@@ -405,7 +403,7 @@ def validate_and_correct_by_template(text: str, column_index: int) -> str:
 
 
 # ============================================================================
-# MAIN PIPELINE
+# PIPELINE UTAMA
 # ============================================================================
 
 def process_table(
@@ -413,13 +411,13 @@ def process_table(
     output_path: Optional[str] = None, 
     verbose: bool = True
 ) -> Dict[str, Any]:
-    # main ocr pipeline
-    # args:
-    #     image_path: path to input image
-    #     output_path: path to save json results (optional)
-    #     verbose: print progress (default: True)
-    # returns:
-    #     dict: results with metadata, columns, and rows
+    # pipeline ocr utama
+    # param:
+    #     image_path: path ke gambar input
+    #     output_path: path untuk simpan hasil json (opsional)
+    #     verbose: tampilkan progress (default: True)
+    # return:
+    #     dict: hasil dengan metadata, kolom, dan baris
     start_time = time.time()
     
     if verbose:
@@ -427,7 +425,7 @@ def process_table(
         logger.info('ADAPTIVE OCR PIPELINE v2.0')
         logger.info('='*80)
     
-    # load image
+    # muat gambar
     if verbose:
         logger.info('[1/6] Loading image...')
     image = cv2.imread(str(image_path))
@@ -436,14 +434,14 @@ def process_table(
     if verbose:
         logger.info(f'Loaded: {image.shape}')
     
-    # run ocr
+    # jalankan ocr
     if verbose:
         logger.info('[2/6] Running full document ocr...')
     detections = run_full_document_ocr(image)
     if verbose:
         logger.info(f'Found {len(detections)} text detections')
     
-    # detect table structure
+    # deteksi struktur tabel
     if verbose:
         logger.info('[3/6] Detecting table structure...')
     h_lines = detect_horizontal_lines(image)
@@ -451,19 +449,21 @@ def process_table(
     if verbose:
         logger.info(f'Grid: {len(h_lines)-1} rows × {len(v_lines)-1} columns')
     
-    # learn columns
+    # pelajari struktur kolom
     if verbose:
         logger.info('[4/6] Learning column structure...')
     header_groups = detect_header_rows(detections)
     columns = learn_column_structure(header_groups, v_lines)
-    header_y_max = (
-        max(g['y_center'] for g in header_groups) + table_settings.header_y_margin 
-        if header_groups else table_settings.header_y_threshold
+    header_y_max = calculate_header_y_max(
+        header_groups=header_groups,
+        sorted_h_lines=h_lines,
+        ocr_results=detections,
+        image_height=image.shape[0]
     )
     if verbose:
         logger.info(f'Learned {len(columns)} columns')
     
-    # build table
+    # bikin struktur tabel
     if verbose:
         logger.info('[5/6] Mapping to table...')
     rows = []
@@ -474,9 +474,9 @@ def process_table(
         
         row_cells = {}
         for col_idx in range(len(columns)):
-            cell = {} # no cell mapping needed here, just build the row
+            # gak perlu mapping cell di sini, cuma bikin struktur baris
             row_cells[col_idx] = {
-                'text': '', # will be filled by template validation
+                'text': '',  # nanti diisi sama template validation
                 'confidence': 0.0
             }
         
@@ -487,17 +487,17 @@ def process_table(
             'cells': row_cells
         })
     
-    # post-process with template validation
+    # post-processing dengan validasi template
     if verbose:
         logger.info('[6/6] Post-processing with template validation...')
     for row in rows:
         for col_idx, cell in row['cells'].items():
-            # use template-based validation for BLOK III accuracy
+            # pakai validasi berbasis template untuk akurasi BLOK III
             cell['text_final'] = validate_and_correct_by_template(cell['text'], col_idx)
     if verbose:
         logger.info('Complete')
     
-    # prepare results
+    # siapkan hasil
     total_time = time.time() - start_time
     results = {
         'metadata': {
@@ -523,7 +523,7 @@ def process_table(
             }
         results['data'].append(row_data)
     
-    # save if requested
+    # simpan kalau diminta
     if output_path:
         with open(output_path, 'w', encoding='utf-8') as f:
             json.dump(results, f, indent=2, ensure_ascii=False)
@@ -538,7 +538,7 @@ def process_table(
 
 
 # ============================================================================
-# CLI INTERFACE
+# INTERFACE CLI (Command Line)
 # ============================================================================
 
 if __name__ == '__main__':

@@ -142,7 +142,7 @@ lab-untuk-ocr/
 │   ├── utils/                       # Utility functions
 │   └── models/                      # Data models
 │
-├── 📂 contoh gambar/                ✅ Sample images
+├── 📂 examples/                    ✅ Sample images
 ├── 📂 data/                         ✅ Data directory
 ├── 📄 README.md                    ✅ Main documentation
 └── 📄 requirements.txt             ✅ Python dependencies
@@ -224,10 +224,10 @@ The system includes a beautiful HTML visualization:
 
 To test with your own images:
 
-1. Place image in `contoh gambar/` folder
+1. Place image in `examples/` folder
 2. Edit `pipeline/run_ocr.py`:
    ```python
-   image = load_image('../contoh gambar/YOUR_IMAGE.png')
+   image = load_image('../examples/YOUR_IMAGE.png')
    ```
 3. Run the pipeline:
    ```bash

@@ -165,7 +165,7 @@ def main():
     if len(sys.argv) > 1:
         test_image = sys.argv[1]
     else:
-        test_image = "contoh gambar/2.png"
+        test_image = "examples/2.png"
     
     if not Path(test_image).exists():
         print(f"❌ Image not found: {test_image}")

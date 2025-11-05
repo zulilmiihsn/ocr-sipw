@@ -1,6 +1,4 @@
-"""
-BLOK III Table Detection (Parallel Dual-Direction Scan)
-"""
+# BLOK III Table Detection (Parallel Dual-Direction Scan)
 
 import cv2
 import numpy as np
@@ -13,7 +11,7 @@ VERBOSE = os.getenv('OCR_VERBOSE', 'false').lower() == 'true'
 
 
 def _scan_top_for_rekapitulasi(image, search_region_top, width, search_height_top, pytesseract):
-    """Helper function to scan TOP region for 'Rekapitulasi' (runs in parallel)"""
+    # fungsi helper buat scan area ATAS cari 'Rekapitulasi' (jalan parallel)
     import time
     start = time.time()
     
@@ -86,7 +84,7 @@ def _scan_top_for_rekapitulasi(image, search_region_top, width, search_height_to
 
 
 def _scan_bottom_for_keterangan(image, search_region_bottom, width, height, search_height_bottom, pytesseract):
-    """Helper function to scan BOTTOM region for 'Keterangan' (runs in parallel)"""
+    # fungsi helper buat scan area BAWAH cari 'Keterangan' (jalan parallel)
     import time
     start = time.time()
     
@@ -166,20 +164,15 @@ def _scan_bottom_for_keterangan(image, search_region_bottom, width, height, sear
 
 
 def _fallback_ratio_detection(image: np.ndarray, height: int, width: int) -> Optional[Tuple[int, int, int, int]]:
-    """
-    Fallback: Ratio-based BLOK III detection
-    
-    Uses fixed proportional positioning based on typical document layout.
-    Robust for documents with consistent template but varying scales.
-    
-    Args:
-        image: Full document image
-        height: Image height
-        width: Image width
-        
-    Returns:
-        Tuple of (x, y, width, height) or None if invalid
-    """
+    # Fallback: Ratio-based BLOK III detection
+    # Uses fixed proportional positioning based on typical document layout.
+    # Robust for documents with consistent template but varying scales.
+    # Args:
+    #     image: Full document image
+    #     height: Image height
+    #     width: Image width
+    # Returns:
+    #     Tuple of (x, y, width, height) or None if invalid
     if VERBOSE:
         print(f"  📐 RATIO-BASED DETECTION:")
         print(f"    Document size: {width}x{height}px")
@@ -216,15 +209,11 @@ def _fallback_ratio_detection(image: np.ndarray, height: int, width: int) -> Opt
 
 
 def detect_table_region(image: np.ndarray) -> Optional[Tuple[int, int, int, int]]:
-    """
-    Detect BLOK III region using parallel dual-direction OCR scan
-    
-    Args:
-        image: Full document image
-        
-    Returns:
-        Tuple of (x, y, width, height) or None if not found
-    """
+    # Detect BLOK III region using parallel dual-direction OCR scan
+    # Args:
+    #     image: Full document image
+    # Returns:
+    #     Tuple of (x, y, width, height) or None if not found
     height, width = image.shape[:2]
     
     try:
@@ -317,15 +306,11 @@ def detect_table_region(image: np.ndarray) -> Optional[Tuple[int, int, int, int]
 
 
 def crop_table(image: np.ndarray, bbox: Tuple[int, int, int, int]) -> np.ndarray:
-    """
-    Crop table region from image
-    
-    Args:
-        image: Full image
-        bbox: Bounding box (x, y, width, height)
-        
-    Returns:
-        Cropped image
-    """
+    # crop region tabel dari image
+    # Args:
+    #     image: Full image
+    #     bbox: Bounding box (x, y, width, height)
+    # Returns:
+    #     Cropped image
     x, y, w, h = bbox
     return image[y:y+h, x:x+w]

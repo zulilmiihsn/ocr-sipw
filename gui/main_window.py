@@ -1,10 +1,11 @@
-"""
-Main Window for Lab-untuk-OCR GUI Application
-"""
+# main window aplikasi ocr
 
 import sys
 import json
 import time
+import cv2
+import re
+from collections import defaultdict
 from pathlib import Path
 
 from PyQt5.QtWidgets import (
@@ -17,44 +18,37 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import Qt, QThread, pyqtSignal, QEvent, QRect, QSize
 from PyQt5.QtGui import QColor, QFont, QPainter, QFontMetrics
 
-# Import QtAwesome for professional icons
 import qtawesome as qta
 
-# Add parent directory to path for pipeline imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from pipeline.lib.table_detector import detect_table_region, crop_table
 from pipeline.ocr_engine import (
-    run_full_document_ocr, detect_vertical_lines, detect_horizontal_lines,
-    detect_header_rows, learn_column_structure, build_table,
+    run_full_document_ocr, detect_all_lines,
+    detect_header_rows, learn_column_structure,
     validate_and_correct_by_template
 )
 
 
 class OCRWorker(QThread):
-    """Background worker for OCR processing (supports multi-file/multi-page)"""
+    # worker untuk proses ocr di background, bisa handle banyak file
     
-    # Signals
-    progress = pyqtSignal(int, str)  # (percentage, stage_name)
-    finished = pyqtSignal(dict)  # OCR results (now includes 'pages' list)
-    error = pyqtSignal(str)  # Error message
+    progress = pyqtSignal(int, str)
+    finished = pyqtSignal(dict)
+    error = pyqtSignal(str)
     
     def __init__(self, file_paths):
         super().__init__()
-        # Accept both single file (string) or multiple files (list)
         self.file_paths = file_paths if isinstance(file_paths, list) else [file_paths]
         self.is_cancelled = False
     
     def run(self):
-        """Run OCR pipeline in background (supports multi-file/multi-page)"""
+        # jalankan proses ocr untuk semua file
         try:
             start_time = time.time()
-            
-            # Aggregate all results from all files/pages
             all_results = []
             total_files = len(self.file_paths)
             
-            # Process each file
             for file_idx, file_path in enumerate(self.file_paths):
                 if self.is_cancelled:
                     return
@@ -62,46 +56,35 @@ class OCRWorker(QThread):
                 file_num = file_idx + 1
                 file_name = Path(file_path).name
                 
-                # Stage 1: Load Image
                 self.progress.emit(
                     int(10 + (file_idx / total_files) * 5),
-                    f"[{file_num}/{total_files}] Loading {file_name}..."
+                    f"[{file_num}/{total_files}] Memuat {file_name}..."
                 )
                 
-                # Load image file
-                import cv2
                 image = cv2.imread(file_path)
                 if image is None:
-                    self.error.emit(f"Failed to load image: {file_name}")
+                    self.error.emit(f"Gagal memuat gambar: {file_name}")
                     continue
                 
                 if self.is_cancelled:
                     return
                 
-                # Process this image
                 page_results = self._process_single_image(
                     image, file_idx, 0, total_files, 1
                 )
                 
                 if page_results:
-                    # Add source info to each row
                     for row in page_results:
                         row['_source_file'] = file_name
                         row['_source_page'] = 1
-                    
-                    # Append to aggregated results
                     all_results.extend(page_results)
             
-            # All files/pages processed - emit results (no auto-sort)
             if not all_results:
-                self.error.emit("No data extracted from any file")
+                self.error.emit("Tidak ada data yang berhasil diekstrak dari file")
                 return
             
-            # Calculate total time
             total_time = time.time() - start_time
-            
-            # Emit aggregated results
-            self.progress.emit(100, "Complete!")
+            self.progress.emit(100, "Selesai!")
             self.finished.emit({
                 'table': all_results,
                 'metadata': {
@@ -112,80 +95,77 @@ class OCRWorker(QThread):
             })
             
         except Exception as e:
-            self.error.emit(f"OCR Error: {str(e)}")
+            self.error.emit(f"Terjadi kesalahan saat memproses OCR: {str(e)}")
     
     def _process_single_image(self, image, file_idx, page_idx, total_files, total_pages):
-        """Process a single image/page and return table rows"""
+        # proses satu gambar dan kembalikan data tabel
         try:
-            # Stage 2: Detect BLOK III
             progress_base = 20 + (file_idx / total_files) * 60
-            self.progress.emit(int(progress_base), "Detecting BLOK III region...")
+            self.progress.emit(int(progress_base), "Mendeteksi region BLOK III...")
             if self.is_cancelled:
                 return
             bbox = detect_table_region(image)
             if bbox is None:
-                self.error.emit("Failed to detect BLOK III table region")
+                self.error.emit("Gagal mendeteksi region tabel BLOK III")
                 return
             cropped = crop_table(image, bbox)
             
-            # Stage 3: OCR Scan (Full Document)
-            self.progress.emit(30, "Stage 3/6: Performing OCR scan...")
+            self.progress.emit(30, "Melakukan pemindaian OCR...")
             if self.is_cancelled:
                 return
             ocr_results = run_full_document_ocr(cropped)
             
-            # Stage 4: Detect Lines
-            self.progress.emit(70, "Stage 4/6: Detecting table structure...")
+            self.progress.emit(70, "Mendeteksi struktur tabel...")
             if self.is_cancelled:
                 return
-            all_h_lines = detect_horizontal_lines(cropped)
-            vertical_lines = detect_vertical_lines(cropped)
+            all_h_lines, vertical_lines = detect_all_lines(cropped)
             
-            # Improved smart row detection using Y-clustering from OCR
+            # deteksi baris yg lebih pintar pakai pengelompokan Y dari hasil OCR
             image_height = cropped.shape[0]
             
-            # ADAPTIVE TOLERANCE: Scale with image size for robustness
+            # toleransi menyesuaikan ukuran gambar biar lebih robust
             adaptive_tolerance = max(10, int(image_height * 0.015))  # 1.5% of image height, min 10px
             
-            # FIXED: Use H-lines (horizontal lines) for header detection (more reliable!)
-            # Problem: OCR-based header detection was too low (229px), causing row 1 data to be skipped
-            # Solution: Use actual table structure (H-lines) - use LAST line in header region
-            lines = sorted(all_h_lines)
+            # perbaikan: pakai garis horizontal (H-lines) buat deteksi header, lebih akurat
+            # masalah: deteksi header pakai OCR terlalu rendah (229px), jadi baris 1 kelewatan
+            # solusi: pakai struktur tabel asli (H-lines), ambil garis TERAKHIR di area header
+            # optimasi: urutkan sekali terus dipake ulang
+            sorted_h_lines = sorted(all_h_lines)
             
-            # Find header separator: LAST H-line in upper region (this separates header from data)
+            # cari pemisah header: garis H TERAKHIR di area atas (ini yang pisahkan header sama data)
             # H-lines in top 30%: [10, 25, 43, 189, 204] → We want 204 (last one = header separator)
-            header_candidates = [y for y in lines if y < image_height * 0.30]  # Search in top 30%
+            header_candidates = [y for y in sorted_h_lines if y < image_height * 0.30]  # cari di 30% area atas
             
             if len(header_candidates) >= 1:
-                # Use the LAST line in header region (this is the header separator)
-                header_y_max = header_candidates[-1]  # LAST one, not [1]!
+                # pakai garis TERAKHIR di area header (ini pemisah header)
+                header_y_max = header_candidates[-1]  # yang TERAKHIR, bukan [1]!
             else:
-                # Fallback: use OCR-based detection
+                # kalau ga ketemu, pakai deteksi berbasis OCR
                 header_y_max = 0
                 for det in ocr_results:
                     y_center = (det['y_min'] + det['y_max']) / 2
                     if y_center < image_height * 0.25:
                         header_y_max = max(header_y_max, det['y_max'])
                 
-                # Add safety margin to avoid cutting data rows
+                # tambahin margin buat jaga-jaga biar data ga ke-potong
                 if header_y_max > 0:
                     header_y_max += 20  # 20px safety buffer
             
-            # Collect Y-centers of data detections (below header)
+            # kumpulin pusat Y dari deteksi data (di bawah header)
             data_y_centers = []
             for det in ocr_results:
                 y_center = (det['y_min'] + det['y_max']) / 2
-                if y_center > header_y_max + 10:  # Below header with margin
+                if y_center > header_y_max + 10:  # di bawah header dengan margin
                     data_y_centers.append(y_center)
             
             if len(data_y_centers) > 0:
-                # Cluster Y positions into rows
+                # kelompokin posisi Y jadi baris-baris
                 data_y_centers = sorted(data_y_centers)
                 
-                # Group detections that are close together (same row)
+                # kelompokin deteksi yang berdekatan (baris yang sama)
                 row_groups = []
                 current_group = [data_y_centers[0]]
-                tolerance = adaptive_tolerance  # ADAPTIVE tolerance based on image size
+                tolerance = adaptive_tolerance  # toleransi menyesuaikan ukuran gambar
                 
                 for y in data_y_centers[1:]:
                     if y - current_group[-1] <= tolerance:
@@ -195,46 +175,44 @@ class OCRWorker(QThread):
                         current_group = [y]
                 row_groups.append(current_group)
                 
-                # Get average Y for each row group
+                # ambil rata-rata Y untuk tiap kelompok baris
                 row_y_positions = [sum(group) / len(group) for group in row_groups]
                 
-                # Force exactly 10 rows by merging or splitting
+                # paksakan jadi pas 10 baris dengan gabungin atau pisahin
                 if len(row_y_positions) > 10:
-                    # Too many rows, keep first 10
+                    # barisnya kebanyakan, ambil 10 yang pertama aja
                     row_y_positions = row_y_positions[:10]
                 elif len(row_y_positions) < 10:
-                    # Too few rows, interpolate missing ones
+                    # barisnya kurang, tambahin yang hilang dengan interpolasi
                     if len(row_y_positions) >= 2:
                         start_y = row_y_positions[0]
                         end_y = row_y_positions[-1]
                         step = (end_y - start_y) / 9
                         row_y_positions = [start_y + i * step for i in range(10)]
                 
-                # Create horizontal lines from row positions
-                h_lines = [int(header_y_max + 10)]  # Start line
+                # bikin garis horizontal dari posisi baris
+                h_lines = [int(header_y_max + 10)]  # garis awal
                 for y in row_y_positions:
                     h_lines.append(int(y))
                 
-                # Add end line
-                lines = sorted(all_h_lines)
-                bottom_line = max(lines) if lines else image_height
+                # tambahin garis akhir
+                bottom_line = max(sorted_h_lines) if sorted_h_lines else image_height
                 h_lines.append(int(bottom_line))
                 
-                # Remove duplicates and sort
+                # hapus duplikat terus urutkan
                 h_lines = sorted(list(set(h_lines)))
                 
-                # Ensure exactly 11 lines for 10 rows
+                # pastikan pas 11 garis buat 10 baris
                 if len(h_lines) > 11:
-                    # Keep first and last, interpolate middle
+                    # simpan yang pertama sama terakhir, interpolasi yang tengah
                     start = h_lines[0]
                     end = h_lines[-1]
                     step = (end - start) / 10
                     h_lines = [int(start + i * step) for i in range(11)]
             else:
-                # Fallback: equal division
-                lines = sorted(all_h_lines)
+                # kalau ga bisa, bagi rata aja
                 data_region_start = header_y_max + 10
-                data_region_end = max(lines) if lines else image_height
+                data_region_end = max(sorted_h_lines) if sorted_h_lines else image_height
                 data_height = data_region_end - data_region_start
                 row_height = data_height / 10
                 
@@ -255,13 +233,38 @@ class OCRWorker(QThread):
             if self.is_cancelled:
                 return
             
-            # Build table with center-based detection mapping
-            from collections import defaultdict
+            # bikin tabel dengan mapping deteksi berbasis pusat
             cells = defaultdict(lambda: {'detections': []})
             
-            # ADVANCED CELL MAPPING with IoU + Fuzzy Logic
+            # optimasi: hitung konstanta di luar loop biar lebih cepat
+            NUMERIC_COLS = frozenset([1, 2] + list(range(4, 11)) + [12, 15, 16])  # Kode SLS, Sub, BTT..Total, Shift, Muatan Dominan, Perubahan
+            MANDATORY_NUMERIC_COLS = [1, 2, 15]  # Kode SLS, Sub-SLS, Muatan Dominan
+            NUMERIC_RANGE = list(range(4, 11))
+            
+            # Pre-compile regex patterns (DRY - avoid re-compiling in loop)
+            PHONE_PATTERN = re.compile(r'(08\d{8,11}|\+62\d{9,12})')
+            
+            # fungsi helper (pindahkan ke luar loop biar lebih efisien)
+            def _only_digits(text: str) -> bool:
+                # cek apakah text cuma berisi angka
+                return text.isdigit()
+            
+            def _digits_len(text: str, n: int) -> bool:
+                # cek apakah text pas n digit
+                return text.isdigit() and len(text) == n
+            
+            def _looks_rt_rw(text: str) -> bool:
+                # cek apakah text keliatan kayak format RT/RW
+                t = text.upper()
+                return ('RT' in t) and ('RW' in t)
+            
+            def _clean_text(text: str) -> str:
+                # bersihkan text dengan hapus spasi dan separator umum
+                return text.replace(' ', '').replace('-', '').replace('(', '').replace(')', '')
+            
+            # mapping cell tingkat lanjut pakai IoU + fuzzy logic
             def calculate_iou(box1, box2):
-                """Calculate Intersection over Union"""
+                # hitung Intersection over Union (IoU)
                 x1_min, y1_min, x1_max, y1_max = box1
                 x2_min, y2_min, x2_max, y2_max = box2
                 
@@ -284,25 +287,48 @@ class OCRWorker(QThread):
                 return inter_area / union_area if union_area > 0 else 0.0
             
             def compute_rule_prior(text_value: str, column_index: int) -> float:
-                """Small prior boost based on expected column content (0.0 - 0.15)."""
+                # boost prioritas kecil berdasarkan konten kolom yang diharapkan (0.0 - 0.25).
                 if not text_value:
                     return 0.0
-                t = str(text_value).strip().upper()
-                is_digits = t.replace(' ', '').isdigit()
-                has_rt = 'RT' in t
-                has_rw = 'RW' in t
+                t = str(text_value).strip()
+                t_clean = _clean_text(t)  # pakai fungsi helper biar ga duplikat
+                t_upper = t.upper()
+                is_digits = t_clean.isdigit()
+                has_rt = 'RT' in t_upper
+                has_rw = 'RW' in t_upper
+                
+                # khusus: prioritas kuat untuk kolom 15 (Contact Person - Phone/Email)
+                if column_index == 15:
+                    # Phone pattern: 08xxx (10-13 digits) or +62xxx
+                    phone_match = PHONE_PATTERN.match(t_clean)  # pakai pattern yg udah dikompilasi
+                    # Email pattern: contains @ or starts with /
+                    has_email = '@' in t or t.startswith('/')
+                    # Combined phone+email pattern
+                    if phone_match or has_email:
+                        return 0.25  # Very strong prior
+                    # kalau cuma angka tapi keliatan kayak nomor telepon (10-13 digit)
+                    if is_digits and 10 <= len(t_clean) <= 13:
+                        return 0.20
+                    return 0.0
+                
+                # khusus: prioritas sangat kuat untuk kolom 16 (Muatan Dominan - digit tunggal 1-9)
+                if column_index == 16:
+                    # Must be exactly single digit 1-9
+                    if len(t_clean) == 1 and t_clean.isdigit() and t_clean in '123456789':
+                        return 0.30  # Strongest prior
+                    # Penalize if it's phone number (long digits)
+                    if is_digits and len(t_clean) >= 10:
+                        return -0.20  # Negative prior (penalty)
+                    return 0.0
+                
                 # Column groups
-                numeric_cols = set([1, 2] + list(range(4, 11)) + [12, 15, 16])  # Kode SLS, Sub, BTT..Total, Shift, Muatan Dominan, Perubahan
                 if column_index == 3:  # RT/RW
                     if has_rt and has_rw:
                         return 0.15
                     if has_rt or has_rw:
                         return 0.10
                     return 0.0
-                if column_index in numeric_cols:
-                    # Stronger prior for Muatan Dominan (col 15)
-                    if column_index == 15:
-                        return 0.15 if is_digits else 0.0
+                if column_index in NUMERIC_COLS:
                     return 0.12 if is_digits else 0.0
                 if column_index == 11:  # Nama Wilayah (texty)
                     return 0.08 if not is_digits else 0.0
@@ -310,84 +336,161 @@ class OCRWorker(QThread):
                 return 0.0
 
             def fuzzy_score(det, cell_box, confidence, column_index: int):
-                """Calculate fuzzy logic score for cell assignment (with rule prior)."""
+                # hitung skor fuzzy logic buat assignment cell (dengan prioritas aturan).
                 det_box = (det['x_min'], det['y_min'], det['x_max'], det['y_max'])
                 cell_x_min, cell_y_min, cell_x_max, cell_y_max = cell_box
                 
-                # 1. Center position match (30% - REDUCED from 50%)
                 det_center_x = (det['x_min'] + det['x_max']) / 2
                 det_center_y = (det['y_min'] + det['y_max']) / 2
                 
-                in_x = cell_x_min <= det_center_x < cell_x_max
-                in_y = cell_y_min <= det_center_y < cell_y_max
-                center_score = 1.0 if (in_x and in_y) else 0.0
-                
-                # 2. IoU overlap (40% - INCREASED from 25%)
-                iou = calculate_iou(det_box, cell_box)
-                
-                # 3. Distance to cell center (20% - INCREASED from 15%)
+                # Pre-calculate cell dimensions once (DRY)
+                cell_width = cell_x_max - cell_x_min
+                cell_height = cell_y_max - cell_y_min
                 cell_center_x = (cell_x_min + cell_x_max) / 2
                 cell_center_y = (cell_y_min + cell_y_max) / 2
                 
+                # robust: pencocokan posisi pusat dengan pengecekan batas ketat
+                # buat kolom 15-16, pakai pencocokan pusat yang KETAT (bobot lebih tinggi)
+                in_x = cell_x_min <= det_center_x < cell_x_max
+                in_y = cell_y_min <= det_center_y < cell_y_max
+                
+                # khusus: buat kolom 15-16, posisi pusat itu PENTING banget
+                if column_index in (15, 16):
+                    # kalau pusat ada di dalam cell, kasih skor sangat tinggi
+                    if in_x and in_y:
+                        center_score = 1.0
+                    # kalau pusat di luar tapi dekat, kasih skor sebagian berdasarkan jarak
+                    elif in_y:  # Same row
+                        # hitung seberapa jauh pusat dari batas cell
+                        if det_center_x < cell_x_min:
+                            # Left of cell
+                            dist = cell_x_min - det_center_x
+                            center_score = max(0.0, 1.0 - (dist / cell_width) * 2)  # Penalize quickly
+                        else:  # Right of cell
+                            dist = det_center_x - cell_x_max
+                            center_score = max(0.0, 1.0 - (dist / cell_width) * 2)
+                    else:
+                        center_score = 0.0
+                    # kasih bobot lebih tinggi untuk posisi pusat di kolom penting
+                    center_weight = 0.50  # 50% weight for center position
+                else:
+                    center_score = 1.0 if (in_x and in_y) else 0.0
+                    center_weight = 0.30  # 30% for other columns
+                
+                # 2. IoU overlap
+                iou = calculate_iou(det_box, cell_box)
+                
+                # 3. Distance to cell center
                 distance = ((det_center_x - cell_center_x)**2 + (det_center_y - cell_center_y)**2)**0.5
-                cell_width = cell_x_max - cell_x_min
-                cell_height = cell_y_max - cell_y_min
                 max_distance = ((cell_width/2)**2 + (cell_height/2)**2)**0.5
                 
                 distance_score = 1.0 - min(distance / max_distance, 1.0) if max_distance > 0 else 0.0
                 
-                # 4. Confidence weight (10%)
+                # 4. Confidence weight
                 conf_score = confidence
                 
-                # OPTIMIZED: Weighted combination (More flexible for narrow columns)
-                # Reduced center_score weight to handle cases where detection center
-                # is slightly outside cell boundary (common in narrow columns like Col 0)
-                total_score = (
-                    center_score * 0.30 +    # REDUCED from 50% to 30%
-                    iou * 0.40 +             # INCREASED from 25% to 40%
-                    distance_score * 0.20 +  # INCREASED from 15% to 20%
-                    conf_score * 0.10        # Kept at 10%
-                )
-                # Rule prior (bias towards expected column content)
-                total_score += compute_rule_prior(det.get('text', ''), column_index)
+                # robust: kombinasi berbobot dengan bobot yang disesuaikan untuk kolom penting
+                if column_index in (15, 16):
+                    total_score = (
+                        center_score * center_weight +  # 50% for center position
+                        iou * 0.25 +                    # 25% for IoU
+                        distance_score * 0.15 +         # 15% for distance
+                        conf_score * 0.10               # 10% for confidence
+                    )
+                else:
+                    total_score = (
+                        center_score * center_weight +  # 30% for center position
+                        iou * 0.40 +                    # 40% for IoU
+                        distance_score * 0.20 +         # 20% for distance
+                        conf_score * 0.10               # 10% for confidence
+                    )
+                
+                # Rule prior (bias towards expected column content) - now with stronger impact
+                rule_prior = compute_rule_prior(det.get('text', ''), column_index)
+                total_score += rule_prior
                 
                 return total_score
             
-            # Calculate adaptive row tolerance for cell mapping
+            # hitung toleransi baris yg menyesuaikan buat mapping cell
             if len(h_lines) > 1:
                 avg_row_height = (h_lines[-1] - h_lines[0]) / max(len(h_lines) - 1, 1)
                 adaptive_row_tolerance = max(8, int(avg_row_height * 0.25))  # 25% of row height, min 8px
             else:
                 adaptive_row_tolerance = 10
             
-            # OPTIMIZATION: Spatial Indexing for Cell Mapping (99.4% fewer checks!)
-            # Build spatial index for fast row/column lookup
+            # optimasi: spatial indexing buat mapping cell (99.4% lebih sedikit pengecekan!)
+            # bikin spatial index buat pencarian baris/kolom yang cepat
             row_ranges = [(h_lines[i], h_lines[i+1], i) for i in range(len(h_lines)-1)]
             col_ranges = [(col['x_left'], col['x_right'], idx) for idx, col in enumerate(column_structure)]
             
-            # Map detections to cells using OPTIMIZED spatial indexing
+            # Map detections to cells using ROBUST X-position-first strategy
             for det in ocr_results:
-                y_center = (det['y_min'] + det['y_max']) / 2
-                x_center = (det['x_min'] + det['x_max']) / 2
+                det_center_x = (det['x_min'] + det['x_max']) / 2
+                det_center_y = (det['y_min'] + det['y_max']) / 2
                 
-                # Skip headers
-                if y_center <= header_y_max:
+                # skip header
+                if det_center_y <= header_y_max:
                     continue
                 
-                # OPTIMIZATION: Pre-filter candidate rows (instead of checking all rows)
+                # optimasi: saring dulu kandidat baris (daripada cek semua baris)
                 candidate_rows = []
                 for y_min, y_max, idx in row_ranges:
-                    if y_min - adaptive_row_tolerance <= y_center <= y_max + adaptive_row_tolerance:
+                    if y_min - adaptive_row_tolerance <= det_center_y <= y_max + adaptive_row_tolerance:
                         candidate_rows.append(idx)
                 
-                # OPTIMIZATION: Pre-filter candidate columns (instead of checking all columns)
+                # robust: strategi mapping dua tahap
+                # pass 1: pencocokan posisi X yang KETAT (kalau pusat X jelas di kolom, langsung assign)
+                # pass 2: fuzzy matching buat kasus yang ambigu
+                # catatan: det_center_x sama det_center_y udah dihitung di atas
+                
+                # cari kolom pakai posisi X yang KETAT dulu (ini yang paling penting!)
+                matched_col_by_x = -1
+                for col_idx, col in enumerate(column_structure):
+                    col_x_min = col['x_left']
+                    col_x_max = col['x_right']
+                    
+                    # STRICT: If X center is clearly within column boundaries, this is THE column
+                    if col_x_min <= det_center_x < col_x_max:
+                        matched_col_by_x = col_idx
+                        break  # Found exact match, no need to check others
+                
+                # kalau nemu pencocokan X yang tepat, langsung pakai (ABAIKAN posisi Y untuk keputusan mapping)
+                if matched_col_by_x >= 0:
+                    # cari baris terbaik buat kolom ini
+                    best_row = -1
+                    best_score = 0.0
+                    
+                    for row_idx in candidate_rows:
+                        row_y_min = h_lines[row_idx]
+                        row_y_max = h_lines[row_idx + 1]
+                        
+                        # cek apakah pusat Y ada di baris ini (dengan toleransi)
+                        if row_y_min - adaptive_row_tolerance <= det_center_y <= row_y_max + adaptive_row_tolerance:
+                            col_x_min = column_structure[matched_col_by_x]['x_left']
+                            col_x_max = column_structure[matched_col_by_x]['x_right']
+                            cell_box = (col_x_min, row_y_min, col_x_max, row_y_max)
+                            
+                            # hitung skor (tapi posisi X udah cocok, jadi ini mostly buat pilih baris)
+                            score = fuzzy_score(det, cell_box, det['confidence'], matched_col_by_x)
+                            
+                            if score > best_score:
+                                best_score = score
+                                best_row = row_idx
+                    
+                    # kalau nemu baris, langsung assign
+                    if best_row >= 0:
+                        cells[(best_row, matched_col_by_x)]['detections'].append(det)
+                        continue  # skip ke deteksi berikutnya
+                
+                # pass 2: kalau ga nemu pencocokan X yang tepat, pakai fuzzy matching (buat kasus edge)
+                # optimasi: saring dulu kandidat kolom (daripada cek semua kolom)
                 candidate_cols = []
                 for x_min, x_max, idx in col_ranges:
-                    # Check if detection overlaps with column
+                    # cek apakah deteksi tumpang tindih sama kolom
                     if not (det['x_max'] < x_min or det['x_min'] > x_max):
                         candidate_cols.append(idx)
                 
-                # Find best matching cell among CANDIDATES ONLY (typically 1-2 cells instead of 170!)
+                # cari cell yang paling cocok di antara KANDIDAT SAJA
                 best_score = 0.0
                 best_row = -1
                 best_col = -1
@@ -402,7 +505,7 @@ class OCRWorker(QThread):
                         
                         cell_box = (col_x_min, row_y_min, col_x_max, row_y_max)
                         
-                        # Calculate fuzzy score (with rule prior)
+                        # hitung skor fuzzy (dengan prioritas aturan)
                         score = fuzzy_score(det, cell_box, det['confidence'], col_idx)
                         
                         # LOWERED threshold from 0.4 to 0.12 for narrow columns
@@ -427,19 +530,18 @@ class OCRWorker(QThread):
                     cell['confidence'] = sum(d['confidence'] for d in dets) / len(dets)
             
             # SECONDARY PASS: Fill mandatory numeric columns if empty using overlap+prior
-            mandatory_numeric_cols = [1, 2, 15]  # Kode SLS, Sub-SLS, Muatan Dominan
             for row_idx in range(len(h_lines) - 1):
                 y_center = (h_lines[row_idx] + h_lines[row_idx + 1]) / 2
                 if y_center <= header_y_max:
                     continue
                 row_y_min = h_lines[row_idx]
                 row_y_max = h_lines[row_idx + 1]
-                for col_idx in mandatory_numeric_cols:
+                for col_idx in MANDATORY_NUMERIC_COLS:
                     key = (row_idx, col_idx)
                     cur = cells.get(key, {})
                     if cur.get('text'):
                         continue  # already filled
-                    # Search best detection overlapping this cell
+                    # cari deteksi terbaik yang tumpang tindih sama cell ini
                     col_x_min = column_structure[col_idx]['x_left']
                     col_x_max = column_structure[col_idx]['x_right']
                     cell_box = (col_x_min, row_y_min, col_x_max, row_y_max)
@@ -455,11 +557,12 @@ class OCRWorker(QThread):
                         # quick x filter (allow small margin ±8px to catch near-boundary values)
                         if det['x_max'] < (col_x_min - 8) or det['x_min'] > (col_x_max + 8):
                             continue
-                        # compute simple score: IoU heavy + rule prior
+                        # hitung skor sederhana: IoU dengan bobot besar + prioritas aturan
                         iou = calculate_iou((det['x_min'], det['y_min'], det['x_max'], det['y_max']), cell_box)
                         if iou <= 0.01:
                             continue
                         prior = compute_rule_prior(det.get('text', ''), col_idx)
+                        # hitung pusat (pake ulang det_center_x/y dari loop luar kalau ada)
                         det_center_x = (det['x_min'] + det['x_max']) / 2
                         det_center_y = (det['y_min'] + det['y_max']) / 2
                         cell_cx = (col_x_min + col_x_max) / 2
@@ -471,7 +574,7 @@ class OCRWorker(QThread):
                         dist_score = 1.0 - min(dist / max_d, 1.0)
                         # Prefer numeric-looking text for mandatory numeric columns
                         txt = str(det.get('text', '')).strip()
-                        is_digits = txt.replace(' ', '').isdigit()
+                        is_digits = _clean_text(txt).isdigit()  # Use helper function (DRY)
                         digits_bonus = 0.06 if is_digits else 0.0
                         score = iou * 0.6 + dist_score * 0.28 + prior * 0.4 + digits_bonus
                         if score > best_score:
@@ -482,21 +585,9 @@ class OCRWorker(QThread):
                         cells[key]['text'] = best_det['text']
                         cells[key]['confidence'] = best_det['confidence']
 
-            # HELPER: validators for per-row pattern
-            def _only_digits(text: str) -> bool:
-                return text.isdigit()
-
-            def _digits_len(text: str, n: int) -> bool:
-                return text.isdigit() and len(text) == n
-
-            def _looks_rt_rw(text: str) -> bool:
-                t = text.upper()
-                return ('RT' in t) and ('RW' in t)
-
             # TERTIARY PASS: Per-row pattern validation and small-swap
             # Expected pattern (0-indexed):
             # 1: 4 digits, 2: 2 digits, 3: RT/RW, 4-10: digits, 11: text, 12: digits, 15: digits, 16: {1,2}
-            numeric_range = list(range(4, 11))
             for row_idx in range(len(h_lines) - 1):
                 y_center = (h_lines[row_idx] + h_lines[row_idx + 1]) / 2
                 if y_center <= header_y_max:
@@ -517,62 +608,169 @@ class OCRWorker(QThread):
 
                 # Enforce col 1 = 4 digits
                 t1 = row_texts.get(1, '')
-                if not _digits_len(t1.replace(' ', ''), 4):
-                    # Try pull from neighbor col 0 or 2
+                if not _digits_len(_clean_text(t1), 4):
+                    # coba ambil dari kolom tetangga 0 atau 2
                     t0 = row_texts.get(0, '')
                     t2 = row_texts.get(2, '')
-                    if _digits_len(t0.replace(' ', ''), 4):
+                    if _digits_len(_clean_text(t0), 4):
                         _try_swap(1, 0)
-                    elif _digits_len(t2.replace(' ', ''), 4):
+                    elif _digits_len(_clean_text(t2), 4):
                         _try_swap(1, 2)
 
                 # Enforce col 2 = 2 digits
                 t2 = row_texts.get(2, '')
-                if not _digits_len(t2.replace(' ', ''), 2):
+                if not _digits_len(_clean_text(t2), 2):
                     t1 = row_texts.get(1, '')
                     t3 = row_texts.get(3, '')
-                    if _digits_len(t1.replace(' ', ''), 2):
+                    if _digits_len(_clean_text(t1), 2):
                         _try_swap(2, 1)
-                    elif _digits_len(t3.replace(' ', ''), 2):
+                    elif _digits_len(_clean_text(t3), 2):
                         _try_swap(2, 3)
 
                 # Enforce col 3 RT/RW
                 t3 = row_texts.get(3, '')
                 if not _looks_rt_rw(t3):
-                    # Try pull from neighbors 2 or 4 if they look like RT/RW
+                    # coba ambil dari tetangga 2 atau 4 kalau keliatan kayak RT/RW
                     if _looks_rt_rw(row_texts.get(2, '')):
                         _try_swap(3, 2)
                     elif _looks_rt_rw(row_texts.get(4, '')):
                         _try_swap(3, 4)
 
                 # Enforce numeric columns 4-10
-                for c in numeric_range:
+                for c in NUMERIC_RANGE:
                     tc = row_texts.get(c, '')
-                    if tc and not _only_digits(tc.replace(' ', '')):
-                        # If neighbor has digits and this cell not, swap toward digits
-                        if _only_digits(row_texts.get(c-1, '').replace(' ', '')):
+                    if tc and not _only_digits(_clean_text(tc)):
+                        # kalau tetangga punya angka tapi cell ini ga punya, tukar ke yang ada angka
+                        if _only_digits(_clean_text(row_texts.get(c-1, ''))):
                             _try_swap(c, c-1)
-                        elif _only_digits(row_texts.get(c+1, '').replace(' ', '')):
+                        elif _only_digits(_clean_text(row_texts.get(c+1, ''))):
                             _try_swap(c, c+1)
 
                 # Enforce Muatan Dominan (15) numeric
                 t15 = row_texts.get(15, '')
-                if not _only_digits(t15.replace(' ', '')):
-                    if _only_digits(row_texts.get(14, '').replace(' ', '')):
+                if not _only_digits(_clean_text(t15)):
+                    if _only_digits(_clean_text(row_texts.get(14, ''))):
                         _try_swap(15, 14)
-                    elif _only_digits(row_texts.get(16, '').replace(' ', '')):
+                    elif _only_digits(_clean_text(row_texts.get(16, ''))):
                         _try_swap(15, 16)
 
                 # Enforce Perubahan Batas (16) in {1,2}
                 t16 = row_texts.get(16, '')
                 if t16 not in ('1', '2'):
-                    # If neighbor equals '1' or '2', swap
+                    # kalau tetangga sama dengan '1' atau '2', tukar
                     if row_texts.get(15, '') in ('1', '2'):
                         _try_swap(16, 15)
                     elif row_texts.get(14, '') in ('1', '2'):
                         _try_swap(16, 14)
+                
+                # perbaikan robust: handle mapping kolom 15 (Contact Person) dan 16 (Muatan Dominan)
+                # masalah: nomor telepon kadang ke-mapping ke kolom 16 padahal harusnya kolom 15
+                # solusi: koreksi agresif berbasis pattern dengan validasi ketat
+                t15_current = row_texts.get(15, '').strip()
+                t16_current = row_texts.get(16, '').strip()
+                
+                # robust: cek semua skenario yang mungkin
+                # Scenario 1: Col 16 is entirely a phone number (10-13 digits) - MUST move to col 15
+                if t16_current:
+                    t16_clean = _clean_text(t16_current)  # Use helper function (DRY)
+                    
+                    # cek apakah kolom 16 cocok sama pattern telepon pas
+                    if PHONE_PATTERN.match(t16_clean):
+                        # Entire col 16 is phone - MUST move to col 15
+                        if t15_current:
+                            new_t15 = f"{t16_current} {t15_current}"
+                        else:
+                            new_t15 = t16_current
+                        
+                        cell_15 = cells.get((row_idx, 15), {})
+                        cell_15['text'] = new_t15
+                        cells[(row_idx, 15)] = cell_15
+                        
+                        # bersihkan kolom 16
+                        cell_16 = cells.get((row_idx, 16), {})
+                        cell_16['text'] = ''
+                        cell_16['detections'] = []
+                        cells[(row_idx, 16)] = cell_16
+                        continue  # Move to next validation
+                    
+                    # cek apakah kolom 16 cuma angka panjang (10-13) - kemungkinan telepon
+                    if t16_clean.isdigit() and 10 <= len(t16_clean) <= 13:
+                        # This is definitely a phone number, not Muatan Dominan
+                        if t15_current:
+                            new_t15 = f"{t16_current} {t15_current}"
+                        else:
+                            new_t15 = t16_current
+                        
+                        cell_15 = cells.get((row_idx, 15), {})
+                        cell_15['text'] = new_t15
+                        cells[(row_idx, 15)] = cell_15
+                        
+                        cell_16 = cells.get((row_idx, 16), {})
+                        cell_16['text'] = ''
+                        cell_16['detections'] = []
+                        cells[(row_idx, 16)] = cell_16
+                        continue
+                    
+                    # Scenario 2: Col 16 contains phone + digit (e.g., "08234567893")
+                    phone_match = PHONE_PATTERN.search(t16_clean)
+                    if phone_match:
+                        phone_text = phone_match.group(1)
+                        remaining = t16_clean.replace(phone_text, '').strip()
+                        
+                        # kalau sisa cuma 1 digit, itu Muatan Dominan
+                        if remaining and len(remaining) == 1 and remaining.isdigit():
+                            if t15_current:
+                                new_t15 = f"{phone_text} {t15_current}"
+                            else:
+                                new_t15 = phone_text
+                            
+                            cell_15 = cells.get((row_idx, 15), {})
+                            cell_15['text'] = new_t15
+                            cells[(row_idx, 15)] = cell_15
+                            
+                            cell_16 = cells.get((row_idx, 16), {})
+                            cell_16['text'] = remaining
+                            cells[(row_idx, 16)] = cell_16
+                            continue
+                        
+                        # kalau telepon 11+ digit, digit terakhir mungkin Muatan Dominan
+                        if len(phone_text) >= 11:
+                            phone_base = phone_text[:-1]
+                            muatan_digit = phone_text[-1]
+                            
+                            if t15_current:
+                                new_t15 = f"{phone_base} {t15_current}"
+                            else:
+                                new_t15 = phone_base
+                            
+                            cell_15 = cells.get((row_idx, 15), {})
+                            cell_15['text'] = new_t15
+                            cells[(row_idx, 15)] = cell_15
+                            
+                            cell_16 = cells.get((row_idx, 16), {})
+                            cell_16['text'] = muatan_digit
+                            cells[(row_idx, 16)] = cell_16
+                            continue
+                
+                # Scenario 3: Col 15 has phone + digit concatenated
+                if t15_current and len(t15_current) > 11:
+                    t15_clean = _clean_text(t15_current)  # Use helper function (DRY)
+                    if t15_clean[-1].isdigit() and not t16_current:
+                        rest = t15_clean[:-1]
+                        if PHONE_PATTERN.match(rest):
+                            # Preserve formatting
+                            phone_part = t15_current.rstrip('0123456789').strip()
+                            last_digit = t15_clean[-1]
+                            
+                            cell_15 = cells.get((row_idx, 15), {})
+                            cell_15['text'] = phone_part
+                            cells[(row_idx, 15)] = cell_15
+                            
+                            cell_16 = cells.get((row_idx, 16), {})
+                            cell_16['text'] = last_digit
+                            cells[(row_idx, 16)] = cell_16
 
-            # Create rows structure
+            # bikin struktur baris
             table_data = []
             for row_idx in range(len(h_lines) - 1):
                 y_center = (h_lines[row_idx] + h_lines[row_idx + 1]) / 2
@@ -600,48 +798,40 @@ class OCRWorker(QThread):
                     'cells': row_cells
                 })
             
-            # Return table data for this image/page
             return table_data
             
         except Exception as e:
-            print(f"Error processing image: {str(e)}")
-            return []  # Return empty list on error
+            print(f"kesalahan saat memproses gambar: {str(e)}")
+            return []
     
     def cancel(self):
-        """Cancel the operation"""
+        # batalkan proses
         self.is_cancelled = True
 
 
 class HeaderDelegate(QStyledItemDelegate):
-    """Custom delegate for table headers with word wrap support"""
+    # delegate untuk header tabel dengan word wrap
     
     def paint(self, painter, option, index):
-        """Paint header with word wrapping"""
+        # gambar header dengan word wrapping
         painter.save()
         
-        # Get text
-        text = index.data(Qt.DisplayRole)
-        if not text:
-            text = ""
+        text = index.data(Qt.DisplayRole) or ""
         
-        # Setup font
         font = QFont()
         font.setPointSize(8)
         font.setBold(True)
         painter.setFont(font)
         
-        # Draw background
         if option.state & QStyle.State_MouseOver:
             painter.fillRect(option.rect, QColor("#F1F5F9"))
         else:
             painter.fillRect(option.rect, QColor("#F8FAFC"))
         
-        # Draw border
         painter.setPen(QColor("#E2E8F0"))
         painter.drawLine(option.rect.topRight(), option.rect.bottomRight())
         painter.drawLine(option.rect.bottomLeft(), option.rect.bottomRight())
         
-        # Draw text with word wrap
         painter.setPen(QColor("#475569"))
         text_rect = option.rect.adjusted(8, 4, -8, -4)
         painter.drawText(
@@ -653,7 +843,7 @@ class HeaderDelegate(QStyledItemDelegate):
         painter.restore()
     
     def sizeHint(self, option, index):
-        """Calculate size hint for wrapped text"""
+        # hitung ukuran untuk text yg di-wrap
         text = index.data(Qt.DisplayRole)
         if not text:
             return QSize(100, 50)
@@ -673,32 +863,31 @@ class HeaderDelegate(QStyledItemDelegate):
 
 
 class CellDelegate(QStyledItemDelegate):
-    """Custom delegate for table cells - handles Enter key and sizing"""
+    # delegate untuk cell tabel, handle enter key untuk navigasi
     
     def createEditor(self, parent, option, index):
-        """Create editor that fills the entire cell"""
+        # buat editor untuk cell
         editor = QLineEdit(parent)
-        editor.setFrame(False)  # Remove border
+        editor.setFrame(False)
         return editor
     
     def setEditorData(self, editor, index):
-        """Set initial data in editor"""
+        # set data awal di editor
         value = index.model().data(index, Qt.EditRole)
         editor.setText(str(value) if value else "")
     
     def setModelData(self, editor, model, index):
-        """Save data from editor to model"""
+        # simpan data dari editor ke model
         model.setData(index, editor.text(), Qt.EditRole)
     
     def updateEditorGeometry(self, editor, option, index):
-        """Make editor fill entire cell"""
+        # atur ukuran editor sesuai cell
         editor.setGeometry(option.rect)
     
     def eventFilter(self, editor, event):
-        """Handle Enter key to commit and move to next cell"""
+        # handle enter key untuk commit dan pindah ke cell berikutnya
         if event.type() == QEvent.KeyPress:
             if event.key() in (Qt.Key_Return, Qt.Key_Enter):
-                # Commit the data
                 self.commitData.emit(editor)
                 self.closeEditor.emit(editor, QStyledItemDelegate.NoHint)
                 return True
@@ -706,7 +895,7 @@ class CellDelegate(QStyledItemDelegate):
 
 
 class CustomTableWidget(QTableWidget):
-    """Custom table widget with enhanced navigation and floating row controls"""
+    # table widget dengan navigasi keyboard dan kontrol row
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -718,7 +907,7 @@ class CustomTableWidget(QTableWidget):
         self.add_row_floating_btn = None
         self.remove_row_floating_btn = None
         
-        # Enable mouse tracking for vertical header
+        # aktifkan tracking mouse untuk header vertikal
         self.verticalHeader().setMouseTracking(True)
         self.verticalHeader().viewport().setMouseTracking(True)
         
@@ -726,10 +915,10 @@ class CustomTableWidget(QTableWidget):
         self.verticalHeader().viewport().installEventFilter(self)
     
     def eventFilter(self, obj, event):
-        """Handle vertical header hover events"""
+        # handle event hover header vertikal
         if obj == self.verticalHeader().viewport():
             if event.type() == event.MouseMove:
-                # Get row from mouse position
+                # ambil baris dari posisi mouse
                 pos = event.pos()
                 row = self.verticalHeader().logicalIndexAt(pos)
                 
@@ -741,23 +930,18 @@ class CustomTableWidget(QTableWidget):
                     self.hide_floating_buttons()
             
             elif event.type() == event.Leave:
-                # Hide buttons when mouse leaves vertical header
+                # sembunyikan tombol ketika mouse keluar dari header vertikal
                 self.hide_floating_buttons()
         
         return super().eventFilter(obj, event)
     
     def show_floating_buttons(self, row):
-        """Show floating buttons for the hovered row"""
+        # tampilkan tombol floating untuk baris yang di-hover
         if self.add_row_floating_btn and self.remove_row_floating_btn:
-            # Calculate button position
             header_rect = self.verticalHeader().sectionViewportPosition(row)
             header_height = self.verticalHeader().sectionSize(row)
-            
-            # Position buttons on the left side of vertical header
             x = 2
             y = header_rect + (header_height - 24) // 2
-            
-            # Show and position buttons
             self.add_row_floating_btn.setParent(self.verticalHeader().viewport())
             self.remove_row_floating_btn.setParent(self.verticalHeader().viewport())
             
@@ -768,7 +952,7 @@ class CustomTableWidget(QTableWidget):
             self.remove_row_floating_btn.show()
     
     def hide_floating_buttons(self):
-        """Hide floating buttons"""
+        # sembunyikan floating buttons
         self.hovered_row = -1
         if self.add_row_floating_btn:
             self.add_row_floating_btn.hide()
@@ -776,18 +960,15 @@ class CustomTableWidget(QTableWidget):
             self.remove_row_floating_btn.hide()
     
     def keyPressEvent(self, event):
-        """Override key press for smart navigation"""
+        # handle keyboard untuk navigasi cell
         current_row = self.currentRow()
         current_col = self.currentColumn()
         is_editing = self.state() == QTableWidget.EditingState
         
-        # Handle Enter key - commit and move to next cell
         if event.key() in (Qt.Key_Return, Qt.Key_Enter):
             if is_editing:
-                # Close editor (delegate will commit data)
                 self.closeEditor(self.itemDelegate().createEditor(self, None, self.model().index(current_row, current_col)), QStyledItemDelegate.NoHint)
             
-            # Move to next cell
             total_cols = self.columnCount()
             total_rows = self.rowCount()
             
@@ -801,7 +982,6 @@ class CustomTableWidget(QTableWidget):
             event.accept()
             return
         
-        # Arrow key navigation
         elif event.key() == Qt.Key_Up and not is_editing:
             total_rows = self.rowCount()
             new_row = current_row - 1 if current_row > 0 else total_rows - 1
@@ -816,43 +996,42 @@ class CustomTableWidget(QTableWidget):
             event.accept()
             return
         
-        # Default behavior for other keys
         super().keyPressEvent(event)
 
 
 class MainWindow(QMainWindow):
-    """Main application window"""
+    # window utama aplikasi
     
     def __init__(self):
         super().__init__()
         self.current_file = None
         self.ocr_results = None
         self.ocr_worker = None
-        self.edited_cells = {}  # Track edited cells
+        self.edited_cells = {}
         
         self.init_ui()
     
     def _get_icon(self, name: str, **kwargs):
-        """Get icon from QtAwesome"""
+        # ambil icon dari qtawesome
         return qta.icon(name, **kwargs)
     
     def load_stylesheet(self):
-        """Load modern QSS stylesheet"""
+        # load stylesheet jika ada
         style_path = Path(__file__).parent / 'styles.qss'
         if style_path.exists():
             with open(style_path, 'r', encoding='utf-8') as f:
                 self.setStyleSheet(f.read())
     
     def init_ui(self):
-        """Initialize the user interface"""
-        self.setWindowTitle("OCR SiPW")
+        # setup tampilan ui
+        self.setWindowTitle("OCR Sistem Informasi Pencatat Wilayah")
         self.setMinimumSize(1280, 800)
         self.setWindowIcon(self._get_icon('fa5s.table', color='#2563EB'))
         
-        # Load QSS stylesheet
+        # muat stylesheet QSS
         self.load_stylesheet()
         
-        # Create central widget (no menu bar for clean interface)
+        # bikin widget utama (ga pakai menu bar biar interface lebih bersih)
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
         
@@ -875,7 +1054,7 @@ class MainWindow(QMainWindow):
         self.progress_bar.setTextVisible(True)
         main_layout.addWidget(self.progress_bar)
         
-        # Export button
+        # tombol ekspor
         export_btn = QPushButton(" Ekspor Hasil")
         export_btn.setIcon(self._get_icon('fa5s.file-export', color='white'))
         export_btn.setObjectName("exportButton")
@@ -892,7 +1071,7 @@ class MainWindow(QMainWindow):
     
     
     def create_file_selection_group(self):
-        """Create file selection UI group with interactive file list"""
+        # buat grup UI pilihan file dengan daftar file interaktif
         group = QGroupBox("Pilih File & Proses")
         layout = QVBoxLayout()
         
@@ -941,45 +1120,45 @@ class MainWindow(QMainWindow):
                 color: #1E293B;
             }
         """)
-        self.file_list.setVisible(False)  # Hidden until files selected
+        self.file_list.setVisible(False)  # disembunyikan sampai file dipilih
         layout.addWidget(self.file_list)
         
         # Bottom row: Action buttons
         bottom_row = QHBoxLayout()
         bottom_row.setSpacing(16)
         
-        # Start OCR button
+        # tombol mulai ocr
         self.start_btn = QPushButton(" Mulai OCR")
         self.start_btn.setIcon(self._get_icon('fa5s.play', color='white'))
         self.start_btn.setObjectName("start_btn")
         self.start_btn.clicked.connect(self.start_ocr)
-        self.start_btn.setEnabled(False)  # Disabled until file selected
+        self.start_btn.setEnabled(False)  # dinonaktifkan sampai file dipilih
         self.start_btn.setMinimumWidth(140)
         self.start_btn.setMinimumHeight(44)
         bottom_row.addWidget(self.start_btn)
         
-        # Sort button
+        # sort button
         self.sort_btn = QPushButton(" Urutkan")
         self.sort_btn.setIcon(self._get_icon('fa5s.sort-amount-down', color='#2563EB'))
         self.sort_btn.setObjectName("sort_btn")
         self.sort_btn.clicked.connect(self.sort_table)
-        self.sort_btn.setEnabled(False)  # Disabled until OCR done
+        self.sort_btn.setEnabled(False)  # dinonaktifkan sampai OCR selesai
         self.sort_btn.setMinimumWidth(140)
         self.sort_btn.setMinimumHeight(44)
         self.sort_btn.setToolTip("Urutkan tabel berdasarkan Kode SLS (↑) dan Sub-SLS (↓)")
         bottom_row.addWidget(self.sort_btn)
         
-        # Reset button
+        # reset button
         self.reset_btn = QPushButton(" Reset")
         self.reset_btn.setIcon(self._get_icon('fa5s.redo', color='#64748B'))
         self.reset_btn.setObjectName("reset_btn")
         self.reset_btn.clicked.connect(self.reset_all)
-        self.reset_btn.setEnabled(False)  # Disabled initially
+        self.reset_btn.setEnabled(False)  # dinonaktifkan awalnya
         self.reset_btn.setMinimumWidth(140)
         self.reset_btn.setMinimumHeight(44)
         bottom_row.addWidget(self.reset_btn)
         
-        bottom_row.addStretch()  # Push buttons to the left
+        bottom_row.addStretch()  # push buttons ke kiri
         
         layout.addLayout(bottom_row)
         
@@ -987,20 +1166,20 @@ class MainWindow(QMainWindow):
         return group
     
     def create_table_group(self):
-        """Create table UI group"""
+        # buat grup UI tabel
         group = QGroupBox("Hasil Ekstraksi Tabel")
         layout = QVBoxLayout()
         
-        # Create custom table widget with arrow key navigation and floating controls
+        # bikin widget tabel kustom dengan navigasi tombol panah dan kontrol mengambang
         self.table = CustomTableWidget()
         self.table.parent_window = self
         self.table.setColumnCount(16)
         self.table.setRowCount(10)
         
-        # Set custom delegate for better cell editing
+        # set delegate kustom buat editing cell yang lebih baik
         self.table.setItemDelegate(CellDelegate())
         
-        # Set headers (column names) - WITH manual line breaks for better fit
+        # set header (nama kolom) - dengan line break manual biar lebih pas
         headers = [
             "Kode\nSLS/Non-SLS",
             "Kode\nSub-SLS",
@@ -1025,24 +1204,24 @@ class MainWindow(QMainWindow):
         header_delegate = HeaderDelegate(self.table)
         self.table.horizontalHeader().setItemDelegate(header_delegate)
         
-        # Set vertical headers (row numbers 1-10) - auto-generated
+        # set header vertikal (nomor baris 1-10) - auto-generated
         for i in range(10):
             self.table.setVerticalHeaderItem(i, QTableWidgetItem(str(i + 1)))
         
-        # Set vertical header (row numbers) width - COMPACT
+        # set lebar header vertikal (nomor baris) - kompak
         self.table.verticalHeader().setFixedWidth(40)
         
         # Configure horizontal header for responsive behavior
         header = self.table.horizontalHeader()
         
-        # Set resize mode: Stretch to fill window width proportionally
+        # set mode resize: rentangkan biar mengisi lebar window secara proporsional
         header.setSectionResizeMode(QHeaderView.Interactive)
         header.setStretchLastSection(True)
         
         # Enable text wrapping in headers for long labels
         header.setDefaultAlignment(Qt.AlignLeft | Qt.AlignVCenter)
         
-        # Set minimum column widths (responsive)
+        # set lebar kolom minimum (responsif)
         min_widths = [
             70,   # Kode SLS/Non-SLS
             65,   # Kode Sub-SLS
@@ -1071,13 +1250,13 @@ class MainWindow(QMainWindow):
             QTableWidget.CurrentChanged |  # Single-click to edit
             QTableWidget.SelectedClicked |  # Click on selected cell
             QTableWidget.EditKeyPressed |   # Any key press
-            QTableWidget.AnyKeyPressed      # Start typing immediately
+            QTableWidget.AnyKeyPressed      # mulai ketik langsung
         )
         self.table.itemChanged.connect(self.on_cell_edited)
         
         # Navigation handled by CustomTableWidget.keyPressEvent
         
-        # Create floating buttons for row control (hidden by default)
+        # bikin tombol mengambang buat kontrol baris (disembunyikan secara default)
         self.create_floating_row_buttons()
         
         layout.addWidget(self.table)
@@ -1086,8 +1265,8 @@ class MainWindow(QMainWindow):
         return group
     
     def create_floating_row_buttons(self):
-        """Create floating add/remove buttons for table rows"""
-        # Add button (tiny, floating)
+        # buat tombol floating tambah/hapus untuk baris tabel
+        # tombol tambah (kecil, mengambang)
         add_btn = QPushButton()
         add_btn.setIcon(self._get_icon('fa5s.plus', color='#10B981', scale_factor=0.6))
         add_btn.setToolTip("Tambah baris di bawah")
@@ -1109,7 +1288,7 @@ class MainWindow(QMainWindow):
     
     
     def browse_file(self):
-        """Open file browser dialog (supports multi-select images only)"""
+        # buka dialog browser file (support multi-select gambar saja)
         file_paths, _ = QFileDialog.getOpenFileNames(
             self,
             "Pilih File Gambar (Multi-select untuk batch)",
@@ -1137,7 +1316,7 @@ class MainWindow(QMainWindow):
             self.reset_btn.setEnabled(True)
     
     def populate_file_list(self, file_paths):
-        """Populate file list with icons and names"""
+        # isi daftar file dengan icon dan nama
         self.file_list.clear()
         
         for file_path in file_paths:
@@ -1161,7 +1340,7 @@ class MainWindow(QMainWindow):
             self.file_list.addItem(item)
     
     def get_ordered_file_paths(self):
-        """Get file paths in current list order (after drag & drop)"""
+        # ambil path file sesuai urutan di list (setelah drag & drop)
         file_paths = []
         for i in range(self.file_list.count()):
             item = self.file_list.item(i)
@@ -1171,7 +1350,7 @@ class MainWindow(QMainWindow):
     
     
     def start_ocr(self):
-        """Start OCR processing (supports multi-file/multi-page)"""
+        # mulai proses OCR (support multi-file/multi-page)
         if not hasattr(self, 'current_files') or not self.current_files:
             return
         
@@ -1201,13 +1380,13 @@ class MainWindow(QMainWindow):
         self.update_status("Memproses...")
     
     def on_progress(self, percentage: int, stage: str):
-        """Update progress bar"""
+        # update progress bar
         self.progress_bar.setValue(percentage)
         self.progress_bar.setFormat(f"{percentage}% - {stage}")
         self.update_status(stage)
     
     def on_ocr_finished(self, results: dict):
-        """Handle OCR completion"""
+        # handle penyelesaian OCR
         self.ocr_results = results
         
         # Hide progress bar
@@ -1231,7 +1410,7 @@ class MainWindow(QMainWindow):
         
         # Show success message
         num_files = metadata.get('num_files', 1)
-        file_text = f"{num_files} file" if num_files > 1 else "1 file"
+        file_text = f"{num_files} berkas" if num_files > 1 else "1 berkas"
         
         QMessageBox.information(
             self,
@@ -1239,13 +1418,13 @@ class MainWindow(QMainWindow):
             f"Berhasil mengekstrak {metadata['num_rows']} baris dari {file_text}!\n\n"
             f"Waktu proses: {metadata['total_time']:.1f} detik\n\n"
             "Data sudah diurutkan otomatis:\n"
-            "• Kode SLS (ascending)\n"
-            "• Kode Sub-SLS (descending)\n\n"
+            "• Kode SLS (naik)\n"
+            "• Kode Sub-SLS (turun)\n\n"
             "Anda dapat mengedit tabel dan mengekspor hasil."
         )
     
     def on_ocr_error(self, error_msg: str):
-        """Handle OCR error"""
+        # handle error OCR
         self.progress_bar.setVisible(False)
         
         # Re-enable Start button on error
@@ -1255,12 +1434,12 @@ class MainWindow(QMainWindow):
         
         QMessageBox.critical(
             self,
-            "Error OCR",
+            "Kesalahan OCR",
             f"Terjadi kesalahan saat memproses OCR:\n\n{error_msg}"
         )
     
     def populate_table(self, table_data):
-        """Populate table with OCR results (supports multi-page, dynamic row count)"""
+        # isi tabel dengan hasil OCR (support multi-page, jumlah baris dinamis)
         # Block signals to avoid triggering itemChanged
         self.table.blockSignals(True)
         
@@ -1305,7 +1484,7 @@ class MainWindow(QMainWindow):
         self.table.blockSignals(False)
     
     def on_cell_edited(self, item: QTableWidgetItem):
-        """Track edited cells"""
+        # track cell yang sudah diedit
         row = item.row()
         col = item.column()
         self.edited_cells[(row, col)] = item.text()
@@ -1314,10 +1493,10 @@ class MainWindow(QMainWindow):
         item.setBackground(QColor(220, 220, 255))  # Light blue
         
         # Update status
-        self.update_status(f"Edited cell ({row+1}, {col+1}) | Total edits: {len(self.edited_cells)}")
+        self.update_status(f"Sel diedit ({row+1}, {col+1}) | Total edit: {len(self.edited_cells)}")
     
     def add_row_at_hover(self):
-        """Add a new row below the hovered row"""
+        # tambah baris baru di bawah baris yang di-hover
         hovered_row = self.table.hovered_row
         if hovered_row < 0:
             return
@@ -1346,7 +1525,7 @@ class MainWindow(QMainWindow):
         self.table.hide_floating_buttons()
     
     def remove_row_at_hover(self):
-        """Remove the hovered row (instant, no confirmation)"""
+        # hapus baris yang di-hover (langsung, tanpa konfirmasi)
         hovered_row = self.table.hovered_row
         if hovered_row < 0:
             return
@@ -1365,7 +1544,7 @@ class MainWindow(QMainWindow):
         self.update_status(f"✓ Baris {hovered_row + 1} dihapus (Total: {self.table.rowCount()} baris)")
     
     def sort_table(self):
-        """Sort table by Kode SLS (ASC) and Sub-SLS (DESC)"""
+        # urutkan tabel berdasarkan Kode SLS (ASC) dan Sub-SLS (DESC)
         # Block signals to prevent triggering itemChanged during sorting
         self.table.blockSignals(True)
         
@@ -1417,13 +1596,13 @@ class MainWindow(QMainWindow):
         self.update_status("✓ Tabel diurutkan otomatis (Kode SLS ↑, Sub-SLS ↓)")
     
     def enable_export_buttons(self, enabled: bool):
-        """Enable or disable export button"""
+        # enable atau disable tombol ekspor
         self.export_button.setEnabled(enabled)
     
     def export_results(self):
-        """Export OCR results with format selection dialog"""
+        # ekspor hasil OCR dengan dialog pilihan format
         if not self.ocr_results:
-            QMessageBox.warning(self, "No Data", "Please run OCR first before exporting.")
+            QMessageBox.warning(self, "Tidak Ada Data", "Silakan jalankan OCR terlebih dahulu sebelum mengekspor.")
             return
         
         # Format selection dialog
@@ -1475,11 +1654,12 @@ class MainWindow(QMainWindow):
             ext = "html"
         
         # File dialog for saving
+        format_label = "Excel" if format_name == "excel" else "CSV" if format_name == "csv" else "JSON"
         file_path, _ = QFileDialog.getSaveFileName(
             self,
-            f"Export {format_name.upper()} Results",
+            f"Ekspor Hasil {format_label}",
             str(Path.home() / f"blok3_results.{ext}"),
-            f"{format_name.upper()} Files (*.{ext});;All Files (*.*)"
+            f"File {format_label} (*.{ext});;Semua File (*.*)"
         )
         
         if not file_path:
@@ -1499,10 +1679,10 @@ class MainWindow(QMainWindow):
             QMessageBox.information(self, "Ekspor Berhasil", f"Hasil diekspor ke:\n{file_path}")
             
         except Exception as e:
-            QMessageBox.critical(self, "Error Ekspor", f"Gagal mengekspor:\n{str(e)}")
+            QMessageBox.critical(self, "Kesalahan Ekspor", f"Gagal mengekspor:\n{str(e)}")
     
     def export_to_excel(self, file_path: str):
-        """Export to Excel with formatting (includes No column)"""
+        # ekspor ke Excel dengan formatting (termasuk kolom No)
         from openpyxl import Workbook
         from openpyxl.styles import PatternFill, Font, Alignment
         
@@ -1523,10 +1703,10 @@ class MainWindow(QMainWindow):
         # Write data (dynamic row count)
         num_rows = self.table.rowCount()
         for row in range(num_rows):
-            # Write row number (No column)
+            # tulis nomor baris (kolom No)
             ws.cell(row + 2, 1, row + 1)
             
-            # Write remaining columns
+            # tulis kolom sisanya
             for col in range(16):
                 item = self.table.item(row, col)
                 if item:
@@ -1535,44 +1715,44 @@ class MainWindow(QMainWindow):
         wb.save(file_path)
     
     def export_to_csv(self, file_path: str):
-        """Export to CSV (includes No column)"""
+        # ekspor ke CSV (termasuk kolom No)
         import csv
         
         with open(file_path, 'w', newline='', encoding='utf-8') as f:
             writer = csv.writer(f)
             
-            # Headers - prepend "No"
+            # header - tambahkan "No" di depan
             headers = ["No"] + [self.table.horizontalHeaderItem(i).text() for i in range(16)]
             writer.writerow(headers)
             
-            # Data (dynamic row count)
+            # data (jumlah baris dinamis)
             num_rows = self.table.rowCount()
             for row in range(num_rows):
-                row_data = [row + 1]  # Start with row number
+                row_data = [row + 1]  # mulai dengan nomor baris
                 for col in range(16):
                     item = self.table.item(row, col)
                     row_data.append(item.text() if item else '')
                 writer.writerow(row_data)
     
     def export_to_json(self, file_path: str):
-        """Export to JSON (includes No column)"""
+        # ekspor ke JSON (termasuk kolom No)
         data = {
             'metadata': self.ocr_results['metadata'],
             'table': []
         }
         
-        # Dynamic row count
+        # jumlah baris dinamis
         num_rows = self.table.rowCount()
         for row in range(num_rows):
             row_data = {'row_number': row + 1, 'cells': {}}
             
-            # Add "No" as column 0
+            # tambahkan "No" sebagai kolom 0
             row_data['cells'][0] = {
                 'text': str(row + 1),
                 'edited': False
             }
             
-            # Add remaining columns (shifted by 1)
+            # tambahkan kolom sisanya (digeser 1)
             for col in range(16):
                 item = self.table.item(row, col)
                 if item and item.text().strip():
@@ -1586,7 +1766,7 @@ class MainWindow(QMainWindow):
             json.dump(data, f, indent=2, ensure_ascii=False)
     
     def export_to_html(self, file_path: str):
-        """Export to HTML"""
+        # ekspor ke HTML
         html = """<!DOCTYPE html>
 <html>
 <head>
@@ -1625,9 +1805,9 @@ class MainWindow(QMainWindow):
         num_rows = self.table.rowCount()
         for row in range(num_rows):
             html += "        <tr>\n"
-            # Add row number
+            # tambahkan nomor baris
             html += f"            <td>{row + 1}</td>\n"
-            # Add remaining columns
+            # tambahkan kolom sisanya
             for col in range(16):
                 item = self.table.item(row, col)
                 text = item.text() if item else ''
@@ -1642,12 +1822,12 @@ class MainWindow(QMainWindow):
             f.write(html)
     
     def update_status(self, message: str):
-        """Update status bar"""
+        # update status bar
         self.status_bar.showMessage(message)
     
     def reset_all(self):
-        """Reset all data and UI to initial state"""
-        # Confirm reset
+        # reset semua data dan UI ke kondisi awal
+        # konfirmasi reset
         reply = QMessageBox.question(
             self,
             "Konfirmasi Reset",
@@ -1659,21 +1839,21 @@ class MainWindow(QMainWindow):
         if reply == QMessageBox.No:
             return
         
-        # Stop OCR worker if running
+        # hentikan worker OCR kalau masih jalan
         if self.ocr_worker and self.ocr_worker.isRunning():
             self.ocr_worker.cancel()
             self.ocr_worker.wait()
         
-        # Clear file selection
+        # bersihkan pilihan file
         self.current_files = []
         self.file_list.clear()
         self.file_list.setVisible(False)
         
-        # Clear OCR results
+        # bersihkan hasil OCR
         self.ocr_results = None
         self.edited_cells.clear()
         
-        # Clear table and reset to default 10 rows
+        # bersihkan tabel dan reset ke default 10 baris
         self.table.clearContents()
         self.table.setRowCount(10)
         for i in range(10):
@@ -1683,7 +1863,7 @@ class MainWindow(QMainWindow):
         self.progress_bar.setVisible(False)
         self.progress_bar.setValue(0)
         
-        # Disable buttons
+        # nonaktifkan tombol
         self.start_btn.setEnabled(False)
         self.sort_btn.setEnabled(False)
         self.reset_btn.setEnabled(False)
@@ -1700,7 +1880,7 @@ class MainWindow(QMainWindow):
     
     
     def closeEvent(self, event):
-        """Handle window close"""
+        # handle penutupan window
         if self.ocr_worker and self.ocr_worker.isRunning():
             reply = QMessageBox.question(
                 self,

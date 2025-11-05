@@ -1,3 +1,1 @@
-"""
-Pipeline utilities library
-"""
+# Pipeline utilities library

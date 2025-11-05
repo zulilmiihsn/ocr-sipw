@@ -9,10 +9,10 @@ from PyQt5.QtWidgets import (
     QFileDialog, QTableWidget, QTableWidgetItem, QLabel, QProgressBar,
     QStatusBar, QMessageBox, QHeaderView, QGroupBox,
     QStyledItemDelegate, QLineEdit, QListWidget, QListWidgetItem, QAbstractItemView,
-    QStyle, QSizePolicy
+    QStyle, QSizePolicy, QDialog
 )
 from PyQt5.QtCore import Qt, QEvent, QRect, QSize, QTimer
-from PyQt5.QtGui import QColor, QFont, QPainter, QFontMetrics
+from PyQt5.QtGui import QColor, QFont, QPainter, QFontMetrics, QLinearGradient, QPen
 
 import qtawesome as qta
 
@@ -362,7 +362,770 @@ class CustomTableWidget(QTableWidget):
     def sizeHint(self):
         # Untuk scrollable table, return size yang reasonable
         # Tabel akan expand sesuai parent container
-        return super().sizeHint()
+            return super().sizeHint()
+        
+
+class ResetConfirmDialog(QDialog):
+    # Modern Professional Reset Confirmation Dialog
+    
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Konfirmasi Reset")
+        self.setWindowFlags(Qt.Dialog | Qt.FramelessWindowHint)
+        self.setModal(True)
+        self.setFixedSize(520, 360)
+        self.result = False
+        
+        # Center dialog pada parent window (akan dipanggil setelah show)
+        self.parent_window = parent
+        
+        # Layout utama
+        main_layout = QVBoxLayout(self)
+        main_layout.setContentsMargins(0, 0, 0, 0)
+        main_layout.setSpacing(0)
+        
+        # Header dengan gradient
+        header = QWidget()
+        header.setFixedHeight(60)
+        header_layout = QHBoxLayout(header)
+        header_layout.setContentsMargins(24, 0, 24, 0)
+        header_layout.setSpacing(12)
+        
+        # Icon
+        icon_label = QLabel()
+        icon_label.setFixedSize(32, 32)
+        icon_pixmap = qta.icon('fa5s.exclamation-triangle', color='#F59E0B').pixmap(32, 32)
+        icon_label.setPixmap(icon_pixmap)
+        header_layout.addWidget(icon_label)
+        
+        # Title
+        title_label = QLabel("Konfirmasi Reset")
+        title_font = QFont("Segoe UI", 14, QFont.Bold)
+        title_label.setFont(title_font)
+        title_label.setStyleSheet("color: #0F172A;")
+        header_layout.addWidget(title_label)
+        header_layout.addStretch()
+        
+        # Close button
+        close_btn = QPushButton()
+        close_btn.setFixedSize(32, 32)
+        close_btn.setIcon(qta.icon('fa5s.times', color='#64748B'))
+        close_btn.setStyleSheet("""
+            QPushButton {
+                background-color: transparent;
+                border: none;
+                border-radius: 4px;
+            }
+            QPushButton:hover {
+                background-color: #F1F5F9;
+            }
+            QPushButton:pressed {
+                background-color: #E2E8F0;
+            }
+        """)
+        close_btn.clicked.connect(self.reject)
+        header_layout.addWidget(close_btn)
+        
+        header.setStyleSheet("""
+            QWidget {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                    stop:0 #F8FAFC, stop:1 #FFFFFF);
+                border-bottom: 1px solid #E2E8F0;
+            }
+        """)
+        
+        main_layout.addWidget(header)
+        
+        # Content area
+        content_widget = QWidget()
+        content_layout = QVBoxLayout(content_widget)
+        content_layout.setContentsMargins(32, 32, 32, 28)
+        content_layout.setSpacing(20)
+        
+        # Question text
+        question_label = QLabel("Apakah Anda yakin ingin mereset semua data?")
+        question_font = QFont("Segoe UI", 11, QFont.Medium)
+        question_label.setFont(question_font)
+        question_label.setStyleSheet("color: #1E293B;")
+        question_label.setWordWrap(True)
+        content_layout.addWidget(question_label)
+        
+        # Warning text
+        warning_label = QLabel("Tindakan ini akan menghapus:")
+        warning_font = QFont("Segoe UI", 9, QFont.Normal)
+        warning_label.setFont(warning_font)
+        warning_label.setStyleSheet("color: #64748B; margin-top: 8px;")
+        warning_label.setWordWrap(True)
+        content_layout.addWidget(warning_label)
+        
+        # Items list
+        items_widget = QWidget()
+        items_layout = QVBoxLayout(items_widget)
+        items_layout.setContentsMargins(20, 4, 0, 8)
+        items_layout.setSpacing(10)
+        
+        items = [
+            "File yang dipilih",
+            "Hasil ekstraksi OCR",
+            "Data tabel",
+            "Semua editan yang telah dilakukan"
+        ]
+        
+        for item in items:
+            item_label = QLabel(f"• {item}")
+            item_font = QFont("Segoe UI", 9, QFont.Normal)
+            item_label.setFont(item_font)
+            item_label.setStyleSheet("color: #475569;")
+            item_label.setWordWrap(True)
+            item_label.setMinimumHeight(22)
+            items_layout.addWidget(item_label)
+        
+        content_layout.addWidget(items_widget)
+        content_layout.addStretch()
+        
+        # Button area
+        button_layout = QHBoxLayout()
+        button_layout.setSpacing(12)
+        button_layout.addStretch()
+        
+        # Cancel button
+        cancel_btn = QPushButton("Batal")
+        cancel_btn.setFixedSize(100, 36)
+        cancel_btn.setFont(QFont("Segoe UI", 9, QFont.Medium))
+        cancel_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #FFFFFF;
+                color: #475569;
+                border: 1.5px solid #E2E8F0;
+                border-radius: 6px;
+            }
+            QPushButton:hover {
+                background-color: #F8FAFC;
+                border: 1.5px solid #2563EB;
+                color: #2563EB;
+            }
+            QPushButton:pressed {
+                background-color: #F1F5F9;
+                border: 1.5px solid #1D4ED8;
+            }
+        """)
+        cancel_btn.clicked.connect(self.reject)
+        button_layout.addWidget(cancel_btn)
+        
+        # Reset button (primary action)
+        reset_btn = QPushButton("Reset")
+        reset_btn.setFixedSize(100, 36)
+        reset_btn.setFont(QFont("Segoe UI", 9, QFont.Medium))
+        reset_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #DC2626;
+                color: #FFFFFF;
+                border: none;
+                border-radius: 6px;
+            }
+            QPushButton:hover {
+                background-color: #B91C1C;
+            }
+            QPushButton:pressed {
+                background-color: #991B1B;
+            }
+        """)
+        reset_btn.clicked.connect(self.accept)
+        button_layout.addWidget(reset_btn)
+        
+        content_layout.addLayout(button_layout)
+        
+        content_widget.setStyleSheet("background-color: #FFFFFF;")
+        main_layout.addWidget(content_widget)
+        
+        # Set overall dialog style
+        self.setStyleSheet("""
+            QDialog {
+                background-color: #FFFFFF;
+                border: 1px solid #E2E8F0;
+                border-radius: 8px;
+            }
+        """)
+    
+    def paintEvent(self, event):
+        # Custom paint untuk rounded corners dan shadow
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.Antialiasing)
+        
+        # Draw shadow
+        shadow_rect = QRect(2, 2, self.width() - 4, self.height() - 4)
+        painter.setPen(Qt.NoPen)
+        painter.setBrush(QColor(0, 0, 0, 15))
+        painter.drawRoundedRect(shadow_rect, 8, 8)
+        
+        # Draw main background
+        bg_rect = QRect(0, 0, self.width() - 2, self.height() - 2)
+        painter.setBrush(QColor("#FFFFFF"))
+        pen = QPen(QColor("#E2E8F0"))
+        pen.setWidth(1)
+        painter.setPen(pen)
+        painter.drawRoundedRect(bg_rect, 8, 8)
+        
+        super().paintEvent(event)
+    
+    def showEvent(self, event):
+        # Center dialog saat ditampilkan
+        if self.parent_window:
+            parent_rect = self.parent_window.geometry()
+            dialog_width = self.width()
+            dialog_height = self.height()
+            x = parent_rect.x() + (parent_rect.width() - dialog_width) // 2
+            y = parent_rect.y() + (parent_rect.height() - dialog_height) // 2
+            self.move(x, y)
+        super().showEvent(event)
+
+
+class ExportSuccessDialog(QDialog):
+    # Modern Professional Export Success Dialog
+    
+    def __init__(self, parent=None, file_path=None):
+        super().__init__(parent)
+        self.setWindowTitle("Ekspor Berhasil")
+        self.setWindowFlags(Qt.Dialog | Qt.FramelessWindowHint)
+        self.setModal(True)
+        self.setFixedSize(500, 280)
+        self.file_path = file_path or ""
+        
+        # Center dialog pada parent window
+        self.parent_window = parent
+        
+        # Layout utama
+        main_layout = QVBoxLayout(self)
+        main_layout.setContentsMargins(0, 0, 0, 0)
+        main_layout.setSpacing(0)
+        
+        # Header dengan gradient
+        header = QWidget()
+        header.setFixedHeight(60)
+        header_layout = QHBoxLayout(header)
+        header_layout.setContentsMargins(24, 0, 24, 0)
+        header_layout.setSpacing(12)
+        
+        # Icon
+        icon_label = QLabel()
+        icon_label.setFixedSize(32, 32)
+        icon_pixmap = qta.icon('fa5s.check-circle', color='#10B981').pixmap(32, 32)
+        icon_label.setPixmap(icon_pixmap)
+        header_layout.addWidget(icon_label)
+        
+        # Title
+        title_label = QLabel("Ekspor Berhasil")
+        title_font = QFont("Segoe UI", 14, QFont.Bold)
+        title_label.setFont(title_font)
+        title_label.setStyleSheet("color: #0F172A;")
+        header_layout.addWidget(title_label)
+        header_layout.addStretch()
+        
+        # Close button
+        close_btn = QPushButton()
+        close_btn.setFixedSize(32, 32)
+        close_btn.setIcon(qta.icon('fa5s.times', color='#64748B'))
+        close_btn.setStyleSheet("""
+            QPushButton {
+                background-color: transparent;
+                border: none;
+                border-radius: 4px;
+            }
+            QPushButton:hover {
+                background-color: #F1F5F9;
+            }
+            QPushButton:pressed {
+                background-color: #E2E8F0;
+            }
+        """)
+        close_btn.clicked.connect(self.accept)
+        header_layout.addWidget(close_btn)
+        
+        header.setStyleSheet("""
+            QWidget {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                    stop:0 #F8FAFC, stop:1 #FFFFFF);
+                border-bottom: 1px solid #E2E8F0;
+            }
+        """)
+        
+        main_layout.addWidget(header)
+        
+        # Content area
+        content_widget = QWidget()
+        content_layout = QVBoxLayout(content_widget)
+        content_layout.setContentsMargins(32, 32, 32, 24)
+        content_layout.setSpacing(20)
+        
+        # Success message
+        message_label = QLabel("Data berhasil diekspor ke file berikut:")
+        message_font = QFont("Segoe UI", 10, QFont.Normal)
+        message_label.setFont(message_font)
+        message_label.setStyleSheet("color: #475569;")
+        content_layout.addWidget(message_label)
+        
+        # File path display dengan background
+        file_widget = QWidget()
+        file_widget.setStyleSheet("""
+            QWidget {
+                background-color: #F8FAFC;
+                border: 1px solid #E2E8F0;
+                border-radius: 6px;
+            }
+        """)
+        file_layout = QVBoxLayout(file_widget)
+        file_layout.setContentsMargins(16, 12, 16, 12)
+        file_layout.setSpacing(4)
+        
+        # File name
+        file_name_label = QLabel(Path(self.file_path).name if self.file_path else "")
+        file_name_font = QFont("Segoe UI", 10, QFont.Medium)
+        file_name_label.setFont(file_name_font)
+        file_name_label.setStyleSheet("color: #1E293B;")
+        file_name_label.setWordWrap(True)
+        file_layout.addWidget(file_name_label)
+        
+        # File path (full path, smaller)
+        if self.file_path:
+            file_path_label = QLabel(str(self.file_path))
+            file_path_font = QFont("Segoe UI", 8, QFont.Normal)
+            file_path_label.setFont(file_path_font)
+            file_path_label.setStyleSheet("color: #64748B;")
+            file_path_label.setWordWrap(True)
+            file_layout.addWidget(file_path_label)
+        
+        content_layout.addWidget(file_widget)
+        content_layout.addStretch()
+        
+        # Button area
+        button_layout = QHBoxLayout()
+        button_layout.setSpacing(12)
+        button_layout.addStretch()
+        
+        # OK button (primary action)
+        ok_btn = QPushButton("Baik")
+        ok_btn.setFixedSize(100, 36)
+        ok_btn.setFont(QFont("Segoe UI", 9, QFont.Medium))
+        ok_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #2563EB;
+                color: #FFFFFF;
+                border: none;
+                border-radius: 6px;
+            }
+            QPushButton:hover {
+                background-color: #1D4ED8;
+            }
+            QPushButton:pressed {
+                background-color: #1E40AF;
+            }
+        """)
+        ok_btn.clicked.connect(self.accept)
+        button_layout.addWidget(ok_btn)
+        
+        content_layout.addLayout(button_layout)
+        
+        content_widget.setStyleSheet("background-color: #FFFFFF;")
+        main_layout.addWidget(content_widget)
+        
+        # Set overall dialog style
+        self.setStyleSheet("""
+            QDialog {
+                background-color: #FFFFFF;
+                border: 1px solid #E2E8F0;
+                border-radius: 8px;
+            }
+        """)
+    
+    def paintEvent(self, event):
+        # Custom paint untuk rounded corners dan shadow
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.Antialiasing)
+        
+        # Draw shadow
+        shadow_rect = QRect(2, 2, self.width() - 4, self.height() - 4)
+        painter.setPen(Qt.NoPen)
+        painter.setBrush(QColor(0, 0, 0, 15))
+        painter.drawRoundedRect(shadow_rect, 8, 8)
+        
+        # Draw main background
+        bg_rect = QRect(0, 0, self.width() - 2, self.height() - 2)
+        painter.setBrush(QColor("#FFFFFF"))
+        pen = QPen(QColor("#E2E8F0"))
+        pen.setWidth(1)
+        painter.setPen(pen)
+        painter.drawRoundedRect(bg_rect, 8, 8)
+        
+        super().paintEvent(event)
+    
+    def showEvent(self, event):
+        # Center dialog saat ditampilkan
+        if self.parent_window:
+            parent_rect = self.parent_window.geometry()
+            dialog_width = self.width()
+            dialog_height = self.height()
+            x = parent_rect.x() + (parent_rect.width() - dialog_width) // 2
+            y = parent_rect.y() + (parent_rect.height() - dialog_height) // 2
+            self.move(x, y)
+        super().showEvent(event)
+
+
+class ExportErrorDialog(QDialog):
+    # Modern Professional Export Error Dialog
+    
+    def __init__(self, parent=None, error_message=None):
+        super().__init__(parent)
+        self.setWindowTitle("Kesalahan Ekspor")
+        self.setWindowFlags(Qt.Dialog | Qt.FramelessWindowHint)
+        self.setModal(True)
+        self.setFixedSize(500, 280)
+        self.error_message = error_message or "Terjadi kesalahan saat mengekspor data."
+        
+        # Center dialog pada parent window
+        self.parent_window = parent
+        
+        # Layout utama
+        main_layout = QVBoxLayout(self)
+        main_layout.setContentsMargins(0, 0, 0, 0)
+        main_layout.setSpacing(0)
+        
+        # Header dengan gradient
+        header = QWidget()
+        header.setFixedHeight(60)
+        header_layout = QHBoxLayout(header)
+        header_layout.setContentsMargins(24, 0, 24, 0)
+        header_layout.setSpacing(12)
+        
+        # Icon
+        icon_label = QLabel()
+        icon_label.setFixedSize(32, 32)
+        icon_pixmap = qta.icon('fa5s.exclamation-circle', color='#EF4444').pixmap(32, 32)
+        icon_label.setPixmap(icon_pixmap)
+        header_layout.addWidget(icon_label)
+        
+        # Title
+        title_label = QLabel("Kesalahan Ekspor")
+        title_font = QFont("Segoe UI", 14, QFont.Bold)
+        title_label.setFont(title_font)
+        title_label.setStyleSheet("color: #0F172A;")
+        header_layout.addWidget(title_label)
+        header_layout.addStretch()
+        
+        # Close button
+        close_btn = QPushButton()
+        close_btn.setFixedSize(32, 32)
+        close_btn.setIcon(qta.icon('fa5s.times', color='#64748B'))
+        close_btn.setStyleSheet("""
+            QPushButton {
+                background-color: transparent;
+                border: none;
+                border-radius: 4px;
+            }
+            QPushButton:hover {
+                background-color: #F1F5F9;
+            }
+            QPushButton:pressed {
+                background-color: #E2E8F0;
+            }
+        """)
+        close_btn.clicked.connect(self.reject)
+        header_layout.addWidget(close_btn)
+        
+        header.setStyleSheet("""
+            QWidget {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                    stop:0 #F8FAFC, stop:1 #FFFFFF);
+                border-bottom: 1px solid #E2E8F0;
+            }
+        """)
+        
+        main_layout.addWidget(header)
+        
+        # Content area
+        content_widget = QWidget()
+        content_layout = QVBoxLayout(content_widget)
+        content_layout.setContentsMargins(32, 32, 32, 24)
+        content_layout.setSpacing(20)
+        
+        # Error message
+        message_label = QLabel("Gagal mengekspor data. Detail kesalahan:")
+        message_font = QFont("Segoe UI", 10, QFont.Normal)
+        message_label.setFont(message_font)
+        message_label.setStyleSheet("color: #475569;")
+        content_layout.addWidget(message_label)
+        
+        # Error details display dengan background
+        error_widget = QWidget()
+        error_widget.setStyleSheet("""
+            QWidget {
+                background-color: #FEF2F2;
+                border: 1px solid #FECACA;
+                border-radius: 6px;
+            }
+        """)
+        error_layout = QVBoxLayout(error_widget)
+        error_layout.setContentsMargins(16, 12, 16, 12)
+        error_layout.setSpacing(4)
+        
+        # Error message text
+        error_label = QLabel(self.error_message)
+        error_font = QFont("Segoe UI", 9, QFont.Normal)
+        error_label.setFont(error_font)
+        error_label.setStyleSheet("color: #991B1B;")
+        error_label.setWordWrap(True)
+        error_layout.addWidget(error_label)
+        
+        content_layout.addWidget(error_widget)
+        content_layout.addStretch()
+        
+        # Button area
+        button_layout = QHBoxLayout()
+        button_layout.setSpacing(12)
+        button_layout.addStretch()
+        
+        # OK button (primary action)
+        ok_btn = QPushButton("Baik")
+        ok_btn.setFixedSize(100, 36)
+        ok_btn.setFont(QFont("Segoe UI", 9, QFont.Medium))
+        ok_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #DC2626;
+                color: #FFFFFF;
+                border: none;
+                border-radius: 6px;
+            }
+            QPushButton:hover {
+                background-color: #B91C1C;
+            }
+            QPushButton:pressed {
+                background-color: #991B1B;
+            }
+        """)
+        ok_btn.clicked.connect(self.reject)
+        button_layout.addWidget(ok_btn)
+        
+        content_layout.addLayout(button_layout)
+        
+        content_widget.setStyleSheet("background-color: #FFFFFF;")
+        main_layout.addWidget(content_widget)
+        
+        # Set overall dialog style
+        self.setStyleSheet("""
+            QDialog {
+                background-color: #FFFFFF;
+                border: 1px solid #E2E8F0;
+                border-radius: 8px;
+            }
+        """)
+    
+    def paintEvent(self, event):
+        # Custom paint untuk rounded corners dan shadow
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.Antialiasing)
+        
+        # Draw shadow
+        shadow_rect = QRect(2, 2, self.width() - 4, self.height() - 4)
+        painter.setPen(Qt.NoPen)
+        painter.setBrush(QColor(0, 0, 0, 15))
+        painter.drawRoundedRect(shadow_rect, 8, 8)
+        
+        # Draw main background
+        bg_rect = QRect(0, 0, self.width() - 2, self.height() - 2)
+        painter.setBrush(QColor("#FFFFFF"))
+        pen = QPen(QColor("#E2E8F0"))
+        pen.setWidth(1)
+        painter.setPen(pen)
+        painter.drawRoundedRect(bg_rect, 8, 8)
+        
+        super().paintEvent(event)
+    
+    def showEvent(self, event):
+        # Center dialog saat ditampilkan
+        if self.parent_window:
+            parent_rect = self.parent_window.geometry()
+            dialog_width = self.width()
+            dialog_height = self.height()
+            x = parent_rect.x() + (parent_rect.width() - dialog_width) // 2
+            y = parent_rect.y() + (parent_rect.height() - dialog_height) // 2
+            self.move(x, y)
+        super().showEvent(event)
+
+
+class OCRCompleteDialog(QDialog):
+    # Modern Professional OCR Complete Dialog
+    
+    def __init__(self, parent=None, is_append_mode=False, num_rows=None, total_rows=None, 
+                 num_files=None, processing_time=None):
+        super().__init__(parent)
+        self.setWindowTitle("OCR Selesai")
+        self.setWindowFlags(Qt.Dialog | Qt.FramelessWindowHint)
+        self.setModal(True)
+        self.setFixedSize(480, 240)
+        
+        # Data
+        self.is_append_mode = is_append_mode
+        self.num_rows = num_rows or 0
+        self.total_rows = total_rows or 0
+        self.num_files = num_files or 1
+        self.processing_time = processing_time or 0.0
+        
+        # Center dialog pada parent window
+        self.parent_window = parent
+        
+        # Layout utama
+        main_layout = QVBoxLayout(self)
+        main_layout.setContentsMargins(0, 0, 0, 0)
+        main_layout.setSpacing(0)
+        
+        # Header dengan gradient
+        header = QWidget()
+        header.setFixedHeight(60)
+        header_layout = QHBoxLayout(header)
+        header_layout.setContentsMargins(24, 0, 24, 0)
+        header_layout.setSpacing(12)
+        
+        # Icon
+        icon_label = QLabel()
+        icon_label.setFixedSize(32, 32)
+        icon_pixmap = qta.icon('fa5s.check-circle', color='#10B981').pixmap(32, 32)
+        icon_label.setPixmap(icon_pixmap)
+        header_layout.addWidget(icon_label)
+        
+        # Title
+        title_label = QLabel("OCR Selesai")
+        title_font = QFont("Segoe UI", 14, QFont.Bold)
+        title_label.setFont(title_font)
+        title_label.setStyleSheet("color: #0F172A;")
+        header_layout.addWidget(title_label)
+        header_layout.addStretch()
+        
+        # Close button
+        close_btn = QPushButton()
+        close_btn.setFixedSize(32, 32)
+        close_btn.setIcon(qta.icon('fa5s.times', color='#64748B'))
+        close_btn.setStyleSheet("""
+            QPushButton {
+                background-color: transparent;
+                border: none;
+                border-radius: 4px;
+            }
+            QPushButton:hover {
+                background-color: #F1F5F9;
+            }
+            QPushButton:pressed {
+                background-color: #E2E8F0;
+            }
+        """)
+        close_btn.clicked.connect(self.accept)
+        header_layout.addWidget(close_btn)
+        
+        header.setStyleSheet("""
+            QWidget {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                    stop:0 #F8FAFC, stop:1 #FFFFFF);
+                border-bottom: 1px solid #E2E8F0;
+            }
+        """)
+        
+        main_layout.addWidget(header)
+        
+        # Content area
+        content_widget = QWidget()
+        content_layout = QVBoxLayout(content_widget)
+        content_layout.setContentsMargins(32, 32, 32, 24)
+        content_layout.setSpacing(20)
+        
+        # Success message dengan statistik sederhana
+        num_rows_val = num_rows if num_rows and num_rows > 0 else 0
+        num_files_val = num_files if num_files and num_files > 0 else 1
+        time_value = processing_time if processing_time and processing_time > 0 else 0.0
+        
+        if is_append_mode:
+            rows_count = num_rows_val
+            total_count = total_rows if total_rows and total_rows > 0 else rows_count
+            success_text = f"Berhasil menambahkan {rows_count} baris baru dari {num_files_val} berkas.\nTotal data: {total_count} baris. Waktu proses: {time_value:.1f} detik."
+        else:
+            success_text = f"Berhasil mengekstrak {num_rows_val} baris dari {num_files_val} berkas.\nWaktu proses: {time_value:.1f} detik."
+        
+        message_label = QLabel(success_text)
+        message_font = QFont("Segoe UI", 10, QFont.Normal)
+        message_label.setFont(message_font)
+        message_label.setStyleSheet("color: #475569; background-color: transparent;")
+        message_label.setWordWrap(True)
+        content_layout.addWidget(message_label)
+        content_layout.addStretch()
+        
+        # Button area
+        button_layout = QHBoxLayout()
+        button_layout.setSpacing(12)
+        button_layout.addStretch()
+        
+        # OK button (primary action)
+        ok_btn = QPushButton("Baik")
+        ok_btn.setFixedSize(100, 36)
+        ok_btn.setFont(QFont("Segoe UI", 9, QFont.Medium))
+        ok_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #2563EB;
+                color: #FFFFFF;
+                border: none;
+                border-radius: 6px;
+            }
+            QPushButton:hover {
+                background-color: #1D4ED8;
+            }
+            QPushButton:pressed {
+                background-color: #1E40AF;
+            }
+        """)
+        ok_btn.clicked.connect(self.accept)
+        button_layout.addWidget(ok_btn)
+        
+        content_layout.addLayout(button_layout)
+        
+        content_widget.setStyleSheet("background-color: #FFFFFF;")
+        main_layout.addWidget(content_widget)
+        
+        # Set overall dialog style
+        self.setStyleSheet("""
+            QDialog {
+                background-color: #FFFFFF;
+                border: 1px solid #E2E8F0;
+                border-radius: 8px;
+            }
+        """)
+    
+    def paintEvent(self, event):
+        # Custom paint untuk rounded corners dan shadow
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.Antialiasing)
+        
+        # Draw shadow
+        shadow_rect = QRect(2, 2, self.width() - 4, self.height() - 4)
+        painter.setPen(Qt.NoPen)
+        painter.setBrush(QColor(0, 0, 0, 15))
+        painter.drawRoundedRect(shadow_rect, 8, 8)
+        
+        # Draw main background
+        bg_rect = QRect(0, 0, self.width() - 2, self.height() - 2)
+        painter.setBrush(QColor("#FFFFFF"))
+        pen = QPen(QColor("#E2E8F0"))
+        pen.setWidth(1)
+        painter.setPen(pen)
+        painter.drawRoundedRect(bg_rect, 8, 8)
+        
+        super().paintEvent(event)
+    
+    def showEvent(self, event):
+        # Center dialog saat ditampilkan
+        if self.parent_window:
+            parent_rect = self.parent_window.geometry()
+            dialog_width = self.width()
+            dialog_height = self.height()
+            x = parent_rect.x() + (parent_rect.width() - dialog_width) // 2
+            y = parent_rect.y() + (parent_rect.height() - dialog_height) // 2
+            self.move(x, y)
+        super().showEvent(event)
 
 
 class MainWindow(QMainWindow):
@@ -391,22 +1154,22 @@ class MainWindow(QMainWindow):
                 self.setStyleSheet(f.read())
     
     def init_ui(self):
-        # setup tampilan ui dengan design modern dan clean
+        # setup tampilan ui dengan design modern dan clean - Native Desktop Professional
         self.setWindowTitle("OCR Sistem Informasi Pencatat Wilayah")
         self.setMinimumSize(1400, 900)  # lebih lebar untuk memanfaatkan layar
         self.setWindowIcon(self._get_icon('fa5s.table', color='#2563EB'))
         
-        # muat stylesheet QSS
+        # muat stylesheet QSS - Native Desktop Professional
         self.load_stylesheet()
         
         # bikin widget utama (ga pakai menu bar biar interface lebih bersih)
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
         
-        # Main layout - minimalis compact spacing
+        # Main layout - Native Desktop Professional spacing
         main_layout = QVBoxLayout(central_widget)
-        main_layout.setContentsMargins(18, 16, 18, 14)  # margin minimalis
-        main_layout.setSpacing(12)  # spacing minimalis untuk efisiensi ruang
+        main_layout.setContentsMargins(20, 20, 20, 16)  # Professional margins
+        main_layout.setSpacing(16)  # Professional spacing
         
         # File selection area (simplified)
         file_group = self.create_file_selection_group()
@@ -416,19 +1179,13 @@ class MainWindow(QMainWindow):
         table_group = self.create_table_group()
         main_layout.addWidget(table_group)
         
-        # Progress bar - compact dan professional
+        # Progress bar - Native Desktop Professional
         self.progress_bar = QProgressBar()
         self.progress_bar.setVisible(False)
         self.progress_bar.setTextVisible(True)
-        self.progress_bar.setMinimumHeight(28)
-        self.progress_bar.setMaximumHeight(28)
-        self.progress_bar.setStyleSheet("""
-            QProgressBar {
-                border-radius: 6px;
-                font-size: 8.5pt;
-                font-weight: 600;
-            }
-        """)
+        self.progress_bar.setMinimumHeight(30)
+        self.progress_bar.setMaximumHeight(30)
+        # Native desktop styling - stylesheet sudah di styles.qss
         main_layout.addWidget(self.progress_bar)
         
         # Status bar
@@ -440,29 +1197,11 @@ class MainWindow(QMainWindow):
     def create_file_selection_group(self):
         # buat grup UI pilihan file dengan layout 3 kolom: kiri (button), tengah (file list), kanan (fitur)
         group = QGroupBox("Opsi")
-        group.setStyleSheet("""
-            QGroupBox {
-                font-weight: 600;
-                font-size: 11pt;
-                color: #1E293B;
-                border: 2px solid #E2E8F0;
-                border-radius: 10px;
-                margin-top: 12px;
-                padding-top: 16px;
-                padding-bottom: 12px;
-                background-color: #FFFFFF;
-            }
-            QGroupBox::title {
-                subcontrol-origin: margin;
-                left: 16px;
-                padding: 0 8px;
-                background-color: #FFFFFF;
-            }
-        """)
-        # Layout 3 kolom - professional, clean, rapi - sesuai UI/UX guidelines
+        # Native desktop styling - stylesheet sudah di styles.qss untuk konsistensi
+        # Layout 3 kolom - Native Desktop Professional
         main_layout = QHBoxLayout()
-        main_layout.setSpacing(16)
-        main_layout.setContentsMargins(18, 12, 18, 12)
+        main_layout.setSpacing(20)  # Professional spacing
+        main_layout.setContentsMargins(20, 16, 20, 16)  # Professional margins
         main_layout.setAlignment(Qt.AlignTop)
         
         # ============================================================
@@ -508,30 +1247,12 @@ class MainWindow(QMainWindow):
         self.file_list.setDragDropMode(QAbstractItemView.InternalMove)
         self.file_list.setSelectionMode(QAbstractItemView.ExtendedSelection)
         self.file_list.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        # Native desktop styling - custom dashed border untuk file list
         self.file_list.setStyleSheet("""
             QListWidget {
-                background-color: #FFFFFF;
                 border: 2px dashed #CBD5E1;
-                border-radius: 8px;
-                padding: 8px;
-                font-size: 9pt;
-            }
-            QListWidget::item {
-                padding: 8px 12px;
-                border-radius: 5px;
-                margin: 3px 0px;
-                background-color: #F8FAFC;
-                border: 1px solid #E2E8F0;
-            }
-            QListWidget::item:hover {
-                background-color: #EFF6FF;
-                border: 1px solid #DBEAFE;
-            }
-            QListWidget::item:selected {
-                background-color: #DBEAFE;
-                color: #1E293B;
-                border: 2px solid #2563EB;
-                font-weight: 500;
+                border-radius: 6px;
+                padding: 6px;
             }
         """)
         self.file_list.setVisible(False)
@@ -541,11 +1262,11 @@ class MainWindow(QMainWindow):
         placeholder_label.setStyleSheet("""
             font-size: 8.5pt;
             color: #64748B;
-            padding: 20px 16px;
+            padding: 24px 20px;
             background-color: #FAFBFC;
             border: 2px dashed #CBD5E1;
-            border-radius: 8px;
-            line-height: 1.5;
+            border-radius: 6px;
+            line-height: 1.6;
         """)
         placeholder_label.setWordWrap(True)
         placeholder_label.setMinimumHeight(110)
@@ -660,27 +1381,10 @@ class MainWindow(QMainWindow):
     def create_table_group(self):
         # buat grup UI tabel dengan design modern
         group = QGroupBox("Tabel")
-        group.setStyleSheet("""
-            QGroupBox {
-                font-weight: 600;
-                font-size: 11pt;
-                color: #1E293B;
-                border: 2px solid #E2E8F0;
-                border-radius: 12px;
-                margin-top: 12px;
-                padding-top: 20px;
-                background-color: #FFFFFF;
-            }
-            QGroupBox::title {
-                subcontrol-origin: margin;
-                left: 16px;
-                padding: 0 8px;
-                background-color: #FFFFFF;
-            }
-        """)
+        # Native desktop styling - stylesheet sudah di styles.qss untuk konsistensi
         layout = QVBoxLayout()
-        layout.setContentsMargins(16, 18, 16, 14)
-        layout.setSpacing(10)
+        layout.setContentsMargins(20, 20, 20, 16)  # Professional margins
+        layout.setSpacing(12)  # Professional spacing
         
         # bikin widget tabel kustom dengan navigasi tombol panah dan kontrol mengambang
         self.table = CustomTableWidget()
@@ -1018,29 +1722,26 @@ class MainWindow(QMainWindow):
         
         if self.existing_table_data and len(self.existing_table_data) > len(new_table_data):
             # append mode
-            QMessageBox.information(
+            dialog = OCRCompleteDialog(
                 self,
-                "OCR Selesai",
-                f"Berhasil menambahkan {len(new_table_data)} baris baru dari {file_text}!\n\n"
-                f"Total data sekarang: {len(self.existing_table_data)} baris\n"
-                f"Waktu proses: {results['metadata']['total_time']:.1f} detik\n\n"
-                "Data sudah diurutkan otomatis:\n"
-                "• Kode SLS (naik)\n"
-                "• Kode Sub-SLS (turun)\n\n"
-                "Anda dapat menambahkan gambar lagi atau mengekspor hasil."
+                is_append_mode=True,
+                num_rows=len(new_table_data),
+                total_rows=len(self.existing_table_data),
+                num_files=num_files,
+                processing_time=results['metadata']['total_time']
             )
+            dialog.exec_()
         else:
             # first scan
-            QMessageBox.information(
+            dialog = OCRCompleteDialog(
                 self,
-                "OCR Selesai",
-                f"Berhasil mengekstrak {results['metadata']['num_rows']} baris dari {file_text}!\n\n"
-                f"Waktu proses: {results['metadata']['total_time']:.1f} detik\n\n"
-                "Data sudah diurutkan otomatis:\n"
-                "• Kode SLS (naik)\n"
-                "• Kode Sub-SLS (turun)\n\n"
-                "Anda dapat mengedit tabel, menambahkan gambar lagi, atau mengekspor hasil."
+                is_append_mode=False,
+                num_rows=results['metadata']['num_rows'],
+                total_rows=results['metadata']['num_rows'],
+                num_files=num_files,
+                processing_time=results['metadata']['total_time']
             )
+            dialog.exec_()
     
     def on_ocr_error(self, error_msg: str):
         # handle error OCR
@@ -1443,10 +2144,12 @@ class MainWindow(QMainWindow):
                 self.export_to_html(file_path)
             
             self.update_status(f"✓ Diekspor ke {Path(file_path).name}")
-            QMessageBox.information(self, "Ekspor Berhasil", f"Hasil diekspor ke:\n{file_path}")
+            dialog = ExportSuccessDialog(self, file_path)
+            dialog.exec_()
             
         except Exception as e:
-            QMessageBox.critical(self, "Kesalahan Ekspor", f"Gagal mengekspor:\n{str(e)}")
+            dialog = ExportErrorDialog(self, str(e))
+            dialog.exec_()
     
     def export_to_excel(self, file_path: str):
         # ekspor ke Excel dengan formatting (termasuk kolom No)
@@ -1594,16 +2297,9 @@ class MainWindow(QMainWindow):
     
     def reset_all(self):
         # reset semua data dan UI ke kondisi awal
-        # konfirmasi reset
-        reply = QMessageBox.question(
-            self,
-            "Konfirmasi Reset",
-            "Apakah Anda yakin ingin mereset?\n\nIni akan menghapus:\n• File yang dipilih\n• Hasil OCR\n• Data tabel\n• Semua editan",
-            QMessageBox.Yes | QMessageBox.No,
-            QMessageBox.No
-        )
-        
-        if reply == QMessageBox.No:
+        # konfirmasi reset dengan modern dialog
+        dialog = ResetConfirmDialog(self)
+        if dialog.exec_() != QDialog.Accepted:
             return
         
         # hentikan worker OCR kalau masih jalan

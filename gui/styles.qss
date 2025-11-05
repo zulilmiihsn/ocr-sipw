@@ -1,36 +1,37 @@
 /* 
- * OCR SiPW - Professional Clean UI
- * Design: Minimal, Clean, Enterprise-grade
- * Color: Single Professional Blue (#2563EB)
+ * OCR SiPW - Professional Native Desktop UI
+ * Design: Native Desktop Application Style
+ * Color: Professional Blue (#2563EB) with refined palette
  */
 
 /* ============================================================================
-   GLOBAL - Clean Professional
+   GLOBAL - Professional Native Desktop
    ============================================================================ */
 
 QMainWindow {
-    background-color: #F8FAFC;
+    background-color: #F5F7FA;
 }
 
 QWidget {
-    font-family: "Segoe UI", "Inter", -apple-system, sans-serif;
+    font-family: "Segoe UI", "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
     font-size: 9pt;
     color: #1E293B;
+    font-weight: 400;
 }
 
 /* ============================================================================
-   BUTTONS - Minimal Professional
+   BUTTONS - Native Desktop Professional
    ============================================================================ */
 
 QPushButton {
     background-color: #2563EB;
-    color: white;
+    color: #FFFFFF;
     border: none;
     border-radius: 6px;
-    padding: 12px 24px;
+    padding: 10px 20px;
     font-weight: 600;
     font-size: 9pt;
-    min-height: 40px;
+    min-height: 38px;
 }
 
 QPushButton:hover {
@@ -39,71 +40,78 @@ QPushButton:hover {
 
 QPushButton:pressed {
     background-color: #1E40AF;
+    padding-top: 11px;
+    padding-bottom: 9px;
 }
 
 QPushButton:disabled {
     background-color: #F1F5F9;
-    color: #CBD5E1;
+    color: #94A3B8;
+    font-weight: 400;
 }
 
-/* Secondary Button Style */
+/* Secondary Button Style - Native Desktop */
 QPushButton#browse_btn,
 QPushButton#reset_btn {
     background-color: #FFFFFF;
     color: #475569;
-    border: 2px solid #E2E8F0;
+    border: 1.5px solid #E2E8F0;
+    font-weight: 500;
 }
 
 QPushButton#browse_btn:hover,
 QPushButton#reset_btn:hover {
     background-color: #F8FAFC;
-    border: 2px solid #2563EB;
+    border: 1.5px solid #2563EB;
     color: #2563EB;
 }
 
 QPushButton#browse_btn:pressed,
 QPushButton#reset_btn:pressed {
-    background-color: #EFF6FF;
+    background-color: #F1F5F9;
+    border: 1.5px solid #1D4ED8;
 }
 
 QPushButton#browse_btn:disabled,
 QPushButton#reset_btn:disabled {
     background-color: #F8FAFC;
-    color: #CBD5E1;
-    border: 2px solid #F1F5F9;
+    color: #94A3B8;
+    border: 1.5px solid #F1F5F9;
 }
 
-/* Sort Button Style */
+/* Sort Button Style - Native Desktop */
 QPushButton#sort_btn {
     background-color: #FFFFFF;
     color: #2563EB;
-    border: 2px solid #2563EB;
+    border: 1.5px solid #2563EB;
+    font-weight: 500;
 }
 
 QPushButton#sort_btn:hover {
     background-color: #EFF6FF;
-    border: 2px solid #1D4ED8;
+    border: 1.5px solid #1D4ED8;
     color: #1D4ED8;
 }
 
 QPushButton#sort_btn:pressed {
     background-color: #DBEAFE;
+    border: 1.5px solid #1E40AF;
 }
 
 QPushButton#sort_btn:disabled {
     background-color: #F8FAFC;
-    color: #CBD5E1;
-    border: 2px solid #F1F5F9;
+    color: #94A3B8;
+    border: 1.5px solid #F1F5F9;
 }
 
-/* Icon Button Style - Minimalist */
+/* Icon Button Style - Native Desktop */
 QPushButton#icon_btn {
     background-color: transparent;
     border: 1px solid #E2E8F0;
     border-radius: 4px;
-    padding: 4px;
-    min-height: 28px;
-    min-width: 28px;
+    padding: 6px;
+    min-height: 32px;
+    min-width: 32px;
 }
 
 QPushButton#icon_btn:hover {
@@ -113,24 +121,25 @@ QPushButton#icon_btn:hover {
 
 QPushButton#icon_btn:pressed {
     background-color: #F1F5F9;
+    border: 1px solid #94A3B8;
 }
 
 QPushButton#icon_btn:disabled {
     background-color: transparent;
     border: 1px solid #F1F5F9;
-    opacity: 0.5;
+    opacity: 0.4;
 }
 
-/* Floating Button Style - Ultra Minimalist */
+/* Floating Button Style - Native Desktop */
 QPushButton#floating_btn {
-    background-color: rgba(255, 255, 255, 0.9);
-    border: none;
-    border-radius: 2px;
-    padding: 2px;
-    min-height: 12px;
-    min-width: 12px;
-    max-height: 12px;
-    max-width: 12px;
+    background-color: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    border-radius: 3px;
+    padding: 3px;
+    min-height: 20px;
+    min-width: 20px;
+    max-height: 20px;
+    max-width: 20px;
 }
 
 QPushButton#floating_btn:hover {
@@ -140,37 +149,38 @@ QPushButton#floating_btn:hover {
 
 QPushButton#floating_btn:pressed {
     background-color: #F1F5F9;
+    border: 1px solid #94A3B8;
 }
 
 /* ============================================================================
-   GROUP BOX - Minimal Clean & Professional
+   GROUP BOX - Native Desktop Professional
    ============================================================================ */
 
 QGroupBox {
     background-color: #FFFFFF;
-    border: 2px solid #E2E8F0;
-    border-radius: 12px;
-    padding: 20px 18px 18px 18px;
-    margin-top: 12px;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    padding: 24px 20px 20px 20px;
+    margin-top: 16px;
     font-weight: 600;
-    font-size: 11pt;
+    font-size: 10.5pt;
     color: #1E293B;
 }
 
 QGroupBox::title {
     subcontrol-origin: margin;
     subcontrol-position: top left;
-    padding: 0 8px;
-    margin-left: 16px;
+    padding: 0 10px;
+    margin-left: 12px;
     background-color: #FFFFFF;
     color: #1E293B;
     font-weight: 600;
-    font-size: 11pt;
-    letter-spacing: 0.3px;
+    font-size: 10.5pt;
+    letter-spacing: 0.2px;
 }
 
 /* ============================================================================
-   TABLE - Professional Clean
+   TABLE - Native Desktop Professional
    ============================================================================ */
 
 QTableWidget {
@@ -180,11 +190,12 @@ QTableWidget {
     gridline-color: #F1F5F9;
     selection-background-color: #EFF6FF;
     selection-color: #1E293B;
-    font-size: 8pt;
+    font-size: 8.5pt;
+    font-weight: 400;
 }
 
 QTableWidget::item {
-    padding: 4px 6px;
+    padding: 6px 8px;
     border: none;
 }
 
@@ -200,26 +211,28 @@ QTableWidget::item:hover {
 
 QTableWidget::item:focus {
     background-color: #DBEAFE;
-    outline: none;
+    outline: 2px solid #2563EB;
+    outline-offset: -2px;
 }
 
-/* Table Header - Clean Professional with Word Wrap Support */
+/* Table Header - Native Desktop Professional */
 QHeaderView::section {
-    background-color: #F8FAFC;
+    background-color: #FAFBFC;
     color: #475569;
-    padding: 10px 8px;
+    padding: 12px 10px;
     border: none;
     border-right: 1px solid #E2E8F0;
-    border-bottom: 1px solid #E2E8F0;
-    font-weight: 500;
-    font-size: 7.5pt;
-    letter-spacing: 0.2px;
+    border-bottom: 2px solid #E2E8F0;
+    font-weight: 600;
+    font-size: 8pt;
+    letter-spacing: 0.1px;
     line-height: 1.4;
-    min-height: 50px;
+    min-height: 52px;
+    text-transform: none;
 }
 
 QHeaderView::section:hover {
-    background-color: #F1F5F9;
+    background-color: #F5F7FA;
 }
 
 QHeaderView::section:first {
@@ -231,28 +244,29 @@ QHeaderView::section:last {
     border-right: none;
 }
 
-/* Vertical Header - Minimal Clean */
+/* Vertical Header - Native Desktop */
 QHeaderView::section:vertical {
-    background-color: #F8FAFC;
+    background-color: #FAFBFC;
     color: #64748B;
-    font-weight: 500;
-    font-size: 8pt;
-    padding: 2px 4px;
-    border-right: 1px solid #E2E8F0;
+    font-weight: 600;
+    font-size: 8.5pt;
+    padding: 4px 6px;
+    border-right: 2px solid #E2E8F0;
     border-bottom: 1px solid #E2E8F0;
-    max-width: 35px;
+    max-width: 40px;
+    text-align: center;
 }
 
 /* ============================================================================
-   PROGRESS BAR - Minimal Professional
+   PROGRESS BAR - Native Desktop Professional
    ============================================================================ */
 
 QProgressBar {
     background-color: #F1F5F9;
-    border: none;
-    border-radius: 8px;
+    border: 1px solid #E2E8F0;
+    border-radius: 6px;
     text-align: center;
-    height: 32px;
+    height: 30px;
     font-size: 8.5pt;
     font-weight: 600;
     color: #2563EB;
@@ -261,11 +275,12 @@ QProgressBar {
 QProgressBar::chunk {
     background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
                                 stop:0 #3B82F6, stop:1 #2563EB);
-    border-radius: 8px;
+    border-radius: 5px;
+    margin: 1px;
 }
 
 /* ============================================================================
-   STATUS BAR - Minimal Clean
+   STATUS BAR - Native Desktop Professional
    ============================================================================ */
 
 QStatusBar {
@@ -273,65 +288,84 @@ QStatusBar {
     color: #64748B;
     border-top: 1px solid #E2E8F0;
     font-size: 8.5pt;
-    font-weight: 500;
-    padding: 10px 16px;
-    min-height: 32px;
+    font-weight: 400;
+    padding: 8px 16px;
+    min-height: 28px;
 }
 
 /* ============================================================================
-   SCROLL BAR - Minimal
+   SCROLL BAR - Native Desktop Professional
    ============================================================================ */
 
 QScrollBar:vertical {
-    background-color: #FFFFFF;
-    width: 10px;
+    background-color: #FAFBFC;
+    width: 12px;
     border-radius: 0px;
     margin: 0px;
+    border: none;
 }
 
 QScrollBar::handle:vertical {
     background-color: #CBD5E1;
-    border-radius: 5px;
-    min-height: 30px;
+    border-radius: 6px;
+    min-height: 40px;
+    margin: 2px;
 }
 
 QScrollBar::handle:vertical:hover {
     background-color: #94A3B8;
 }
 
+QScrollBar::handle:vertical:pressed {
+    background-color: #64748B;
+}
+
 QScrollBar:horizontal {
-    background-color: #FFFFFF;
-    height: 10px;
+    background-color: #FAFBFC;
+    height: 12px;
     border-radius: 0px;
     margin: 0px;
+    border: none;
 }
 
 QScrollBar::handle:horizontal {
     background-color: #CBD5E1;
-    border-radius: 5px;
-    min-width: 30px;
+    border-radius: 6px;
+    min-width: 40px;
+    margin: 2px;
 }
 
 QScrollBar::handle:horizontal:hover {
     background-color: #94A3B8;
 }
 
+QScrollBar::handle:horizontal:pressed {
+    background-color: #64748B;
+}
+
 QScrollBar::add-line, QScrollBar::sub-line {
     background: none;
     border: none;
+    width: 0px;
+    height: 0px;
+}
+
+QScrollBar::add-page, QScrollBar::sub-page {
+    background: none;
 }
 
 /* ============================================================================
-   LABELS - Clean Typography
+   LABELS - Native Desktop Typography
    ============================================================================ */
 
 QLabel {
     color: #64748B;
     font-weight: 400;
+    font-size: 9pt;
 }
 
 /* ============================================================================
-   DIALOG - Professional Clean
+   DIALOG - Native Desktop Professional
    ============================================================================ */
 
 QDialog {
@@ -340,17 +374,17 @@ QDialog {
 
 QRadioButton {
     color: #475569;
-    spacing: 8px;
-    padding: 6px;
+    spacing: 10px;
+    padding: 8px;
     font-weight: 400;
     font-size: 9pt;
 }
 
 QRadioButton::indicator {
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
     border: 2px solid #CBD5E1;
-    border-radius: 8px;
+    border-radius: 9px;
     background-color: #FFFFFF;
 }
 
@@ -364,13 +398,13 @@ QRadioButton::indicator:hover {
 }
 
 QDialogButtonBox QPushButton {
-    min-width: 80px;
-    padding: 8px 16px;
+    min-width: 85px;
+    padding: 9px 18px;
     font-weight: 500;
 }
 
 /* ============================================================================
-   MESSAGE BOX - Professional
+   MESSAGE BOX - Native Desktop Professional
    ============================================================================ */
 
 QMessageBox {
@@ -381,52 +415,97 @@ QMessageBox QLabel {
     color: #1E293B;
     font-size: 9pt;
     font-weight: 400;
+    line-height: 1.5;
 }
 
 QMessageBox QPushButton {
-    min-width: 80px;
-    padding: 8px 16px;
+    min-width: 85px;
+    padding: 9px 18px;
     font-weight: 500;
 }
 
 /* ============================================================================
-   TOOLTIPS - Minimal
+   TOOLTIPS - Native Desktop Professional
    ============================================================================ */
 
 QToolTip {
     background-color: #1E293B;
     color: #F8FAFC;
     border: none;
-    border-radius: 2px;
-    padding: 6px 10px;
-    font-size: 8pt;
+    border-radius: 4px;
+    padding: 8px 12px;
+    font-size: 8.5pt;
     font-weight: 400;
 }
 
 /* ============================================================================
-   INPUT FIELDS - Clean Professional
+   INPUT FIELDS - Native Desktop Professional
    ============================================================================ */
 
 QLineEdit {
     background-color: #FFFFFF;
-    border: 1px solid #E2E8F0;
+    border: 1.5px solid #E2E8F0;
     border-radius: 4px;
     padding: 8px 12px;
     font-size: 9pt;
     font-weight: 400;
     color: #1E293B;
+    selection-background-color: #DBEAFE;
+    selection-color: #1E293B;
 }
 
 QLineEdit:focus {
-    border: 1px solid #2563EB;
+    border: 1.5px solid #2563EB;
+    outline: none;
 }
 
 QLineEdit:hover {
-    border: 1px solid #CBD5E1;
+    border: 1.5px solid #CBD5E1;
 }
 
 QLineEdit:disabled {
     background-color: #F8FAFC;
     color: #94A3B8;
-    border: 1px solid #F1F5F9;
+    border: 1.5px solid #F1F5F9;
+}
+
+/* ============================================================================
+   LIST WIDGET - Native Desktop Professional
+   ============================================================================ */
+
+QListWidget {
+    background-color: #FFFFFF;
+    border: 1.5px solid #E2E8F0;
+    border-radius: 6px;
+    padding: 6px;
+    font-size: 9pt;
+    outline: none;
+}
+
+QListWidget::item {
+    padding: 8px 12px;
+    border-radius: 4px;
+    margin: 2px 0px;
+    background-color: #F8FAFC;
+    border: 1px solid #E2E8F0;
+}
+
+QListWidget::item:hover {
+    background-color: #F1F5F9;
+    border: 1px solid #CBD5E1;
+}
+
+QListWidget::item:selected {
+    background-color: #DBEAFE;
+    color: #1E293B;
+    border: 1.5px solid #2563EB;
+    font-weight: 500;
+}
+
+/* ============================================================================
+   FILE DIALOG - Native Desktop Professional
+   ============================================================================ */
+
+QFileDialog {
+    background-color: #FFFFFF;
 }

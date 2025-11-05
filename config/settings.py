@@ -87,7 +87,7 @@ class GUISettings:
 class AppSettings:
     """Application-wide settings."""
     app_name: str = "OCR SiPW"
-    app_version: str = "7.1"
+    app_version: str = "7.2"
     organization_name: str = "Lab OCR Team"
     
     # Cache settings

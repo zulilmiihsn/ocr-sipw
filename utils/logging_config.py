@@ -1,4 +1,4 @@
-"""Logging configuration for Lab OCR application."""
+"""Logging configuration for OCR SiPW application."""
 
 import logging
 import sys

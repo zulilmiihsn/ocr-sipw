@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# lab-untuk-ocr gui application
+# ocr-sipw gui application
 # ==============================
 # bloK iii table extraction system dengan interactive gui
 

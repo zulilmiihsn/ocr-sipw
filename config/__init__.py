@@ -1,4 +1,4 @@
-"""Configuration module for Lab OCR application."""
+"""Configuration module for OCR SiPW application."""
 
 from .settings import (
     OCRSettings,

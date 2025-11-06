@@ -1,4 +1,4 @@
-# Lab-untuk-OCR Pipeline
+# OCR-SIPW Pipeline
 # ======================
 # Production-ready OCR pipeline for BLOK III table extraction
 # Main components:
@@ -7,4 +7,4 @@
 # - lib/: Utility modules
 
 __version__ = "3.1.0"
-__author__ = "Lab OCR Team"
+__author__ = "PKL FILKOM UB"

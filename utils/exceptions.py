@@ -1,4 +1,4 @@
-"""Custom exceptions for Lab OCR application."""
+"""Custom exceptions for OCR SiPW application."""
 
 
 class OCRException(Exception):

@@ -1,4 +1,4 @@
-"""Utility modules for Lab OCR application."""
+"""Utility modules for OCR SiPW application."""
 
 from .logging_config import setup_logging, get_logger
 from .exceptions import (

@@ -88,7 +88,7 @@ class AppSettings:
     """Application-wide settings."""
     app_name: str = "OCR SiPW"
     app_version: str = "7.2"
-    organization_name: str = "Lab OCR Team"
+    organization_name: str = "PKL FILKOM UB"
     
     # Cache settings
     ocr_cache_max: int = 16

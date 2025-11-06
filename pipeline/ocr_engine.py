@@ -7,7 +7,7 @@
 # - deteksi garis vertikal untuk batas cell yang akurat
 # - post-processing untuk pembersihan karakter dan validasi template
 # - waktu pemrosesan: ~78 detik
-# author: lab ocr team
+# author: PKL FILKOM UB
 # version: 2.0 (final)
 # date: october 2025
 

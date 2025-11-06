@@ -1,5 +1,5 @@
 # 🔧 Refactoring Summary
-## Lab OCR - Code Improvements
+## OCR SiPW - Code Improvements
 
 **Tanggal:** 2025  
 **Status:** ✅ Phase 1 Completed, Phase 2 In Progress
@@ -120,7 +120,7 @@
 ## 📁 **Struktur Baru**
 
 ```
-lab-untuk-ocr/
+ocr-sipw/
 ├── config/                    ✅ NEW
 │   ├── __init__.py
 │   ├── constants.py          ✅ All constants

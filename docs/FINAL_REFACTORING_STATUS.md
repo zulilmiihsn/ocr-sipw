@@ -134,7 +134,7 @@ ocr_config = {
 ## 📁 **Struktur Final**
 
 ```
-lab-untuk-ocr/
+ocr-sipw/
 ├── config/                    ✅ NEW - All settings
 │   ├── __init__.py
 │   ├── constants.py          ✅ No magic numbers

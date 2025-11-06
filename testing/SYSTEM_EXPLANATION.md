@@ -464,7 +464,7 @@ rw_match = RW_PATTERN.search(text)
 
 ---
 
-**Author:** Lab OCR Team  
+**Author:** PKL FILKOM UB  
 **Version:** 6.2+ (with all optimizations)  
 **Date:** October 2025
 

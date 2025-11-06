@@ -1,5 +1,5 @@
 # 📋 Code Review & Best Practices Analysis
-## Lab OCR - BLOK III Table Extraction System
+## OCR SiPW - BLOK III Table Extraction System
 
 **Tanggal Review:** 2025  
 **Reviewer:** AI Code Assistant  
@@ -34,7 +34,7 @@
 
 #### ✅ **Sudah Baik:**
 ```
-lab-untuk-ocr/
+ocr-sipw/
 ├── app.py                 # Entry point (clean)
 ├── gui/                   # GUI components (separated)
 │   ├── main_window.py    # Main UI (❌ too large)

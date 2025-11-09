@@ -19,8 +19,7 @@ python app.py
 ## ✨ Fitur Utama
 
 ### 🎨 GUI Application
-- **Multi-file processing** - Proses beberapa file sekaligus
-- **PDF support** - Mendukung file PDF multi-halaman
+- **Multi-file processing** - Proses beberapa file gambar sekaligus
 - **Progress tracking** - Progress bar real-time
 - **Interactive table** - Tabel hasil yang dapat diedit
 - **Auto-sort** - Otomatis mengurutkan berdasarkan Kode SLS & Sub-SLS
@@ -73,7 +72,7 @@ pip install -r requirements.txt
 ## 📝 Penggunaan
 
 1. Jalankan aplikasi dengan `python app.py`
-2. Pilih file gambar atau PDF melalui tombol "Pilih File" atau drag & drop
+2. Pilih file gambar (PNG, JPG, JPEG) melalui tombol "Pilih File" atau drag & drop
 3. Tunggu proses OCR selesai
 4. Periksa dan edit hasil di tabel jika perlu
 5. Export hasil ke format yang diinginkan (Excel, CSV, JSON, atau HTML)

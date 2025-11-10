@@ -12,9 +12,37 @@ cd ocr-sipw
 # Install dependencies
 pip install -r requirements.txt
 
+# Test setup (optional, untuk memastikan semua dependencies terinstall)
+python test_setup.py
+
 # Run GUI application
 python app.py
 ```
+
+## 🔧 Troubleshooting
+
+Jika aplikasi tidak muncul atau ada error:
+
+1. **Test setup terlebih dahulu:**
+   ```bash
+   python test_setup.py
+   ```
+
+2. **Pastikan semua dependencies terinstall:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. **Jika ada error saat menjalankan aplikasi:**
+   - Periksa pesan error di console/terminal
+   - Pastikan Python version >= 3.8
+   - Pastikan semua dependencies terinstall dengan benar
+   - Coba jalankan `python test_setup.py` untuk melihat dependency mana yang bermasalah
+
+4. **Jika aplikasi tidak muncul sama sekali:**
+   - Pastikan PyQt5 terinstall: `pip install PyQt5`
+   - Cek apakah ada error di console/terminal
+   - Pastikan tidak ada aplikasi lain yang menggunakan port/resource yang sama
 
 ## ✨ Fitur Utama
 

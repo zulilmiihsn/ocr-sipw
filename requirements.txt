@@ -6,17 +6,17 @@
 # ============================================================================
 
 # Image Processing
-opencv-python>=4.8.1,<5.0.0
-numpy>=1.24.0,<2.0.0
+opencv-python==4.8.1.78
+numpy==1.24.3
 
 # ============================================================================
 # OCR ENGINE
 # ============================================================================
 
 # PaddleOCR (AI-based OCR)
-# Note: Ensure paddlepaddle and paddleocr versions are compatible
-paddlepaddle>=3.0.0,<4.0.0
-paddleocr>=3.0.0,<4.0.0
+# Note: These versions are tested and compatible
+paddlepaddle==3.2.0
+paddleocr==3.3.1
 
 # ============================================================================
 # GUI APPLICATION
@@ -24,18 +24,18 @@ paddleocr>=3.0.0,<4.0.0
 
 # PyQt5 Framework
 # Note: PyQt5 5.15.x is the final stable version
-PyQt5>=5.15.0,<6.0.0
-PyQt5-Qt5>=5.15.2
-PyQt5-sip>=12.13.0,<13.0.0
+PyQt5==5.15.10
+PyQt5-Qt5==5.15.2
+PyQt5-sip==12.13.0
 
 # Icon Library
-QtAwesome>=1.2.0,<2.0.0
+QtAwesome==1.2.3
 
 # ============================================================================
 # DATA EXPORT
 # ============================================================================
 
 # Excel Export
-openpyxl>=3.1.0,<4.0.0
+openpyxl==3.1.2
 
 # CSV/JSON (built-in Python modules)

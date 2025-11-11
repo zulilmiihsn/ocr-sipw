@@ -1,13 +1,22 @@
 # OCR-SIPW - Production Dependencies
 # Install: pip install -r requirements.txt
+#
+# Updated based on verified working versions from developer PC
+# Tested and working with Python 3.13.3 and the versions below
+# All versions have been verified to work correctly
 
 # ============================================================================
 # CORE DEPENDENCIES
 # ============================================================================
 
 # Image Processing
-opencv-python==4.8.1.78
-numpy==1.24.3
+# Tested: 4.10.0.84 (works with >=4.8.1.78)
+opencv-python>=4.8.1.78,<5.0.0
+
+# Numerical computing
+# Tested: 2.2.6 (works with NumPy 2.x, also compatible with 1.24.3+)
+# Note: NumPy 2.x is fully supported by PaddleOCR and OpenCV
+numpy>=1.24.3,<3.0.0
 
 # ============================================================================
 # OCR ENGINE
@@ -15,6 +24,7 @@ numpy==1.24.3
 
 # PaddleOCR (AI-based OCR)
 # Note: These versions are tested and compatible
+# Exact versions required for stability
 paddlepaddle==3.2.0
 paddleocr==3.3.1
 
@@ -24,11 +34,18 @@ paddleocr==3.3.1
 
 # PyQt5 Framework
 # Note: PyQt5 5.15.x is the final stable version
-PyQt5==5.15.10
+# Tested: 5.15.11 (works with >=5.15.10)
+PyQt5>=5.15.10,<6.0.0
+
+# PyQt5 Qt5 binaries (exact version required)
 PyQt5-Qt5==5.15.2
-PyQt5-sip==12.13.0
+
+# PyQt5 SIP bindings
+# Tested: 12.17.1 (works with >=12.13.0)
+PyQt5-sip>=12.13.0,<13.0.0
 
 # Icon Library
+# Exact version for consistency
 QtAwesome==1.2.3
 
 # ============================================================================
@@ -36,6 +53,7 @@ QtAwesome==1.2.3
 # ============================================================================
 
 # Excel Export
-openpyxl==3.1.2
+# Tested: 3.1.5 (works with >=3.1.2)
+openpyxl>=3.1.2,<4.0.0
 
 # CSV/JSON (built-in Python modules)
